@@ -6,4 +6,4 @@
 script = ExtResource("1_ms0fu")
 
 [node name="WaterSim" type="WaterSim" parent="."]
-enabled = false
+enabled = true

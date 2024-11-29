@@ -21,14 +21,41 @@ namespace godot
 	// 	return sin(2 * Math_PI * carrier_freq * x + modulation_index * sin(2 * Math_PI * modulating_freq * x));
 	// }
 
+	static void print(String input) // string (normal)
+	{
+		godot::UtilityFunctions::print(input);
+	}
+
+	static void print(int input) // int
+	{
+		godot::String s = godot::String::num(input);
+		print(s);
+	}
+	static void print(float input) // float
+	{
+		godot::String s = godot::String::num(input);
+		print(s);
+	}
+	static void print(double input) // double
+	{
+		godot::String s = godot::String::num(input);
+		print(s);
+	}
+
+	static void format2(String input)
+	{
+		Dictionary placeholders;
+		placeholders["name"] = "Player";
+		placeholders["score"] = 100;
+
+		String formatted_string = String("Hello {name}, your score is {score}!").format(placeholders);
+
+		// godot::String s = in
+	}
+
 	static class Helper
 	{
 	public:
-		static void print(String input) // string (normal)
-		{
-			godot::UtilityFunctions::print(input);
-		}
-
 		// static void print(float input) /// float
 		// {
 		// 	print(godot::String("{}").format(Array::make(input)));
@@ -69,22 +96,6 @@ namespace godot
 
 		// 	return x;
 		// }
-
-		static void print(int input) // int
-		{
-			godot::String my_string = godot::String::num(input);
-			print(my_string);
-		}
-		static void print(float input) // float
-		{
-			godot::String my_string = godot::String::num(input);
-			print(my_string);
-		}
-		static void print(double input) // double
-		{
-			godot::String my_string = godot::String::num(input);
-			print(my_string);
-		}
 	};
 }
 

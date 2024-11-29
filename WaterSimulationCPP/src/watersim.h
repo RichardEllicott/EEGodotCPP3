@@ -97,7 +97,7 @@ namespace godot
 		void _init_grid_data()
 		{
 
-			Helper::print("init grid data...");
+			print("init grid data...");
 
 
 			data_lock = true;

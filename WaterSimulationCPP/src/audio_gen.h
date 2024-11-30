@@ -11,8 +11,8 @@
 #include <godot_cpp/classes/audio_stream_playback.hpp>           // AudioStreamPlayback
 
 // trying to make Godot recognise me!
-#include <godot_cpp/core/defs.hpp>
-#include <godot_cpp/godot.hpp>
+// #include <godot_cpp/core/defs.hpp>
+// #include <godot_cpp/godot.hpp>
 
 // #include <godot_cpp/classes/sprite2d.hpp>
 // #include <godot_cpp/classes/random_number_generator.hpp>
@@ -24,9 +24,7 @@
 // #include <godot_cpp/classes/node2d.hpp>
 // #include <godot_cpp/classes/sprite2d.hpp>
 
-
-#include <godot_cpp/core/class_db.hpp> // GDCLASS
-
+// #include <godot_cpp/core/class_db.hpp> // GDCLASS
 
 // #include <godot_cpp/classes/audio_stream_generator_playback.hpp>
 // #include <godot_cpp/classes/audio_server.hpp>
@@ -38,10 +36,8 @@ using namespace godot;
 
 class AudioGen : public Node
 {
-    
-    // GDCLASS(AudioGen, Node)
 
-
+    GDCLASS(AudioGen, Node)
 
     // DECLARE_PROPERTY(bool, enabled)
 
@@ -105,7 +101,8 @@ public:
         }
     }
 
-    void _bind_methods()
+protected:
+    static void _bind_methods()
     {
         // macros from macros.h
         // CREATE_CLASSDB_BINDINGS(WaterSim, BOOL, enabled)
@@ -116,7 +113,6 @@ public:
         // CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, sine_frequency)
 
         // CREATE_CLASSDB_BINDINGS(AudioGen, BOOL, enabled)
-
     }
 };
 

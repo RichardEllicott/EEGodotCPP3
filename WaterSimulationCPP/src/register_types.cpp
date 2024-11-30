@@ -10,6 +10,8 @@
 #include "watersim.h" // only this works!?!/!
 #include "template.h"
 // #include "audio_gen.h"
+#include "sound_generator.h"
+
 
 
 
@@ -29,6 +31,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(WaterSim); // SHIT!!!!
 	GDREGISTER_CLASS(Template); // SHIT!!!!
 	// GDREGISTER_CLASS(AudioGen); // SHIT!!!!
+	GDREGISTER_CLASS(SoundGenerator); // SHIT!!!!
+
 
 }
 

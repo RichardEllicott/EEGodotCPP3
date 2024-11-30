@@ -24,26 +24,24 @@ public:                                   \
 	void set_##NAME(const TYPE p_##NAME); \
 	TYPE get_##NAME() const;
 
+// header file macro, to declare a property
+#define DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER(TYPE, NAME) \
+private:                                                      \
+	TYPE NAME;                                                \
+                                                              \
+public:                                                       \
+	void set_##NAME(const TYPE p_##NAME) { return NAME; };    \
+	TYPE get_##NAME() const { NAME = p_##NAME; };
 
 // cpp file macro, create the get/set functions
 #define CREATE_GETTER_SETTER(CLASS, TYPE, NAME)     \
 	TYPE CLASS::get_##NAME() const { return NAME; } \
 	void CLASS::set_##NAME(const TYPE p_##NAME) { NAME = p_##NAME; }
 
-
-
 // bindings macro
 #define CREATE_CLASSDB_BINDINGS(CLASS, TYPE, NAME)                                \
 	ClassDB::bind_method(D_METHOD("get_" #NAME), &CLASS::get_##NAME);             \
 	ClassDB::bind_method(D_METHOD("set_" #NAME, "p_" #NAME), &CLASS::set_##NAME); \
 	ADD_PROPERTY(PropertyInfo(Variant::TYPE, #NAME), "set_" #NAME, "get_" #NAME);
-
-
-
-
-
-
-
-
 
 #endif

@@ -108,11 +108,9 @@ void WaterSim::_draw()
 void WaterSim::run_simulation(double delta)
 {
 
-	// print("loop test 1...");
 
-	print("helelel");
 
-	
+
 	_check_grid_data();
 
 	int displacement_grid_size = displacement_grid.size();

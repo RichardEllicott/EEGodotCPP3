@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://dobm4bmdy04n4"]
+
+[ext_resource type="Script" path="res://projects/audio_generator/audio_generator.gd" id="1_osd6p"]
+
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_5qq53"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="audio_generator" type="Node" parent="."]
+script = ExtResource("1_osd6p")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="audio_generator"]
+stream = SubResource("AudioStreamGenerator_5qq53")
+autoplay = true
+
+[node name="Template" type="Template" parent="."]

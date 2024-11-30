@@ -1,6 +1,19 @@
+#ifndef REGISTER_TYPES_CPP
+#define REGISTER_TYPES_CPP
+
+
 #include "register_types.h"
 
-#include "watersim.h"
+
+
+// add files here
+#include "watersim.h" // only this works!?!/!
+#include "template.h"
+// #include "audio_gen.h"
+
+
+
+
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
@@ -13,7 +26,10 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 		return;
 	}
 
-	GDREGISTER_CLASS(WaterSim);
+	GDREGISTER_CLASS(WaterSim); // SHIT!!!!
+	GDREGISTER_CLASS(Template); // SHIT!!!!
+	// GDREGISTER_CLASS(AudioGen); // SHIT!!!!
+
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {
@@ -34,3 +50,6 @@ GDExtensionBool GDE_EXPORT example_library_init(GDExtensionInterfaceGetProcAddre
 	return init_obj.init();
 }
 }
+
+
+#endif

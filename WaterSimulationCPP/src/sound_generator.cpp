@@ -101,9 +101,22 @@ void SoundGenerator::fill_buffer()
 
     AudioStreamGeneratorPlayback *playback_ptr = get_audio_generator_playback_ptr(); // we need a pointer to the playback generator
 
-    if (playback_ptr && playback_ptr != NULL && playback_ptr != nullptr) // THESE EXTRA CHECKS REQUIRED!!! lol
+
+    if (!playback_ptr){
+        print("AudioStreamGeneratorPlayback invalid! 1");
+        return;
+    }
+    if (playback_ptr == NULL){
+        print("AudioStreamGeneratorPlayback invalid! 2");
+        return;
+    }
+    if (playback_ptr == nullptr){
+        print("AudioStreamGeneratorPlayback invalid! 3");
+        return;
+    }
+
+    if (playback_ptr && playback_ptr != NULL && playback_ptr != nullptr) // I CANNOT SEEM TO REFACTOR THIS LINE AWAY!!
     {
-        // print("AudioStreamGeneratorPlayback not found!");
 
         float increment = pulse_hz / sample_hz;
 

@@ -13,10 +13,6 @@
 #include "sound_generator.h"
 
 
-
-
-
-
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
@@ -28,8 +24,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 		return;
 	}
 
-	GDREGISTER_CLASS(WaterSim); // SHIT!!!!
-	GDREGISTER_CLASS(Template); // SHIT!!!!
+	GDREGISTER_CLASS(WaterSim);
+	GDREGISTER_CLASS(Template);
 	// GDREGISTER_CLASS(AudioGen); // SHIT!!!!
 	GDREGISTER_CLASS(SoundGenerator); // SHIT!!!!
 

@@ -26,6 +26,8 @@ autoplay = true
 [node name="Template2" type="Template" parent="."]
 
 [node name="SoundGenerator" type="SoundGenerator" parent="."]
+sample_hz = 0.4
+pulse_hz = 0.8
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SoundGenerator"]
 stream = SubResource("AudioStreamGenerator_n70af")

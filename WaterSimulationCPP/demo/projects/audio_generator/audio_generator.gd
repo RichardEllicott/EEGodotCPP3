@@ -33,7 +33,7 @@ func _process(delta: float) -> void:
 func _ready() -> void:
     $AudioStreamPlayer.play()
     playback = $AudioStreamPlayer.get_stream_playback()
-    fill_buffer()
+    #fill_buffer()
 
 
 

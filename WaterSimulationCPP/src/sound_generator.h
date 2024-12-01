@@ -3,10 +3,7 @@
 
 /*
 
-WARNING NOTE
-
-
-i need to make sure i save this as sin_example!!!
+simple sine generator example
 
 
 */
@@ -40,12 +37,16 @@ class SoundGenerator : public Sprite2D
     DECLARE_PROPERTY(float, pulse_hz)
 
 private:
+
+    // i am not 100% sure but it seems wise to update the buffer at a slower rate? i get crashes sometimes
     double timer = 0.0;
     double delay = 0.125;
 
     double phase = 0.0;
 
 
+    // these functions assist in finding the AudioStreamPlayer child and it's AudioStreamGeneratorPlayback
+    // we need to interact with these using pointers and quite a few scenarios just crash!
     AudioStreamPlayer *audio_player_ptr;
     AudioStreamPlayer *get_audio_player_ptr();
 
@@ -70,15 +71,6 @@ public:
 
     
 
-
-    // Ref<AudioStreamGeneratorPlayback> audio_generator_playback_ref;
-
-
-
-    // AudioStreamPlayer* player;
-    // AudioStreamPlayback* playback;
-
-    // Ref<AudioStreamGeneratorPlayback> playback_ref;
 };
 
 #endif

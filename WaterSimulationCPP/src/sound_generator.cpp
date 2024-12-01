@@ -54,10 +54,10 @@ AudioStreamPlayer *SoundGenerator::get_audio_player_ptr()
 
 // REFACTOR
 Ref<AudioStreamGeneratorPlayback> SoundGenerator::get_audio_generator_playback_ref()
-{   
+{
     // we seem to need to do this casting in steps
     Ref<AudioStreamPlayback> playback = get_audio_player_ptr()->get_stream_playback(); // needs to return the plain AudioStreamPlayback
-    if (playback.is_valid()) // if valid try to cast
+    if (playback.is_valid())                                                           // if valid try to cast
     {
         Ref<AudioStreamGeneratorPlayback> generator_playback = playback; // casting occurs here
 
@@ -67,13 +67,12 @@ Ref<AudioStreamGeneratorPlayback> SoundGenerator::get_audio_generator_playback_r
         }
     }
 
-    // // TESTED trying to cast at once, causes crash
+    // // probabally no!?! we will check
     // Ref<AudioStreamGeneratorPlayback> playback = get_audio_player_ptr()->get_stream_playback();
     // if (playback.is_valid())
     // {
     //     return playback; // return valid ref
     // }
-
 
     return nullptr;
 }
@@ -91,11 +90,6 @@ AudioStreamGeneratorPlayback *SoundGenerator::get_audio_generator_playback_ptr()
 void SoundGenerator::fill_buffer()
 {
     // CHECKS, prevents crashes!
-
-    // #region Checks
-
-    #pragma region CHECKS // these checks ensure no null references etc, if anything fails here their will be no sound!
-
     if (get_audio_player_ptr() == nullptr) // check the AudioStreamPlayer
     {
         print("AudioStreamPlayer not found!");
@@ -106,28 +100,23 @@ void SoundGenerator::fill_buffer()
         return;
 
     AudioStreamGeneratorPlayback *playback_ptr = get_audio_generator_playback_ptr(); // we need a pointer to the playback generator
-    if (!playback_ptr)
+
+    if (playback_ptr && playback_ptr != NULL && playback_ptr != nullptr) // THESE EXTRA CHECKS REQUIRED!!! lol
     {
-        print("AudioStreamGeneratorPlayback not found!");
-        return;
+        // print("AudioStreamGeneratorPlayback not found!");
+
+        float increment = pulse_hz / sample_hz;
+
+        int frames_available = playback_ptr->get_frames_available();
+
+        for (int i = 0; i < frames_available; i++)
+        {
+            playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
+            phase = fmod(phase + increment, 1.0);
+        }
+
+        print(frames_available);
     }
-    #pragma endregion
-
-    
-
-    float increment = pulse_hz / sample_hz;
-
-    int frames_available = playback_ptr->get_frames_available();
-
-    for (int i = 0; i < frames_available; i++)
-    {
-        playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
-        phase = fmod(phase + increment, 1.0);
-    }
-
-    print(frames_available);
-
-
 }
 
 void SoundGenerator::_ready()

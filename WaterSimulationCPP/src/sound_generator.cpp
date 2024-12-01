@@ -17,6 +17,8 @@ SoundGenerator::SoundGenerator()
 {
     enabled = false;
     speed = 35.7;
+
+    sample_hz = 44100;
 }
 
 SoundGenerator::~SoundGenerator()
@@ -65,12 +67,18 @@ void SoundGenerator::fill_buffer()
             // int frames_available2 = generator_playback->get_frames_available();
 
 
-            AudioStreamGeneratorPlayback *playback_ptr = generator_playback.ptr();
+            AudioStreamGeneratorPlayback *playback_ptr = generator_playback.ptr(); // for some reason we need the pointer not the ref (which crashes)
             if (playback_ptr)
             {
                 // Now you can access the plain object
                 int frames_available = playback_ptr->get_frames_available();
 
+
+                for (int i = 0; i < frames_available; i++){
+                    playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
+                    phase = fmod(phase + increment, 1.0);
+
+                }
 
                 print(frames_available);
             }

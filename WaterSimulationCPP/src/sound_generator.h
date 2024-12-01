@@ -36,8 +36,10 @@ class SoundGenerator : public Sprite2D
 
 private:
 
-    float timer = 0.0;
-    float delay = 0.125;
+    double timer = 0.0;
+    double delay = 0.125;
+
+    double phase = 0.0;
 
 protected:
     static void _bind_methods();

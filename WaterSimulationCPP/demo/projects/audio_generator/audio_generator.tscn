@@ -21,12 +21,13 @@ script = ExtResource("1_osd6p")
 stream = SubResource("AudioStreamGenerator_5qq53")
 autoplay = true
 
-[node name="Template" type="Template" parent="."]
+[node name="Template" type="Sprite2D" parent="."]
 
-[node name="Template2" type="Template" parent="."]
+[node name="Template2" type="Sprite2D" parent="."]
+
+[node name="SoundGenerator2" type="Sprite2D" parent="."]
 
 [node name="SoundGenerator" type="SoundGenerator" parent="."]
-pulse_hz = 220.0
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SoundGenerator"]
 stream = SubResource("AudioStreamGenerator_n70af")

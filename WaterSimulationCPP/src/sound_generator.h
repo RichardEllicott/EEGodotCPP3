@@ -49,7 +49,10 @@ private:
     AudioStreamPlayer *audio_player_ptr;
     AudioStreamPlayer *get_audio_player_ptr();
 
-    
+    Ref<AudioStreamGeneratorPlayback> get_audio_generator_playback_ref();
+    AudioStreamGeneratorPlayback* get_audio_generator_playback_ptr();
+
+
 
 protected:
     static void _bind_methods();
@@ -69,7 +72,6 @@ public:
 
 
     // Ref<AudioStreamGeneratorPlayback> audio_generator_playback_ref;
-    Ref<AudioStreamGeneratorPlayback> get_audio_generator_playback_ref();
 
 
 

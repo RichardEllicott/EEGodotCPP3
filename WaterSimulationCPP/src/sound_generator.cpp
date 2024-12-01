@@ -54,102 +54,84 @@ AudioStreamPlayer *SoundGenerator::get_audio_player_ptr()
 
 // REFACTOR
 Ref<AudioStreamGeneratorPlayback> SoundGenerator::get_audio_generator_playback_ref()
-{
-    Ref<AudioStreamPlayback> playback = get_audio_player_ptr()->get_stream_playback();
-    if (playback.is_valid())
+{   
+    // we seem to need to do this casting in steps
+    Ref<AudioStreamPlayback> playback = get_audio_player_ptr()->get_stream_playback(); // needs to return the plain AudioStreamPlayback
+    if (playback.is_valid()) // if valid try to cast
     {
-        Ref<AudioStreamGeneratorPlayback> generator_playback = playback;
+        Ref<AudioStreamGeneratorPlayback> generator_playback = playback; // casting occurs here
 
-        if (generator_playback.is_valid())
+        if (generator_playback.is_valid()) // if valid
         {
-            // print("Successfully casted to AudioStreamGeneratorPlayback.");
-            return generator_playback;
+            return generator_playback; // finally return the ref
         }
     }
 
+    // // TESTED trying to cast at once, causes crash
+    // Ref<AudioStreamGeneratorPlayback> playback = get_audio_player_ptr()->get_stream_playback();
+    // if (playback.is_valid())
+    // {
+    //     return playback; // return valid ref
+    // }
+
+
+    return nullptr;
+}
+
+AudioStreamGeneratorPlayback *SoundGenerator::get_audio_generator_playback_ptr()
+{
+    Ref<AudioStreamGeneratorPlayback> ref = get_audio_generator_playback_ref();
+    if (ref.is_valid())
+    {
+        return ref.ptr(); // return valid pointer
+    }
     return nullptr;
 }
 
 void SoundGenerator::fill_buffer()
 {
+    // CHECKS, prevents crashes!
 
-    if (get_audio_player_ptr() == nullptr)
+    // #region Checks
+
+    #pragma region CHECKS // these checks ensure no null references etc, if anything fails here their will be no sound!
+
+    if (get_audio_player_ptr() == nullptr) // check the AudioStreamPlayer
     {
         print("AudioStreamPlayer not found!");
         return;
     }
 
-    if (!audio_player_ptr->is_playing()) // not playing, do not call get_stream_playback
+    if (!audio_player_ptr->is_playing()) // not playing, do not call get_stream_playback (which gives a warning)
         return;
 
-    // Ref<AudioStreamPlayback> playback = audio_player_ptr->get_stream_playback(); // use ptr()??
-
-    // if (playback.is_valid())
-    // {
-
-    // Ref<AudioStreamGeneratorPlayback> generator_playback = playback;
-    Ref<AudioStreamGeneratorPlayback> generator_playback = get_audio_generator_playback_ref(); // REFACTOR
-
-    if (generator_playback.is_valid())
+    AudioStreamGeneratorPlayback *playback_ptr = get_audio_generator_playback_ptr(); // we need a pointer to the playback generator
+    if (!playback_ptr)
     {
-        // print("Successfully casted to AudioStreamGeneratorPlayback.");
+        print("AudioStreamGeneratorPlayback not found!");
+        return;
+    }
+    #pragma endregion
 
-        float increment = pulse_hz / sample_hz;
+    
 
-        AudioStreamGeneratorPlayback *playback_ptr = generator_playback.ptr(); // for some reason we need the pointer not the ref (which crashes)
+    float increment = pulse_hz / sample_hz;
 
-        if (playback_ptr)
-        {
-            // Now you can access the plain object
-            int frames_available = playback_ptr->get_frames_available();
+    int frames_available = playback_ptr->get_frames_available();
 
-            for (int i = 0; i < frames_available; i++)
-            {
-                playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
-                phase = fmod(phase + increment, 1.0);
-            }
+    for (int i = 0; i < frames_available; i++)
+    {
+        playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
+        phase = fmod(phase + increment, 1.0);
+    }
 
-            print(frames_available);
-        }
-        else
-        {
-            print("Invalid playback reference!");
-        }
-        // }
-    };
+    print(frames_available);
 
-    // AudioStreamPlayback* playback_ptr = playback_ref.ptr();
 
-    // AudioStreamPlayback _final = *playback_ptr;
-
-    // int frames_available = playback_ref.ptr()->get_frames_available();
 }
 
 void SoundGenerator::_ready()
 {
-    // Node *child = get_node_or_null("AudioStreamPlayer");
-
-    // if (child == nullptr)
-    // {
-    //     UtilityFunctions::print("Child not found!");
-
-    //     return;
-    // }
-    // else
-    // {
-    //     AudioStreamPlayer *_player = Object::cast_to<AudioStreamPlayer>(child);
-    //     if (_player != nullptr)
-    //     {
-    //         UtilityFunctions::print("Found a AudioStreamPlayer node!");
-    //         player = _player;
-
-    //         playback_ref = _player->get_stream_playback();
-    //     }
-    //     else
-    //     {
-    //         UtilityFunctions::print("Child is not a AudioStreamPlayer node.");
-    //     }
-    // }
 }
 
 // macros from macros.h

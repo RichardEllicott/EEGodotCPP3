@@ -16,10 +16,12 @@ using namespace godot;
 SoundGenerator::SoundGenerator()
 {
     enabled = false;
-    speed = 35.7;
+    buffer_size = 1024;
 
     sample_hz = 44100.0;
     pulse_hz = 220.0;
+
+    // timer_delay = 1.0 / 16.0;
 }
 
 SoundGenerator::~SoundGenerator()
@@ -36,10 +38,8 @@ void SoundGenerator::_physics_process(double delta)
 
 void SoundGenerator::_process(double delta)
 {
-    timer += delta;
-    if (timer >= delay)
+    if (enabled)
     {
-        timer -= delay;
         fill_buffer();
     }
 }
@@ -89,47 +89,96 @@ AudioStreamGeneratorPlayback *SoundGenerator::get_audio_generator_playback_ptr()
 
 void SoundGenerator::fill_buffer()
 {
-    // CHECKS, prevents crashes!
-    if (get_audio_player_ptr() == nullptr) // check the AudioStreamPlayer
-    {
-        print("AudioStreamPlayer not found!");
-        return;
-    }
 
-    if (!audio_player_ptr->is_playing()) // not playing, do not call get_stream_playback (which gives a warning)
-        return;
-
-    AudioStreamGeneratorPlayback *playback_ptr = get_audio_generator_playback_ptr(); // we need a pointer to the playback generator
-
-
-    if (!playback_ptr){
-        print("AudioStreamGeneratorPlayback invalid! 1");
-        return;
-    }
-    if (playback_ptr == NULL){
-        print("AudioStreamGeneratorPlayback invalid! 2");
-        return;
-    }
-    if (playback_ptr == nullptr){
-        print("AudioStreamGeneratorPlayback invalid! 3");
-        return;
-    }
-
-    if (playback_ptr && playback_ptr != NULL && playback_ptr != nullptr) // I CANNOT SEEM TO REFACTOR THIS LINE AWAY!!
+    if (get_audio_player_ptr() != nullptr) // will be null if no AudioStreamPlayer
     {
 
-        float increment = pulse_hz / sample_hz;
-
-        int frames_available = playback_ptr->get_frames_available();
-
-        for (int i = 0; i < frames_available; i++)
+        if (audio_player_ptr->is_playing()) // check if playing
         {
-            playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
-            phase = fmod(phase + increment, 1.0);
-        }
 
-        print(frames_available);
+            AudioStreamGeneratorPlayback *playback_ptr = get_audio_generator_playback_ptr(); // we need a pointer to the playback generator
+
+            // WARNING.. it seems to be critical here to use:
+            // (playback_ptr != NULL)
+            //
+            // but this contradicts c++ style guides that advise "nullptr"
+
+            if (playback_ptr != NULL)
+            { // note i changed this from NULL!?! (still not sure maybe check all)
+
+                float increment = pulse_hz / sample_hz;
+
+                int frames_available = playback_ptr->get_frames_available();
+                frames_available = MIN(frames_available, buffer_size);
+
+                for (int i = 0; i < frames_available; i++)
+                {
+                    playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
+                    phase = fmod(phase + increment, 1.0);
+                }
+
+                print(frames_available);
+            }
+        }
     }
+    else
+    {
+        print("AudioStreamPlayer child not found!");
+    }
+
+    // if (!audio_player_ptr->is_playing()) // not playing, do not call get_stream_playback (which gives a warning)
+    //     return;
+
+    // AudioStreamGeneratorPlayback *playback_ptr = get_audio_generator_playback_ptr(); // we need a pointer to the playback generator
+
+    // MIX RATE MAY CRASH???
+
+    // // getting the mix rate
+    // Ref<AudioStream> audio_stream_ref = audio_player_ptr->get_stream();
+    // if (audio_stream_ref.is_valid())
+    // {
+    //     Ref<AudioStreamGenerator> audio_stream_generator_ref = audio_stream_ref;
+    //     if (audio_stream_generator_ref.is_valid())
+    //     {
+    //         AudioStreamGenerator *audio_stream_generator_ptr = audio_stream_generator_ref.ptr();
+
+    //         if (audio_stream_generator_ptr != NULL) // check to avoid crash
+    //         {
+    //             sample_hz = audio_stream_generator_ptr->get_mix_rate(); // WARNING MAYBE SHOULD CHECK
+    //         }
+    //     }
+    // }
+
+    // WARNING
+    // doing this crashes:
+    //
+    // if (playback_ptr == NULL) return
+    //
+    // i sometimes use this check pattern but it seems to be dangerous with pointers
+
+    // i also tried:
+    // if (playback) // still crashes
+    // if (playback_ptr != nullptr)
+
+    // SHOULD BE CRASH!?!
+    // if (playback_ptr != NULL) // WARNING this is a golden check (even despite the previous pattern)
+    // {
+    //     // if (playback_ptr != nullptr)
+    //     // {
+    //     float increment = pulse_hz / sample_hz;
+
+    //     int frames_available = playback_ptr->get_frames_available();
+
+    //     frames_available = MIN(frames_available, buffer_size);
+
+    //     for (int i = 0; i < frames_available; i++)
+    //     {
+    //         playback_ptr->push_frame(Vector2(1.0, 1.0) * sin(phase * Math_TAU));
+    //         phase = fmod(phase + increment, 1.0);
+    //     }
+
+    //     print(frames_available);
+    // }
 }
 
 void SoundGenerator::_ready()
@@ -138,20 +187,15 @@ void SoundGenerator::_ready()
 
 // macros from macros.h
 CREATE_GETTER_SETTER(SoundGenerator, bool, enabled)
-CREATE_GETTER_SETTER(SoundGenerator, float, speed)
-
+CREATE_GETTER_SETTER(SoundGenerator, int, buffer_size)
 CREATE_GETTER_SETTER(SoundGenerator, float, sample_hz)
 CREATE_GETTER_SETTER(SoundGenerator, float, pulse_hz)
-
-// CREATE_GETTER_SETTER(SoundGenerator, AudioStreamPlayer, player)
-// CREATE_GETTER_SETTER(SoundGenerator, AudioStreamPlayback, playback)
 
 void SoundGenerator::_bind_methods()
 {
     // macros from macros.h
     CREATE_CLASSDB_BINDINGS(SoundGenerator, BOOL, enabled)
-    CREATE_CLASSDB_BINDINGS(SoundGenerator, FLOAT, speed)
-
+    CREATE_CLASSDB_BINDINGS(SoundGenerator, INT, buffer_size)
     CREATE_CLASSDB_BINDINGS(SoundGenerator, FLOAT, sample_hz)
     CREATE_CLASSDB_BINDINGS(SoundGenerator, FLOAT, pulse_hz)
 }

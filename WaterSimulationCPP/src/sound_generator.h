@@ -27,20 +27,16 @@ class SoundGenerator : public Sprite2D
 
     // MACROS from macros.h
     DECLARE_PROPERTY(bool, enabled) // we need to also add two more lines to the cpp file per a property we want to @export
-    DECLARE_PROPERTY(float, speed)
-
-    // DECLARE_PROPERTY(Ref<AudioStreamPlayer>, player)
-
-    // DECLARE_PROPERTY(AudioStreamPlayback, playback)
-
+    DECLARE_PROPERTY(int, buffer_size)
     DECLARE_PROPERTY(float, sample_hz)
     DECLARE_PROPERTY(float, pulse_hz)
+
 
 private:
 
     // i am not 100% sure but it seems wise to update the buffer at a slower rate? i get crashes sometimes
-    double timer = 0.0;
-    double delay = 0.125;
+    // double timer = 0.0;
+    // double timer_delay = 1.0 / 16.0;
 
     double phase = 0.0;
 

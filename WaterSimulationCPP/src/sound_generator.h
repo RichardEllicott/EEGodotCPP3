@@ -26,6 +26,8 @@ set the generator buffer length to much lower, you can use 5-10ms with c++
 #include <godot_cpp/classes/audio_stream_generator.hpp>          // AudioStreamGenerator
 #include <godot_cpp/classes/audio_stream_generator_playback.hpp> // AudioStreamGeneratorPlayback
 
+#include <godot_cpp/classes/audio_stream.hpp> // AudioStream
+
 using namespace godot;
 
 class SoundGenerator : public Sprite2D
@@ -38,24 +40,29 @@ class SoundGenerator : public Sprite2D
     DECLARE_PROPERTY(float, frequency)
 
 
+    #pragma region AudioStreamExport
 private:
+    Ref<AudioStream> audio_stream;
 
+public:
+    void set_audio_stream(const Ref<AudioStream> &p_audio_stream);
+    Ref<AudioStream> get_audio_stream() const;
+    #pragma endregion
+
+private:
     // i am not 100% sure but it seems wise to update the buffer at a slower rate? i get crashes sometimes
     // double timer = 0.0;
     // double timer_delay = 1.0 / 16.0;
 
     double phase = 0.0;
 
-
     // these functions assist in finding the AudioStreamPlayer child and it's AudioStreamGeneratorPlayback
     // we need to interact with these using pointers and quite a few scenarios just crash!
-    AudioStreamPlayer* audio_player_ptr;
-    AudioStreamPlayer* get_audio_player_ptr(); // get the AudioStreamPlayer pointer, has a cache so may need to restart scene if changing nodes
+    AudioStreamPlayer *audio_player_ptr;
+    AudioStreamPlayer *get_audio_player_ptr(); // get the AudioStreamPlayer pointer, has a cache so may need to restart scene if changing nodes
 
     Ref<AudioStreamGeneratorPlayback> get_audio_generator_playback_ref();
-    AudioStreamGeneratorPlayback* get_audio_generator_playback_ptr();
-
-
+    AudioStreamGeneratorPlayback *get_audio_generator_playback_ptr();
 
 protected:
     static void _bind_methods();
@@ -73,8 +80,7 @@ public:
 
     void _update_sample_rate();
 
-    
-
+    Vector2 _get_frame();
 };
 
 #endif

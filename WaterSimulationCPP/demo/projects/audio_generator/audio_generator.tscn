@@ -11,8 +11,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SoundGenerator" type="SoundGenerator" parent="."]
-enabled = true
+[node name="SoundGenerator" type="Sprite2D" parent="."]
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SoundGenerator"]
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="SoundGenerator"]
+
+[node name="SoundGenerator2" type="SoundGenerator" parent="."]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SoundGenerator2"]
 stream = SubResource("AudioStreamGenerator_mypqq")

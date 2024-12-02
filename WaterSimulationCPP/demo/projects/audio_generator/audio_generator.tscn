@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://b041rp162y8li"]
+[gd_scene load_steps=2 format=3 uid="uid://d2c406s2mr15x"]
 
-[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_s7h7b"]
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_mypqq"]
+buffer_length = 0.05
 
 [node name="audio_generator" type="Control"]
 layout_mode = 3
@@ -14,4 +15,4 @@ grow_vertical = 2
 enabled = true
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SoundGenerator"]
-stream = SubResource("AudioStreamGenerator_s7h7b")
+stream = SubResource("AudioStreamGenerator_mypqq")

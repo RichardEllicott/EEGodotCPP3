@@ -3,7 +3,13 @@
 
 /*
 
-simple sine generator example
+simple signal generator example
+
+create a child AudioStreamPlayer called "AudioStreamPlayer"
+set it's stream to an AudioStreamGenerator
+set the generator buffer length to much lower, you can use 5-10ms with c++
+
+
 
 
 */
@@ -17,6 +23,7 @@ simple sine generator example
 
 #include <godot_cpp/classes/audio_stream_player.hpp>             // AudioStreamPlayer
 #include <godot_cpp/classes/audio_stream_playback.hpp>           // AudioStreamPlayback
+#include <godot_cpp/classes/audio_stream_generator.hpp>          // AudioStreamGenerator
 #include <godot_cpp/classes/audio_stream_generator_playback.hpp> // AudioStreamGeneratorPlayback
 
 using namespace godot;
@@ -27,9 +34,8 @@ class SoundGenerator : public Sprite2D
 
     // MACROS from macros.h
     DECLARE_PROPERTY(bool, enabled) // we need to also add two more lines to the cpp file per a property we want to @export
-    DECLARE_PROPERTY(int, buffer_size)
-    DECLARE_PROPERTY(float, sample_hz)
-    DECLARE_PROPERTY(float, pulse_hz)
+    DECLARE_PROPERTY(float, sample_rate)
+    DECLARE_PROPERTY(float, frequency)
 
 
 private:
@@ -43,8 +49,8 @@ private:
 
     // these functions assist in finding the AudioStreamPlayer child and it's AudioStreamGeneratorPlayback
     // we need to interact with these using pointers and quite a few scenarios just crash!
-    AudioStreamPlayer *audio_player_ptr;
-    AudioStreamPlayer *get_audio_player_ptr();
+    AudioStreamPlayer* audio_player_ptr;
+    AudioStreamPlayer* get_audio_player_ptr(); // get the AudioStreamPlayer pointer, has a cache so may need to restart scene if changing nodes
 
     Ref<AudioStreamGeneratorPlayback> get_audio_generator_playback_ref();
     AudioStreamGeneratorPlayback* get_audio_generator_playback_ptr();
@@ -64,6 +70,8 @@ public:
     void _draw() override;
 
     void fill_buffer();
+
+    void _update_sample_rate();
 
     
 

@@ -90,8 +90,8 @@ AudioStreamGeneratorPlayback *SoundGenerator::get_audio_generator_playback_ptr()
 
 void SoundGenerator::fill_buffer()
 {
-
-    #define DEBUG_FILL_BUFFER
+    
+    // #define DEBUG_FILL_BUFFER // prints out messsages to find the point of crash! (KEEP)
 
 
     #ifdef DEBUG_FILL_BUFFER

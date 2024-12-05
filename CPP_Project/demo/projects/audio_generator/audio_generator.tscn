@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2c406s2mr15x"]
+
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_mypqq"]
+buffer_length = 0.1
+
+[node name="audio_generator" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SoundGenerator" type="Sprite2D" parent="."]
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="SoundGenerator"]
+
+[node name="SoundGenerator2" type="SoundGenerator" parent="."]
+enabled = true
+frequency = 110.0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SoundGenerator2"]
+stream = SubResource("AudioStreamGenerator_mypqq")
+volume_db = -24.0
+bus = &"Reverb"

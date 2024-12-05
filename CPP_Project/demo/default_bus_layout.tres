@@ -1,0 +1,23 @@
+[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://dgyc52vfv2v00"]
+
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_f0nkh"]
+resource_name = "Reverb"
+room_size = 1.0
+damping = 1.0
+dry = 0.5
+
+[sub_resource type="AudioEffectLimiter" id="AudioEffectLimiter_cpdtr"]
+resource_name = "Limiter"
+
+[resource]
+bus/0/volume_db = -4.25003
+bus/1/name = &"Reverb"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = -3.32682
+bus/1/send = &"Master"
+bus/1/effect/0/effect = SubResource("AudioEffectReverb_f0nkh")
+bus/1/effect/0/enabled = false
+bus/1/effect/1/effect = SubResource("AudioEffectLimiter_cpdtr")
+bus/1/effect/1/enabled = false

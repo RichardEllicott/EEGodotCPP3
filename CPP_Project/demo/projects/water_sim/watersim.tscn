@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://be3eo3bl82so5"]
+
+[ext_resource type="Script" path="res://test.gd" id="1_ms0fu"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_ms0fu")
+
+[node name="WaterSim" type="Sprite2D" parent="."]
+
+[node name="WaterSim2" type="WaterSim" parent="."]
+enabled = true
+grid_size = Vector2i(128, 128)
+drag = 0.5
+drip_volume = 1.0

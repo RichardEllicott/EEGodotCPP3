@@ -4,18 +4,21 @@
 
 #include "register_types.h"
 
+// new modules need and entry here, and the other matching region
+#pragma region MODULES 
+#include "watersim.h" // water sim example (Eulerian Fluid Simulator)
+#include "template.h" // template, do not modify but copy, included for debug
+// #include "audio_gen.h" // bad experiment i think (one file program)
+#include "sound_generator.h" // sound generator example
+#include "mesh_generator.h"
+#pragma endregion
 
 
-// add files here
-#include "watersim.h" // only this works!?!/!
-#include "template.h"
-// #include "audio_gen.h"
-#include "sound_generator.h"
-
-
+// i think all these are required, but the IDE will not complain
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
+
 
 using namespace godot;
 
@@ -24,11 +27,14 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 		return;
 	}
 
-	GDREGISTER_CLASS(WaterSim);
+	// new modules need and entry here, and the other matching region
+	#pragma region MODULES 
+	GDREGISTER_CLASS(WaterSim); 
 	GDREGISTER_CLASS(Template);
-	// GDREGISTER_CLASS(AudioGen); // SHIT!!!!
-	GDREGISTER_CLASS(SoundGenerator); // SHIT!!!!
-
+	// GDREGISTER_CLASS(AudioGen); 
+	GDREGISTER_CLASS(SoundGenerator);
+	GDREGISTER_CLASS(MeshGenerator);
+	#pragma endregion
 
 }
 

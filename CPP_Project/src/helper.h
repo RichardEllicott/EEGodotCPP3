@@ -7,6 +7,15 @@ Static Helper Class
 
 #include <godot_cpp/variant/utility_functions.hpp> // godot::UtilityFunctions::print(input);
 
+// for format??? have not checked yet
+// #include <godot_cpp/classes/global_constants.hpp>
+// #include <godot_cpp/classes/string.hpp>
+// #include <godot_cpp/core/class_db.hpp>
+// #include <godot_cpp/variant/dictionary.hpp>
+// #include <godot_cpp/variant/variant.hpp>
+
+
+
 using namespace godot;
 
 // static helper class to remeber print etc
@@ -41,6 +50,10 @@ static void print(double input) // double
 	godot::String s = godot::String::num(input);
 	print(s);
 }
+
+// static void format(String input){
+// 	String::format();
+// }
 
 // static void format2(String input, Array[String] pars)
 // {

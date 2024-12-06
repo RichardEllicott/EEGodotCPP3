@@ -11,4 +11,5 @@ script = ExtResource("1_ms0fu")
 enabled = true
 grid_size = Vector2i(128, 128)
 drag = 0.5
+drip_chance = 131072.0
 drip_volume = 1.0

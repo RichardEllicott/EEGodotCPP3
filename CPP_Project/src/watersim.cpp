@@ -59,7 +59,11 @@ void WaterSim::_draw()
 				// data_value *= 0.85; // optional scale
 				// data_value = data_value / 2.0 + 0.5;
 
-				draw_rect(Rect2(Vector2(x, y), Vector2(1, 1)), Color(data_value, data_value, data_value), true);
+				// Color color = Color(data_value, data_value, data_value);
+
+				Color color = Color::from_hsv(fmod(data_value, 1.0), 1.0, 1.0);
+
+				draw_rect(Rect2(Vector2(x, y), Vector2(1, 1)), color, true);
 			}
 		}
 	}
@@ -72,35 +76,20 @@ void WaterSim::run_simulation(double delta)
 
 	grid_size.x = MAX(grid_size.x, 0);
 	grid_size.y = MAX(grid_size.y, 0);
-	int expected_array_size = grid_size.x * grid_size.y;
+	int cell_count = grid_size.x * grid_size.y;
 
-	_check_grid_data();
+	_check_grid_data(); // this function is important as if the grid data is not setup this will trigger it (avoids crash)
 
-	#define DRIP1
-	#ifdef DRIP1
-	if (frame_count % 32 == 0){
-		
-		int rand_ref = rng->randi_range(0, expected_array_size - 1);
-		displacement_grid[rand_ref] += drip_volume;
-	}
-	#endif
+#pragma region HEIGHT_CORRECTION
+	if (height_correction)
+	{
+		float correction = 0.5 - average_displacement; // note we need to run our height correction at start (after _check_grid_data)
+		for (int i = 0; i < cell_count; i++)
+			displacement_grid[i] = displacement_grid[i] + correction;
+		}
+#pragma endregion
 
-
-
-	// int displacement_grid_size = displacement_grid.size();
-
-	// int velocity_grid_size = velocity_grid.size();
-
-	// String tt2 = godot::String::num(velocity_grid_size);
-	// // print(tt2);
-
-	// if (displacement_grid_size != velocity_grid_size || displacement_grid_size == 0)
-	// 	return;
-
-	// int expected_size = grid_size.x * grid_size.y;
-
-	// if (displacement_grid_size != expected_size)
-	// 	return;
+	float total_displacement = 0.0; // we will add up the total volume in the following loops (used to calculate average displacement)
 
 	for (int y = 0; y < grid_size.y; y++)
 	{
@@ -129,7 +118,7 @@ void WaterSim::run_simulation(double delta)
 
 			// force is proportional to surrounding cells
 			float force = ((hn + he + hs + hw) / 4.0) - height; // calculate our force it is based on our displacement vs the other 4 averaged
-			force *= speed * water_pressure;										// apply speed factor (this scales the force it would be based on the liquids weight i guess)
+			force *= force_factor;								// apply speed factor (this scales the force it would be based on the liquids weight i guess)
 
 			// add our force
 			velocity += force;
@@ -145,17 +134,19 @@ void WaterSim::run_simulation(double delta)
 			float sin_pos = x_lerp * sine_frequency * 360.0 * DEG_TO_RAD + time_passed * speed;
 			float sin_height = sin(sin_pos);
 // float sin_height = Helper::trichoidal_wave(sin_pos);
-#endif		
+#endif
 
-			# ifdef DRIP2
-			if (drip_chance > 0.0){
-				if (rng->randf() <= drip_chance){
+#define DRIP2
+#ifdef DRIP2
+			if (drip_chance > 0.0)
+			{
+				if (rng->randf() <= 1.0 / drip_chance)
+				{
 					height += drip_volume;
 				}
-
-
 			}
-			#endif
+#endif
+			total_displacement += height;
 
 			velocity_grid[ref] = velocity;	 // save the velocity back
 			displacement_grid[ref] = height; // add back
@@ -169,6 +160,12 @@ void WaterSim::run_simulation(double delta)
 #endif
 		}
 	}
+
+	float cell_count_f = cell_count;
+
+	average_displacement = total_displacement / cell_count_f; // save average volume
+
+	// print(average_displacement);
 }
 
 void WaterSim::_physics_process(double delta)
@@ -186,49 +183,38 @@ void WaterSim::_process(double delta)
 
 	time_passed += delta;
 
-	// Vector2 new_position = Vector2(
-	// 	amplitude + (amplitude * sin(time_passed * 2.0)),
-	// 	amplitude + (amplitude * cos(time_passed * 1.5))
-	// );
-	// set_position(new_position);
-
 	queue_redraw();
 }
 
 // macros from macros.h
 CREATE_GETTER_SETTER(WaterSim, bool, enabled)
-CREATE_GETTER_SETTER(WaterSim, float, speed)
-CREATE_GETTER_SETTER(WaterSim, float, water_pressure)
-
 CREATE_GETTER_SETTER(WaterSim, Vector2i, grid_size)
-CREATE_GETTER_SETTER(WaterSim, Vector2, size)
-CREATE_GETTER_SETTER(WaterSim, float, sine_strength)
-CREATE_GETTER_SETTER(WaterSim, float, sine_frequency)
-
+CREATE_GETTER_SETTER(WaterSim, float, force_factor)
 CREATE_GETTER_SETTER(WaterSim, float, drag)
+
 CREATE_GETTER_SETTER(WaterSim, float, drip_chance)
 CREATE_GETTER_SETTER(WaterSim, float, drip_volume)
+CREATE_GETTER_SETTER(WaterSim, bool, height_correction)
 
-
-
-
+// CREATE_GETTER_SETTER(WaterSim, Vector2, size)
+// CREATE_GETTER_SETTER(WaterSim, float, sine_strength)
+// CREATE_GETTER_SETTER(WaterSim, float, sine_frequency)
 
 void WaterSim::_bind_methods()
 {
 	// macros from macros.h
 	CREATE_CLASSDB_BINDINGS(WaterSim, BOOL, enabled)
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, speed)
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, water_pressure)
-
 	CREATE_CLASSDB_BINDINGS(WaterSim, VECTOR2I, grid_size)
-	CREATE_CLASSDB_BINDINGS(WaterSim, VECTOR2, size)
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, sine_strength)
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, sine_frequency)
-
+	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, force_factor)
 	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, drag)
+
 	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, drip_chance)
 	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, drip_volume)
+	CREATE_CLASSDB_BINDINGS(WaterSim, BOOL, height_correction)
 
+	// CREATE_CLASSDB_BINDINGS(WaterSim, VECTOR2, size)
+	// CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, sine_strength)
+	// CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, sine_frequency)
 }
 
 #endif

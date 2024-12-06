@@ -28,25 +28,25 @@ class WaterSim : public Sprite2D
 
 	// WARNING: MACROS (they need corrosponding macros in the cpp file)
 
-	DECLARE_PROPERTY(bool, enabled)
-	DECLARE_PROPERTY(float, speed)
-	DECLARE_PROPERTY(float, water_pressure)
+	DECLARE_PROPERTY(bool, enabled) // simulation enabled
+	DECLARE_PROPERTY(Vector2i, grid_size) // the simulation size, in cells
+	DECLARE_PROPERTY(float, force_factor) // the proportion of force the cells exert on one another
+	DECLARE_PROPERTY(float, drag) // the linear drag applied to their velocity (so they loose energy)
 
-	DECLARE_PROPERTY(Vector2i, grid_size)
-	DECLARE_PROPERTY(Vector2, size)
-	DECLARE_PROPERTY(float, sine_strength)
-	DECLARE_PROPERTY(float, sine_frequency)
+	DECLARE_PROPERTY(float, drip_chance) // the chance of a drip but as 1.0/drip_chance.. because Godot truncates all the fractions (annoying)
+	DECLARE_PROPERTY(float, drip_volume) // the amount of volume of each drop
+	DECLARE_PROPERTY(bool, height_correction) // will run through all cells and ensure average height of 0.5 (compensating for the drops)
 
-	DECLARE_PROPERTY(float, drag)
-	DECLARE_PROPERTY(float, drip_chance)
-	DECLARE_PROPERTY(float, drip_volume)
-
-
+	// DECLARE_PROPERTY(Vector2, size)
+	// DECLARE_PROPERTY(float, sine_strength)
+	// DECLARE_PROPERTY(float, sine_frequency)
 
 private:
-	double time_passed;
+	float time_passed = 0.0;
 
-	int frame_count;
+	int frame_count = 0;
+
+	float average_displacement = 0.5;
 
 	// PackedFloat32Array *data = memnew(PackedFloat32Array); // seems the only way to prevent crash (not having * crashes)
 
@@ -122,7 +122,8 @@ public:
 		for (int i = 0; i < array_size; i++)
 		{
 
-			displacement_grid[i] = rng->randf(); // works!
+			// displacement_grid[i] = rng->randf();
+			displacement_grid[i] = 0.5;
 
 			velocity_grid[i] = 0.0; // rest the velocity to 0
 		}
@@ -221,8 +222,8 @@ public:
 
 		time_passed = 0.0;
 
-		speed = 1.0;
-		water_pressure = 1.0;
+		// speed = 1.0;
+		force_factor = 1.0;
 
 		frame_count = 0;
 
@@ -230,13 +231,12 @@ public:
 
 		grid_size = Vector2i(32, 32);
 
-		size = Vector2(1.0, 1.0);
+		// size = Vector2(1.0, 1.0);
 
 		_init_grid_data(); // required to set grids up
 
-		sine_strength = 1.0;
-		sine_frequency = 8.0;
-
+		// sine_strength = 1.0;
+		// sine_frequency = 8.0;
 
 		drip_chance = 0.0;
 		drip_volume = 1.0 / 16.0;

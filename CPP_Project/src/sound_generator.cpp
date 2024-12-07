@@ -90,26 +90,24 @@ AudioStreamGeneratorPlayback *SoundGenerator::get_audio_generator_playback_ptr()
 
 void SoundGenerator::fill_buffer()
 {
-    
-    #define DEBUG_FILL_BUFFER // prints out messsages to find the point of crash! (KEEP)
 
+#define DEBUG_FILL_BUFFER // prints out messsages to find the point of crash! (KEEP)
 
-    #ifdef DEBUG_FILL_BUFFER
+#ifdef DEBUG_FILL_BUFFER
     print("DEBUG_FILL_BUFFER 0");
-    #endif
+#endif
 
     if (get_audio_player_ptr() != NULL) // will be NULL if no AudioStreamPlayer
     {
-        #ifdef DEBUG_FILL_BUFFER
+#ifdef DEBUG_FILL_BUFFER
         print("DEBUG_FILL_BUFFER 1");
-        #endif
-        
+#endif
 
         if (audio_player_ptr->is_playing()) // check if playing
         {
-            #ifdef DEBUG_FILL_BUFFER
+#ifdef DEBUG_FILL_BUFFER
             print("DEBUG_FILL_BUFFER 2");
-            #endif
+#endif
 
             AudioStreamGeneratorPlayback *playback_ptr = get_audio_generator_playback_ptr(); // we need a pointer to the playback generator
 
@@ -120,9 +118,9 @@ void SoundGenerator::fill_buffer()
 
             if (playback_ptr != NULL) // very weird nullptr fails, using NULL
             {
-                #ifdef DEBUG_FILL_BUFFER
+#ifdef DEBUG_FILL_BUFFER
                 print("DEBUG_FILL_BUFFER 3");
-                #endif
+#endif
 
                 float increment = frequency / sample_rate;
 
@@ -130,12 +128,9 @@ void SoundGenerator::fill_buffer()
 
                 int frames_available = playback_ptr->get_frames_available();
 
-
-                #ifdef DEBUG_FILL_BUFFER
+#ifdef DEBUG_FILL_BUFFER
                 print("DEBUG_FILL_BUFFER 4");
-                #endif
-
-
+#endif
 
                 for (int i = 0; i < frames_available; i++)
                 {
@@ -214,6 +209,7 @@ void SoundGenerator::_update_sample_rate()
 CREATE_GETTER_SETTER(SoundGenerator, bool, enabled)
 CREATE_GETTER_SETTER(SoundGenerator, float, sample_rate)
 CREATE_GETTER_SETTER(SoundGenerator, float, frequency)
+
 
 // CREATE_GETTER_SETTER(SoundGenerator, AudioStream*, audio_stream)
 

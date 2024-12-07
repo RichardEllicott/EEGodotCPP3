@@ -6,6 +6,9 @@
 
 #include <godot_cpp/classes/sprite2d.hpp>
 
+#include <godot_cpp/classes/random_number_generator.hpp>
+
+
 using namespace godot;
 
 class TemplateSFile : public Sprite2D
@@ -18,19 +21,24 @@ class TemplateSFile : public Sprite2D
 
     //
     //
-    // DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(bool, enabled)
-    // DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(bool, test123)
+    // DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(bool, enabled) // doesn't crash alone
+    // DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(float, speed)
 
-    // DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(Texture2D, texture) // still can't get these working
+    DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(Ref<Texture2D>, texture222) // ah use ref!
+    // DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(Ref<RandomNumberGenerator>, rng) // ah use ref!
+
+    
 
 private:
 protected:
     static void _bind_methods()
     {
-        // CREATE_CLASSDB_BINDINGS(TemplateSFile, BOOL, enabled)
-        // CREATE_CLASSDB_BINDINGS(TemplateSFile, BOOL, test123)
+        // CREATE_CLASSDB_BINDINGS(TemplateSFile, BOOL, enabled); // just crashes with signal or not
+        // CREATE_CLASSDB_BINDINGS(TemplateSFile, Variant::FLOAT, speed)
 
-        // CREATE_CLASSDB_BINDINGS2()
+        CREATE_CLASSDB_BINDINGS2(TemplateSFile, "Texture2D", texture222)
+        // CREATE_CLASSDB_BINDINGS2(TemplateSFile, "RandomNumberGenerator", rng)
+
 
         #pragma region SIGNALS
     	// ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed", PROPERTY_HINT_RANGE, "0,20,0.01"), "set_speed", "get_speed");

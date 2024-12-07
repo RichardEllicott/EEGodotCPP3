@@ -3,4 +3,3 @@
 [node name="Node2D" type="Node2D"]
 
 [node name="TemplateSFile" type="TemplateSFile" parent="."]
-enabled = false

@@ -5,3 +5,4 @@
 [node name="Template" type="Template" parent="."]
 
 [node name="TemplateSFile" type="TemplateSFile" parent="."]
+enabled = true

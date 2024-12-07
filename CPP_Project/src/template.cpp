@@ -40,6 +40,7 @@ void Template::_ready()
 // macros from macros.h
 CREATE_GETTER_SETTER(Template, bool, enabled)
 CREATE_GETTER_SETTER(Template, float, speed)
+CREATE_GETTER_SETTER(Template, Vector2i, grid_size)
 
 CREATE_GETTER_SETTER(Template, Ref<Texture2D>, texture2d)
 
@@ -47,9 +48,9 @@ void Template::_bind_methods()
 {
     // macros from macros.h
     CREATE_CLASSDB_BINDINGS(Template, BOOL, enabled)
-    // CREATE_CLASSDB_BINDINGS2(Template, "bool", enabled) // test?? CRASHED!!!
-
+    // CREATE_CLASSDB_BINDINGS2(Template, "bool", enabled) // tested alt macro? CRASHED!!!
     CREATE_CLASSDB_BINDINGS(Template, FLOAT, speed)
+    CREATE_CLASSDB_BINDINGS(Template, VECTOR2I, grid_size)
 
     CREATE_CLASSDB_BINDINGS2(Template, "Texture2D", texture2d)
 

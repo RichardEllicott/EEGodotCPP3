@@ -25,9 +25,15 @@ private:                                  \
 // EXPERIMENTAL (putting the functions on the header file, breaks!!!)
 // // header file macro, to declare a property (supports only variants)
 // // this all in one macro changes the public/private scope
-#define DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(TYPE, NAME) \
+
+//
+//
+// i think const causes problem!!
+
+
+#define DECLARE_PROPERTY_SINGLE_FILE(TYPE, NAME) \
 public:                                                                    \
-	const TYPE get_##NAME() { return NAME; };                                    \
+	TYPE get_##NAME() { return NAME; };                                    \
 	void set_##NAME(const TYPE p_##NAME) { NAME = p_##NAME; };             \
                                                                            \
 private:                                                                   \

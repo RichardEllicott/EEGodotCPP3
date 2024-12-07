@@ -8,7 +8,8 @@
 #pragma region MODULES 
 #include "watersim.h" // water sim example (Eulerian Fluid Simulator)
 #include "template.h" // template, do not modify but copy, included for debug
-// #include "audio_gen.h" // bad experiment i think (one file program)
+#include "template_sfile.h" // testing one file ideas
+
 #include "sound_generator.h" // sound generator example
 #include "mesh_generator.h"
 #pragma endregion
@@ -31,7 +32,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	#pragma region MODULES 
 	GDREGISTER_CLASS(WaterSim); 
 	GDREGISTER_CLASS(Template);
-	// GDREGISTER_CLASS(AudioGen); 
+	GDREGISTER_CLASS(TemplateSFile); 
 	GDREGISTER_CLASS(SoundGenerator);
 	GDREGISTER_CLASS(MeshGenerator);
 	#pragma endregion

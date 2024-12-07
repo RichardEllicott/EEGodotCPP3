@@ -1,4 +1,9 @@
-[gd_scene load_steps=3 format=4 uid="uid://c0xgft2ppooxq"]
+[gd_scene load_steps=5 format=4 uid="uid://c0xgft2ppooxq"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_r4061"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_tims7"]
+noise = SubResource("FastNoiseLite_r4061")
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_o51bc"]
 _surfaces = [{
@@ -21,6 +26,8 @@ map_data = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 [node name="mesh_generator" type="Node3D"]
 
 [node name="MeshGenerator" type="MeshGenerator" parent="."]
+enabled = false
+texture2d = SubResource("NoiseTexture2D_tims7")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="MeshGenerator"]
 mesh = SubResource("ArrayMesh_o51bc")

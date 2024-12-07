@@ -22,16 +22,38 @@
 #include <godot_cpp/classes/mesh.hpp>
 #include <godot_cpp/core/class_db.hpp>
 
+#include <godot_cpp/classes/texture2d.hpp>
+
 using namespace godot;
 
 class MeshGenerator : public Node3D
 {
     GDCLASS(MeshGenerator, Node3D)
 
+#pragma region GDCLASS_EXPAND // not yet used binding
+
+#pragma endregion
+
     // MACROS from macros.h
     DECLARE_PROPERTY(bool, enabled) // we need to also add two more lines to the cpp file per a property we want to @export
     DECLARE_PROPERTY(float, height)
     DECLARE_PROPERTY(Vector2i, grid_size)
+
+
+    DECLARE_PROPERTY(NodePath, node_path)
+
+
+#pragma region Texture2DExport // not yet used binding
+
+    DECLARE_PROPERTY(Ref<Texture2D>, texture2d)
+
+// private:
+//     Ref<Texture2D> texture2d;
+
+// public:
+//     void set_texture2d(const Ref<Texture2D> &p_texture2d);
+//     Ref<Texture2D> get_texture2d() const;
+#pragma endregion
 
 private:
 protected:
@@ -41,7 +63,6 @@ public:
     void _ready() override;
     void _process(double delta) override;
     void _physics_process(double delta) override;
-
 
     void add_quad();
     void add_terrain();

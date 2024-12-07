@@ -12,6 +12,15 @@ Template::Template()
 {
     enabled = false;
     speed = 35.7;
+
+
+    print("hello from template!");
+
+
+
+
+
+
 }
 
 Template::~Template()

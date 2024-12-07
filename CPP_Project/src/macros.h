@@ -3,45 +3,62 @@
 
 /*
 
-PROPERTY EXPORT MACROS
+WARNING
 
-a lot of boilerplate is require to show just one variable in C++ (compared to GDScript)
+MY MACROS HAVE TOO SIMILAR NAMES!!!
 
-ie: 4-5 for the property declaration
-at least 2 for the get/set (if using one liners)
-3 lines in the _bind_methods function
-
-so these macros reduce that
 
 */
 
-// header file macro, to declare a property
 #define DECLARE_PROPERTY(TYPE, NAME)      \
-private:                                  \
-	TYPE NAME;                            \
                                           \
 public:                                   \
 	void set_##NAME(const TYPE p_##NAME); \
-	TYPE get_##NAME() const;
+	TYPE get_##NAME() const;              \
+                                          \
+private:                                  \
+	TYPE NAME;
 
-// header file macro, to declare a property
-#define DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER(TYPE, NAME) \
-private:                                                      \
-	TYPE NAME;                                                \
-                                                              \
-public:                                                       \
-	void set_##NAME(const TYPE p_##NAME) { return NAME; };    \
-	TYPE get_##NAME() const { NAME = p_##NAME; };
+// EXPERIMENTAL (putting the functions on the header file, breaks!!!)
+// // header file macro, to declare a property (supports only variants)
+// // this all in one macro changes the public/private scope
+#define DECLARE_PROPERTY_AND_CREATE_GETTER_SETTER_EXPERIMENTAL(TYPE, NAME) \
+public:                                                                    \
+	const TYPE get_##NAME() { return NAME; };                                    \
+	void set_##NAME(const TYPE p_##NAME) { NAME = p_##NAME; };             \
+                                                                           \
+private:                                                                   \
+	TYPE NAME;
 
-// cpp file macro, create the get/set functions
+// cpp file macro, create the get/set functions for @export
 #define CREATE_GETTER_SETTER(CLASS, TYPE, NAME)     \
 	TYPE CLASS::get_##NAME() const { return NAME; } \
 	void CLASS::set_##NAME(const TYPE p_##NAME) { NAME = p_##NAME; }
 
 // bindings macro
+// run inside _bind_methods on the cpp file
+// works only for variants and needs you to find a special constant for each type (like BOOL, FLOAT, VECTOR2I)
+//
+// Examples:
+// CREATE_CLASSDB_BINDINGS(MeshGenerator, BOOL, enabled)
+// CREATE_CLASSDB_BINDINGS(MeshGenerator, FLOAT, height)
+// CREATE_CLASSDB_BINDINGS(MeshGenerator, VECTOR2I, grid_size)
+//
 #define CREATE_CLASSDB_BINDINGS(CLASS, TYPE, NAME)                                \
 	ClassDB::bind_method(D_METHOD("get_" #NAME), &CLASS::get_##NAME);             \
 	ClassDB::bind_method(D_METHOD("set_" #NAME, "p_" #NAME), &CLASS::set_##NAME); \
 	ADD_PROPERTY(PropertyInfo(Variant::TYPE, #NAME), "set_" #NAME, "get_" #NAME);
 
 #endif
+
+// this one works for clases, like Texture2D etc
+//
+// BIND_CLASSDB_PROPERTY2(MeshGenerator, "Texture2D", texture2d);
+//
+// i have only tested Texture2D so far
+//
+//
+#define CREATE_CLASSDB_BINDINGS2(CLASS, TYPE, NAME)                         \
+	ClassDB::bind_method(D_METHOD("set_" #NAME, TYPE), &CLASS::set_##NAME); \
+	ClassDB::bind_method(D_METHOD("get_" #NAME), &CLASS::get_##NAME);       \
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, #NAME, PROPERTY_HINT_RESOURCE_TYPE, TYPE), "set_" #NAME, "get_" #NAME)

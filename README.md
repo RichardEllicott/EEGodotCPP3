@@ -8,11 +8,10 @@ has already been set up and compiled on windows using vs.code
 
 To Compile:
 -install the latest (stable) python to your platform, try to ensure the path variales are set upon install
--open the command line (hyperterminal for windows, bash for mac/linux) and type:
+-install scons
 ```
 pip install scons
 ```
 
-
-
-on other platforms you may need to call scons
+- get the c++ bindings:
+  https://github.com/godotengine/godot-cpp/tree/4.3

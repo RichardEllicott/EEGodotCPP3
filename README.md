@@ -10,3 +10,7 @@ pip install scons
   https://github.com/godotengine/godot-cpp/tree/4.3
 
 - compile the c++ bindings by running the command scons in the directory
+```
+cd .\godot-cpp\
+scons
+```

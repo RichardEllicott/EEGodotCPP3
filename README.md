@@ -9,7 +9,7 @@ has already been set up and compiled on windows using vs.code
 To Compile:
 -install the latest (stable) python to your platform, try to ensure the path variales are set upon install
 -open the command line (hyperterminal for windows, bash for mac/linux) and type:
->> pip install scons
+$> pip install scons
 
 
 

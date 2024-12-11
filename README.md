@@ -15,3 +15,4 @@ scons
 ```
 - if you get any compile problems refer to the Godot docs, you may need to install a compiler
 - setup an ide like [vs.code](https://code.visualstudio.com/)
+- to compile the project run scons in the root directory, check out the demo folder for a Godot project

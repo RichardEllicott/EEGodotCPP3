@@ -6,12 +6,7 @@
 ```
 pip install scons
 ```
-- get the [c++ bindings](https://github.com/godotengine/godot-cpp/tree/4.3) and put them in the root directory:
-  
-
-
-
-  
+- get the [c++ bindings](https://github.com/godotengine/godot-cpp/tree/4.3) and put them in the root directory
 - open the terminal and navigate to the project's root directory
 - compile the c++ bindings by running the command scons in the directory
 ```

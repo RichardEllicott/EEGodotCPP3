@@ -13,3 +13,5 @@ pip install scons
 cd .\godot-cpp\
 scons
 ```
+- if you get any compile problems refer to the Godot docs, you may need to install a compiler
+- setup an ide like [vs.code](https://code.visualstudio.com/)

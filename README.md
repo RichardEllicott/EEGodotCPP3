@@ -1,5 +1,5 @@
 # EEGodotCPP3
-# Godot 4.3 GDExtension C++ boilerplate library
+# Godot GDExtension C++ boilerplate library
 
 ## Instructions
 - install the latest (stable) python to your platform, try to ensure the path variales are set upon install (ensuring you can use the python and pips commands at the terminal)

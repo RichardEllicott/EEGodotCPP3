@@ -11,4 +11,4 @@ grid_size = Vector2i(128, 128)
 drag = 0.5
 drip_chance = 131072.0
 drip_volume = 1.0
-height_correction = false
+height_correction = true

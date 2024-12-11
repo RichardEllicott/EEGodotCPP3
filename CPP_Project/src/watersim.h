@@ -86,6 +86,7 @@ public:
 
 	void _physics_process(double delta) override;
 
+	// check the grid data matches our settings, if not set it up
 	void _check_grid_data()
 	{
 
@@ -104,6 +105,7 @@ public:
 		}
 	}
 
+	// set up the arrays to reflect the grid size
 	void _init_grid_data()
 	{
 
@@ -139,8 +141,8 @@ public:
 
 	void run_simulation(double delta);
 
-	// int coor_to_ref(Vector2i coor);
-
+	
+	// coordinate to an array ref number
 	int coor_to_ref(Vector2i coor)
 	{
 		coor.x += grid_size.x; // a bit of a hack, warning the modulo is confusing, negative values can ruin this function beyond a certain point
@@ -160,6 +162,7 @@ public:
 		return coor_to_ref(Vector2i(x, y));
 	}
 
+	// reverse function
 	Vector2i ref_to_coor(int ref)
 	{
 		return Vector2i(ref % grid_size.x, ref / grid_size.x);
@@ -189,18 +192,11 @@ public:
 		}
 	}
 
-	// WARNING THIS ISSUE CAUSES IDE CRASHES
-	// this workaround
-	// https://github.com/godotengine/godot/issues/95745
-	//
-	// A plain:
-	// RandomNumberGenerator rng = RandomNumberGenerator(); // causes crash!
-	//
+
 private:
 #
 	// RandomNumberGenerator *rng_ptr; // plain pointer works (but requires rembering to deconstruct)
-
-	Ref<RandomNumberGenerator> rng; // settling for a Ref
+	Ref<RandomNumberGenerator> rng; // this reference pattern is prefered (as we don't need to deconstruct it)
 
 	int test_int()
 	{
@@ -211,7 +207,7 @@ private:
 	}
 
 public:
-	WaterSim()
+	WaterSim() // breaking convention putting this in the h file but it makes tracking the memory easier
 	{
 		// rng_ptr = memnew(RandomNumberGenerator); // pointer version (need to delete)
 

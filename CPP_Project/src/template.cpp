@@ -47,12 +47,12 @@ CREATE_GETTER_SETTER(Template, Ref<Texture2D>, texture2d)
 void Template::_bind_methods()
 {
     // macros from macros.h
-    CREATE_CLASSDB_BINDINGS(Template, BOOL, enabled)
+    CREATE_VAR_BINDINGS(Template, BOOL, enabled)
     // CREATE_CLASSDB_BINDINGS2(Template, "bool", enabled) // tested alt macro? CRASHED!!!
-    CREATE_CLASSDB_BINDINGS(Template, FLOAT, speed)
-    CREATE_CLASSDB_BINDINGS(Template, VECTOR2I, grid_size)
+    CREATE_VAR_BINDINGS(Template, FLOAT, speed)
+    CREATE_VAR_BINDINGS(Template, VECTOR2I, grid_size)
 
-    CREATE_CLASSDB_BINDINGS2(Template, "Texture2D", texture2d)
+    CREATE_CLASS_BINDINGS(Template, "Texture2D", texture2d)
 
     ADD_SIGNAL(MethodInfo("test_signal", PropertyInfo(Variant::OBJECT, "node"), PropertyInfo(Variant::VECTOR2, "new_pos"))); // signal still testing
 }

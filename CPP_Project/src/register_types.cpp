@@ -10,6 +10,11 @@
 #include "template.h" // template, do not modify but copy, included for debug
 #include "template_sfile.h" // testing one file ideas
 #include "sound_generator.h" // sound generator example
+
+// s1 files
+#include "s1_audio_generator.h" // single file new one
+#include "s1_ui_draw.h" //
+
 #include "mesh_generator.h"
 #pragma endregion
 
@@ -33,6 +38,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(Template);
 	GDREGISTER_CLASS(TemplateSFile); 
 	GDREGISTER_CLASS(SoundGenerator);
+	GDREGISTER_CLASS(S1AudioGenerator); // sort in file
+	GDREGISTER_CLASS(S1_UI_Draw);
 	GDREGISTER_CLASS(MeshGenerator);
 	#pragma endregion
 

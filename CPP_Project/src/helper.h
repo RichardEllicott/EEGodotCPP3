@@ -18,10 +18,42 @@ Static Helper Class
 
 using namespace godot;
 
-// static helper class to remeber print etc
 
-static const double DEG_TO_RAD = Math_PI / 180.0;
-static const double RAD_TO_DEG = 180.0 / Math_PI;
+
+// Circular Array Pool
+// Used to store audio signal history
+template <typename T, std::size_t Size>
+class CircularArrayPool {
+    std::array<T, Size> pool;
+    std::size_t current_index = 0;
+    std::size_t count = 0;
+
+   public:
+    void add(const T &item) {
+        pool[current_index] = item;
+        current_index = (current_index + 1) % Size;  // Wrap around.
+        if (count < Size) {
+            count++;
+        }
+    }
+
+    T &get(std::size_t index) {
+        if (index >= count) {
+            throw std::out_of_range("Index out of bounds!");
+        }
+        // Map logical index to physical index in circular buffer.
+        return pool[(current_index + index) % Size];
+    }
+
+    std::size_t size() const { return count; }
+    std::size_t capacity() const { return Size; }
+};
+
+
+
+
+static const double DEG_TO_RAD = Math_PI / 180.0; // multiply by this to convert
+static const double RAD_TO_DEG = 180.0 / Math_PI; // multiply by this to convert
 
 // // Simple Frequency Modulation function
 // double fm_wave(double x, double carrier_freq, double modulating_freq, double modulation_index)

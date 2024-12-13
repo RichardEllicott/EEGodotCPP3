@@ -27,6 +27,7 @@ SoundGenerator::SoundGenerator()
 
 SoundGenerator::~SoundGenerator()
 {
+   audio_player_ptr = nullptr; // important for preventing memory crash
 }
 
 void SoundGenerator::_draw()
@@ -219,15 +220,19 @@ CREATE_GETTER_SETTER(SoundGenerator, float, frequency)
 void SoundGenerator::_bind_methods()
 {
     // macros from macros.h
-    CREATE_CLASSDB_BINDINGS(SoundGenerator, BOOL, enabled)
-    CREATE_CLASSDB_BINDINGS(SoundGenerator, FLOAT, sample_rate)
-    CREATE_CLASSDB_BINDINGS(SoundGenerator, FLOAT, frequency)
+    CREATE_VAR_BINDINGS(SoundGenerator, BOOL, enabled)
+    CREATE_VAR_BINDINGS(SoundGenerator, FLOAT, sample_rate)
+    CREATE_VAR_BINDINGS(SoundGenerator, FLOAT, frequency)
 
 #pragma region AudioStreamExport // generated this with chat gp!
 
-    ClassDB::bind_method(D_METHOD("set_audio_stream", "audio_stream"), &SoundGenerator::set_audio_stream);
-    ClassDB::bind_method(D_METHOD("get_audio_stream"), &SoundGenerator::get_audio_stream);
-    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "audio_stream", PROPERTY_HINT_RESOURCE_TYPE, "AudioStream"), "set_audio_stream", "get_audio_stream");
+    // ClassDB::bind_method(D_METHOD("set_audio_stream", "audio_stream"), &SoundGenerator::set_audio_stream);
+    // ClassDB::bind_method(D_METHOD("get_audio_stream"), &SoundGenerator::get_audio_stream);
+    // ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "audio_stream", PROPERTY_HINT_RESOURCE_TYPE, "AudioStream"), "set_audio_stream", "get_audio_stream");
+
+    CREATE_CLASS_BINDINGS(SoundGenerator, "AudioStream", audio_stream)
+
+
 
 #pragma endregion
 

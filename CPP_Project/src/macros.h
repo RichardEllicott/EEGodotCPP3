@@ -30,7 +30,11 @@ private:                                  \
 //
 // i think const causes problem!!
 
-
+// note ending has no ;
+// allows:
+//
+// DECLARE_PROPERTY_SINGLE_FILE(float, pulse_width) = 0.5;
+//
 #define DECLARE_PROPERTY_SINGLE_FILE(TYPE, NAME) \
 public:                                                                    \
 	TYPE get_##NAME() { return NAME; };                                    \
@@ -38,6 +42,18 @@ public:                                                                    \
                                                                            \
 private:                                                                   \
 	TYPE NAME;
+
+
+
+#define DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(TYPE, NAME, DEFAULT) \
+public:                                                                    \
+	TYPE get_##NAME() { return NAME; };                                    \
+	void set_##NAME(const TYPE p_##NAME) { NAME = p_##NAME; };             \
+                                                                           \
+private:                                                                   \
+	TYPE NAME = DEFAULT;
+
+
 
 // cpp file macro, create the get/set functions for @export
 //
@@ -47,33 +63,7 @@ private:                                                                   \
 	TYPE CLASS::get_##NAME() const { return NAME; } \
 	void CLASS::set_##NAME(const TYPE p_##NAME) { NAME = p_##NAME; }
 
-// bindings macro
-// run inside _bind_methods on the cpp file
-// works only for variants and needs you to find a special constant for each type (like BOOL, FLOAT, VECTOR2I)
-//
-// Examples:
-// CREATE_CLASSDB_BINDINGS(MeshGenerator, BOOL, enabled)
-// CREATE_CLASSDB_BINDINGS(MeshGenerator, FLOAT, height)
-// CREATE_CLASSDB_BINDINGS(MeshGenerator, VECTOR2I, grid_size)
-//
-#define CREATE_CLASSDB_BINDINGS(CLASS, TYPE, NAME)                                \
-	ClassDB::bind_method(D_METHOD("get_" #NAME), &CLASS::get_##NAME);             \
-	ClassDB::bind_method(D_METHOD("set_" #NAME, "p_" #NAME), &CLASS::set_##NAME); \
-	ADD_PROPERTY(PropertyInfo(Variant::TYPE, #NAME), "set_" #NAME, "get_" #NAME);
 
-
-
-// this one works for clases, like Texture2D etc
-//
-// BIND_CLASSDB_PROPERTY2(MeshGenerator, "Texture2D", texture2d);
-//
-// i have only tested Texture2D so far
-//
-//
-#define CREATE_CLASSDB_BINDINGS2(CLASS, TYPE, NAME)                         \
-	ClassDB::bind_method(D_METHOD("set_" #NAME, TYPE), &CLASS::set_##NAME); \
-	ClassDB::bind_method(D_METHOD("get_" #NAME), &CLASS::get_##NAME);       \
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, #NAME, PROPERTY_HINT_RESOURCE_TYPE, TYPE), "set_" #NAME, "get_" #NAME);
 
 
 // COPY

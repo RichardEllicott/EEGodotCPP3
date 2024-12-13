@@ -41,19 +41,36 @@ private:
     // but declare Godot objects with a Ref<>
     Ref<RandomNumberGenerator> rng2; // make sure call instantiate() in the constructor!
 
+public:
+    // subroutine example (can be called from GDScript)
+    void macro_test()
+    {
+        UtilityFunctions::print("macro_test from c++!!!");
+    }
+
+    // function with input example (can be called from GDScript)
+    String macro_test2(const String &input, int number) // a String doesn't need to be a %reference
+    {
+        return input + String::num(number);
+    }
+
 protected:
     static void _bind_methods()
     {
         // // these macros create the bindings for the properties
-        CREATE_CLASSDB_BINDINGS(TemplateSFile, BOOL, enabled); // just crashes with signal or not
+        CREATE_VAR_BINDINGS(TemplateSFile, BOOL, enabled); // just crashes with signal or not
         // CREATE_CLASSDB_BINDINGS(TemplateSFile, Variant::FLOAT, speed) // note Variant::FLOAT is also valid
-        CREATE_CLASSDB_BINDINGS(TemplateSFile, VECTOR2I, grid_size) // note Variant::FLOAT is also valid
+        CREATE_VAR_BINDINGS(TemplateSFile, VECTOR2I, grid_size) // note Variant::FLOAT is also valid
 
-        CREATE_CLASSDB_BINDINGS2(TemplateSFile, "Texture2D", texture2d) // maybe the texture causes crashing?????? (i have ide crashes)
+        CREATE_CLASS_BINDINGS(TemplateSFile, "Texture2D", texture2d) // maybe the texture causes crashing?????? (i have ide crashes)
         // CREATE_CLASSDB_BINDINGS2(TemplateSFile, "RandomNumberGenerator", rng)
 
         // // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed", PROPERTY_HINT_RANGE, "0,20,0.01"), "set_speed", "get_speed");
         // ADD_SIGNAL(MethodInfo("position_changed", PropertyInfo(Variant::OBJECT, "node"), PropertyInfo(Variant::VECTOR2, "new_pos")));
+
+        // manual method binding (so the methods can be called from GDScript or other languages)
+        ClassDB::bind_method(D_METHOD("macro_test"), &TemplateSFile::macro_test);
+        ClassDB::bind_method(D_METHOD("macro_test2", "input", "number"), &TemplateSFile::macro_test2); // method bind with pars
     }
 
 public:
@@ -63,7 +80,7 @@ public:
 
         rng2.instantiate(); // ensure the ref is created, or linked to something (note the . as we access the value type Ref<>)
 
-        if (rng2.is_valid()) // we don't need to check here after instantiate, but this is the memory safe pattern
+        if (rng2.is_valid())   // we don't need to check here after instantiate, but this is the memory safe pattern
             rng2->randomize(); // the use a ref, use the pointer syntax (warning this would crash if the rng2 didn't exist, sometimes you should check)
 
         // // if you do not set these the properties will not have a default value!

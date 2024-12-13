@@ -1,0 +1,25 @@
+
+# for this codebase i have choosen Microsoft's default styel
+
+# i like that MS puts the open brace on a newline, i feel i can see the nesting easier and comment the right things out
+
+BasedOnStyle: Google 
+
+IndentWidth: 4 # i prefer this for all my code
+
+ColumnLimit: 0 # column limits are dumb on widescreen!
+
+# # even Microsoft though doesn't enforce it for all braces like if and while... i do though!
+# BraceWrapping:
+# #   AfterControlStatement: Always
+#   AfterControlStatement: Never # will put it back!
+
+
+
+
+# # Control the alignment of escaped newlines in macro definitions
+# AlignEscapedNewlines: Left
+# # Ensure trailing comments are aligned
+# AlignTrailingComments: true
+# # Indent preprocessor directives to match nesting levels
+# IndentPPDirectives: AfterHash

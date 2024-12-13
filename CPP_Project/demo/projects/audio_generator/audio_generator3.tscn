@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://br4ylfhh7nxq8"]
+
+[ext_resource type="Script" path="res://projects/audio_generator/render_server_example.gd" id="1_ck1r8"]
+[ext_resource type="Texture2D" uid="uid://e61vh63y5b13" path="res://textures/proto.png" id="2_w7gwh"]
+
+[node name="audio_generator3" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="S1_UI_Draw" type="S1_UI_Draw" parent="."]
+enabled = true
+layout_mode = 0
+offset_left = 17.0
+offset_top = 13.0
+offset_right = 57.0
+offset_bottom = 53.0
+
+[node name="render_server_example" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+offset_left = 56.0
+offset_top = 45.0
+offset_right = 96.0
+offset_bottom = 85.0
+script = ExtResource("1_ck1r8")
+texture = ExtResource("2_w7gwh")

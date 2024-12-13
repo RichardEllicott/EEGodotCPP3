@@ -1,0 +1,226 @@
+[gd_scene load_steps=7 format=3 uid="uid://rqvua0ko8us1"]
+
+[ext_resource type="Script" path="res://projects/audio_generator/keyboard.gd" id="1_2wici"]
+[ext_resource type="Script" path="res://projects/audio_generator/s1_audio_generator.gd" id="1_woxpj"]
+
+[sub_resource type="AudioStreamWAV" id="AudioStreamWAV_eyq7j"]
+
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_s67uc"]
+buffer_length = 0.02
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_77mms"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.5, 0.5, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jeg1r"]
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.5, 0.5, 1)
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="S1AudioGenerator" type="S1AudioGenerator" parent="."]
+frequency = 1.0
+mode = 4
+audio_stream_wav = SubResource("AudioStreamWAV_eyq7j")
+stream = SubResource("AudioStreamGenerator_s67uc")
+autoplay = true
+script = ExtResource("1_woxpj")
+
+[node name="keyboard" type="Control" parent="." node_paths=PackedStringArray("s1_audio_gen")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_2wici")
+s1_audio_gen = NodePath("../S1AudioGenerator")
+keys = 25
+white_stylebox = SubResource("StyleBoxFlat_77mms")
+black_stylebox = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="0" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="1" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 64.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="2" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 64.0
+offset_right = 96.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="3" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 96.0
+offset_right = 128.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="4" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 128.0
+offset_right = 160.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="5" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 160.0
+offset_right = 192.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="6" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 192.0
+offset_right = 224.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="7" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 224.0
+offset_right = 256.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="8" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 256.0
+offset_right = 288.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="9" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 288.0
+offset_right = 320.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="10" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 320.0
+offset_right = 352.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="11" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 352.0
+offset_right = 384.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="12" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 384.0
+offset_right = 416.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="13" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 416.0
+offset_right = 448.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="14" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 448.0
+offset_right = 480.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="15" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 480.0
+offset_right = 512.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="16" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 512.0
+offset_right = 544.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="17" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 544.0
+offset_right = 576.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="18" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 576.0
+offset_right = 608.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="19" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 608.0
+offset_right = 640.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="20" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 640.0
+offset_right = 672.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="21" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 672.0
+offset_right = 704.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="22" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 704.0
+offset_right = 736.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jeg1r")
+
+[node name="23" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 736.0
+offset_right = 768.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="24" type="Button" parent="keyboard"]
+layout_mode = 0
+offset_left = 768.0
+offset_right = 800.0
+offset_bottom = 128.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")

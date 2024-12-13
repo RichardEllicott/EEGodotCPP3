@@ -203,14 +203,14 @@ CREATE_GETTER_SETTER(WaterSim, bool, height_correction)
 void WaterSim::_bind_methods()
 {
 	// macros from macros.h
-	CREATE_CLASSDB_BINDINGS(WaterSim, BOOL, enabled)
-	CREATE_CLASSDB_BINDINGS(WaterSim, VECTOR2I, grid_size)
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, force_factor)
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, drag)
+	CREATE_VAR_BINDINGS(WaterSim, BOOL, enabled)
+	CREATE_VAR_BINDINGS(WaterSim, VECTOR2I, grid_size)
+	CREATE_VAR_BINDINGS(WaterSim, FLOAT, force_factor)
+	CREATE_VAR_BINDINGS(WaterSim, FLOAT, drag)
 
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, drip_chance)
-	CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, drip_volume)
-	CREATE_CLASSDB_BINDINGS(WaterSim, BOOL, height_correction)
+	CREATE_VAR_BINDINGS(WaterSim, FLOAT, drip_chance)
+	CREATE_VAR_BINDINGS(WaterSim, FLOAT, drip_volume)
+	CREATE_VAR_BINDINGS(WaterSim, BOOL, height_correction)
 
 	// CREATE_CLASSDB_BINDINGS(WaterSim, VECTOR2, size)
 	// CREATE_CLASSDB_BINDINGS(WaterSim, FLOAT, sine_strength)

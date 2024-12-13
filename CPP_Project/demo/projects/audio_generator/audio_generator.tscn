@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://d2c406s2mr15x"]
+[gd_scene load_steps=3 format=3 uid="uid://d2c406s2mr15x"]
+
+[ext_resource type="Script" path="res://projects/audio_generator/audio_generator.gd" id="1_r7dgk"]
 
 [sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_mypqq"]
 buffer_length = 0.1
@@ -16,10 +18,17 @@ grow_vertical = 2
 [node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="SoundGenerator"]
 
 [node name="SoundGenerator2" type="SoundGenerator" parent="."]
-enabled = true
 frequency = 110.0
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="SoundGenerator2"]
+stream = SubResource("AudioStreamGenerator_mypqq")
+volume_db = -24.0
+bus = &"Reverb"
+
+[node name="Node3D" type="Node" parent="."]
+script = ExtResource("1_r7dgk")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Node3D"]
 stream = SubResource("AudioStreamGenerator_mypqq")
 volume_db = -24.0
 bus = &"Reverb"

@@ -227,17 +227,17 @@ void MeshGenerator::_bind_methods()
 
 
 #pragma region VARIANT_BINDINGS
-    CREATE_CLASSDB_BINDINGS(MeshGenerator, BOOL, enabled)
-    CREATE_CLASSDB_BINDINGS(MeshGenerator, FLOAT, height)
-    CREATE_CLASSDB_BINDINGS(MeshGenerator, VECTOR2I, grid_size)
+    CREATE_VAR_BINDINGS(MeshGenerator, BOOL, enabled)
+    CREATE_VAR_BINDINGS(MeshGenerator, FLOAT, height)
+    CREATE_VAR_BINDINGS(MeshGenerator, VECTOR2I, grid_size)
 
-    CREATE_CLASSDB_BINDINGS(MeshGenerator, NODE_PATH, node_path)
+    CREATE_VAR_BINDINGS(MeshGenerator, NODE_PATH, node_path)
 
 #pragma endregion
 
 #pragma region REFERENCE_BINDINGS // generated this with chat gp!
 
-    CREATE_CLASSDB_BINDINGS2(MeshGenerator, "Texture2D", texture2d); // note different macro required for ref types (Texture2D, AudioStream etc)
+    CREATE_CLASS_BINDINGS(MeshGenerator, "Texture2D", texture2d); // note different macro required for ref types (Texture2D, AudioStream etc)
 
 
     // ClassDB::bind_method(D_METHOD("set_texture2d", "texture2d"), &MeshGenerator::set_texture2d);

@@ -58,7 +58,7 @@ private:
 
     // these functions assist in finding the AudioStreamPlayer child and it's AudioStreamGeneratorPlayback
     // we need to interact with these using pointers and quite a few scenarios just crash!
-    AudioStreamPlayer *audio_player_ptr;
+    AudioStreamPlayer *audio_player_ptr = nullptr; // setting nullptr for extra saftey
     AudioStreamPlayer *get_audio_player_ptr(); // get the AudioStreamPlayer pointer, has a cache so may need to restart scene if changing nodes
 
     Ref<AudioStreamGeneratorPlayback> get_audio_generator_playback_ref();

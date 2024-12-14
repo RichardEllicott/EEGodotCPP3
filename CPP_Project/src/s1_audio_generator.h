@@ -26,6 +26,12 @@ make an AudioStreamGenerator for this to work
 
 using namespace godot;
 
+
+
+
+
+
+
 // abstract note structure
 // i choose to use a structure with vector's (c++'s version of Lists)
 //
@@ -48,6 +54,8 @@ struct Note {
     // {
     // }
 };
+
+
 
 class S1AudioGenerator : public AudioStreamPlayer {
     GDCLASS(S1AudioGenerator, AudioStreamPlayer)
@@ -85,6 +93,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
    protected:
     static void _bind_methods() {
+
         // // these macros create the bindings for the properties
         CREATE_VAR_BINDINGS(S1AudioGenerator, BOOL, enabled)
         CREATE_VAR_BINDINGS(S1AudioGenerator, INT, mix_rate)

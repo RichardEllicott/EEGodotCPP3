@@ -15,6 +15,11 @@
 #include "s1_audio_generator.h" // single file new one
 #include "s1_ui_draw.h" //
 
+
+#include "freeverb.h" //single file reverb effect
+#include "audio_effect_template.h"
+
+
 #include "mesh_generator.h"
 #pragma endregion
 
@@ -41,6 +46,16 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(S1AudioGenerator); // sort in file
 	GDREGISTER_CLASS(S1_UI_Draw);
 	GDREGISTER_CLASS(MeshGenerator);
+
+	// my audio effect
+	GDREGISTER_CLASS(Freeverb);
+	GDREGISTER_CLASS(FreeverbInstance);
+
+	GDREGISTER_CLASS(AudioEffectTemplate); // seems to be appearing as template
+	GDREGISTER_CLASS(AudioEffectTemplateInstance); // seems to be appearing as template
+
+	
+
 	#pragma endregion
 
 }

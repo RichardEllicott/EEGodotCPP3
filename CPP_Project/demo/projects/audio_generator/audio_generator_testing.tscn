@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://rqvua0ko8us1"]
+[gd_scene load_steps=8 format=3 uid="uid://rqvua0ko8us1"]
 
 [ext_resource type="Script" path="res://projects/audio_generator/keyboard.gd" id="1_2wici"]
 [ext_resource type="Script" path="res://projects/audio_generator/s1_audio_generator.gd" id="1_woxpj"]
+[ext_resource type="Script" path="res://projects/audio_generator/render_server_example.gd" id="3_3kod2"]
 
 [sub_resource type="AudioStreamWAV" id="AudioStreamWAV_eyq7j"]
 
@@ -37,7 +38,9 @@ frequency = 1.0
 mode = 4
 audio_stream_wav = SubResource("AudioStreamWAV_eyq7j")
 stream = SubResource("AudioStreamGenerator_s67uc")
+volume_db = -12.0
 autoplay = true
+bus = &"Reverb"
 script = ExtResource("1_woxpj")
 
 [node name="keyboard" type="Control" parent="." node_paths=PackedStringArray("s1_audio_gen")]
@@ -224,3 +227,18 @@ offset_left = 768.0
 offset_right = 800.0
 offset_bottom = 128.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_77mms")
+
+[node name="S1_UI_Draw" type="S1_UI_Draw" parent="."]
+layout_mode = 0
+offset_left = 179.0
+offset_top = 168.0
+offset_right = 219.0
+offset_bottom = 208.0
+
+[node name="render_server_example" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 120.0
+offset_top = 239.0
+offset_right = 160.0
+offset_bottom = 279.0
+script = ExtResource("3_3kod2")

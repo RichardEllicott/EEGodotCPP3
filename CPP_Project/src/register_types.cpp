@@ -43,8 +43,10 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(Template);
 	GDREGISTER_CLASS(TemplateSFile); 
 	GDREGISTER_CLASS(SoundGenerator);
+
 	GDREGISTER_CLASS(S1AudioGenerator); // sort in file
 	GDREGISTER_CLASS(S1_UI_Draw);
+	
 	GDREGISTER_CLASS(MeshGenerator);
 
 	// my audio effect

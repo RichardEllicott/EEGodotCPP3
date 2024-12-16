@@ -1,28 +1,14 @@
-[gd_resource type="AudioBusLayout" load_steps=4 format=3 uid="uid://dgyc52vfv2v00"]
+[gd_resource type="AudioBusLayout" load_steps=2 format=3 uid="uid://dgyc52vfv2v00"]
 
-[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_f0nkh"]
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_veif5"]
 resource_name = "Reverb"
-room_size = 1.0
-damping = 1.0
-dry = 0.5
-
-[sub_resource type="AudioEffectTemplate" id="AudioEffectTemplate_p4psc"]
-resource_name = "Template"
-
-[sub_resource type="Freeverb" id="Freeverb_6nsr1"]
-enabled = true
-resource_name = "Freeverb"
 
 [resource]
 bus/1/name = &"Reverb"
 bus/1/solo = false
 bus/1/mute = false
 bus/1/bypass_fx = false
-bus/1/volume_db = -25.7583
+bus/1/volume_db = -6.24739
 bus/1/send = &"Master"
-bus/1/effect/0/effect = SubResource("AudioEffectReverb_f0nkh")
-bus/1/effect/0/enabled = false
-bus/1/effect/1/effect = SubResource("AudioEffectTemplate_p4psc")
-bus/1/effect/1/enabled = false
-bus/1/effect/2/effect = SubResource("Freeverb_6nsr1")
-bus/1/effect/2/enabled = true
+bus/1/effect/0/effect = SubResource("AudioEffectReverb_veif5")
+bus/1/effect/0/enabled = true

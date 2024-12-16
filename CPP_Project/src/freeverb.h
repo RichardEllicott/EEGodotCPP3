@@ -93,29 +93,33 @@ class FreeverbInstance : public AudioEffectInstance {
     }
 
    public:
+    ~FreeverbInstance() {
+    };
+
+    // the effect encapsulated for reuse by my own mixer as well as Godot's
+    float process(float sample) {
+        auto wet = 0.0f;
+        // Process comb filters in parallel
+        for (auto &comb : comb_filters) {
+            process_comb_filter(comb, sample, wet);
+        }
+        // Process all-pass filters in series
+        for (auto &allpass : allpass_filters) {
+            process_allpass_filter(allpass, wet);
+        }
+        // Mix dry and wet signals
+        float out = sample * (1.0f - mix) + wet * mix;
+
+        return out;
+    }
+
     virtual void _process(const void *src_buffer, AudioFrame *dst_buffer, int frame_count) override {
         const AudioFrame *p_src_frames = static_cast<const AudioFrame *>(src_buffer);
 
         for (int i = 0; i < frame_count; i++) {
-            float dry = p_src_frames[i].left + p_src_frames[i].right;  // Mono input
-            float wet = 0.0f;
+            float dry = (p_src_frames[i].left + p_src_frames[i].right) / 2.0f;  // Mono input
 
-            // float dry = p_src_frames[i].l + p_src_frames[i].r; // Mono input
-            // float wet = 0.0f;
-
-            // Process comb filters in parallel
-            for (auto &comb : comb_filters) {
-                process_comb_filter(comb, dry, wet);
-            }
-
-            // Process all-pass filters in series
-            for (auto &allpass : allpass_filters) {
-                process_allpass_filter(allpass, wet);
-            }
-
-            // Mix dry and wet signals
-            float out = dry * (1.0f - mix) + wet * mix;
-
+            auto out = process(dry);
 
             dst_buffer[i].left = out;  // back out
             dst_buffer[i].right = out;
@@ -128,10 +132,6 @@ class FreeverbInstance : public AudioEffectInstance {
         CREATE_VAR_BINDINGS(FreeverbInstance, BOOL, enabled);
         CREATE_VAR_BINDINGS(FreeverbInstance, VECTOR2I, grid_size)
     }
-
-   public:
-    ~FreeverbInstance() {
-    };
 };
 
 // the wrapper for the effect

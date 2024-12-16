@@ -15,6 +15,9 @@ ColumnLimit: 0 # column limits are dumb on widescreen!
 #   AfterControlStatement: Never # will put it back!
 
 
+PointerAlignment: Left
+
+
 
 
 # # Control the alignment of escaped newlines in macro definitions

@@ -26,12 +26,6 @@ make an AudioStreamGenerator for this to work
 
 using namespace godot;
 
-
-
-
-
-
-
 // abstract note structure
 // i choose to use a structure with vector's (c++'s version of Lists)
 //
@@ -45,7 +39,7 @@ struct Note {
     float start_time;
 
     float get_frequency() {
-        return 440.0f * pow(2.0f, pitch / 12.0f);
+        return 2.0f * pow(2.0f, pitch / 12.0f);
     }
 
     // // Constructor
@@ -55,7 +49,50 @@ struct Note {
     // }
 };
 
+// RC-like envelope follower
+class AnalogPeakSimulator {
+   private:
+    float peak;       // Current peak value
+    float decayRate;  // How quickly the peak falls
 
+   public:
+    AnalogPeakSimulator(float initialPeak = 0.0f, float decay = 0.01f)
+        : peak(initialPeak), decayRate(decay) {}
+
+    float process(float input) {
+        // Simulate voltage stability (smooth peak-following)
+        if (input > peak) {
+            peak = input;  // Instant peak rise
+        } else {
+            peak -= decayRate * (peak - input);  // Smooth decay
+        }
+        return peak;
+    }
+};
+
+class MyHighPassFilter {
+   public:
+    float cutoff_frequency;    // Cutoff frequency in Hz
+    float sample_rate;         // Sample rate in Hz
+    float alpha;               // Filter coefficient
+    float prev_input = 0.0f;   // Previous input sample
+    float prev_output = 0.0f;  // Previous output sample
+
+    MyHighPassFilter(float cutoff, float sampleRate)
+        : cutoff_frequency(cutoff), sample_rate(sampleRate) {
+        // Calculate alpha based on the cutoff frequency
+        float rc = 1.0f / (2.0f * Math_PI * cutoff_frequency);
+        alpha = rc / (rc + (1.0f / sample_rate));
+    }
+
+    float process(float input) {
+        // High-pass filter difference equation
+        float output = alpha * (prev_output + input - prev_input);
+        prev_input = input;
+        prev_output = output;
+        return output;
+    }
+};
 
 class S1AudioGenerator : public AudioStreamPlayer {
     GDCLASS(S1AudioGenerator, AudioStreamPlayer)
@@ -65,7 +102,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mix_rate, 44100)     // samples per a second (hz)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, frequency, 220)    // frequency of tone generator (hz) (default A3)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pulse_width, 0.5)  // pulse widh of some waves like square
-    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mode, 0)             // 0=sin 1=square 2=saw 3=wave
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mode, 4)             // 0=sin 1=square 2=saw 3=wave
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume_dB, -24)  // decibels (only for the generator stream, not render)
 
@@ -78,6 +115,9 @@ class S1AudioGenerator : public AudioStreamPlayer {
     // read and write to this wav file .... I THINK MADE A CRASH WHEN WE ADDED IT BUT OKAY!?
     // not sure about the memory saftey as not initilized
     DECLARE_PROPERTY_SINGLE_FILE(PackedFloat32Array, poly_notes)
+
+   private:
+    MyHighPassFilter high_pass_filter = MyHighPassFilter(10.0f, mix_rate);
 
    public:
     void macro_test() {
@@ -93,7 +133,6 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
    protected:
     static void _bind_methods() {
-
         // // these macros create the bindings for the properties
         CREATE_VAR_BINDINGS(S1AudioGenerator, BOOL, enabled)
         CREATE_VAR_BINDINGS(S1AudioGenerator, INT, mix_rate)
@@ -123,9 +162,6 @@ class S1AudioGenerator : public AudioStreamPlayer {
         ClassDB::bind_method(D_METHOD("clear_note", "pitch"), &S1AudioGenerator::clear_note);
         ClassDB::bind_method(D_METHOD("clear_notes"), &S1AudioGenerator::clear_notes);
 
-
-
-
         // this binding pattern seems to crash the compile, still working this out
         // BIND_ENUM_CONSTANT(WAVE::SINE);
         // BIND_ENUM_CONSTANT(WAVE::SQUARE);
@@ -146,17 +182,20 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
     float increment;  // calculate as (frequency / mix_rate)
 
-   private:
-    // std::vector<Note> notes;    // vector to store the note structures
-    std::vector<float> history;  // Store the past frames (values)
-    std::unordered_map<float, Note> notes;
 
-    int max_history = 1024;
+
+   public:
+    // store the previous sound
+    std::vector<float> history_buffer;         // Store the past frames (values)
+    int history_buffer_size = mix_rate * 4.0;  // 4 seconds
+    int history_buffer_position = 0;
+
+    std::unordered_map<float, Note> notes;
 
    public:
     // functions for adding notes, which we'll add from gdscript (to handle the controls)
     void add_note(float _note, float volume = 1.0f, float duration = -1) {
-        print("add note " + String::num_real(frequency));
+        // print("add note " + String::num_real(frequency));
 
         Note note = Note();
         note.pitch = _note;
@@ -175,6 +214,8 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
    public:
     S1AudioGenerator() {
+        // high_pass_filter(10.0f, mix_rate);
+
         // ensure the ref is created, or linked to something (note the . as we access the value type Ref<>)
         rng.instantiate();
 
@@ -214,6 +255,8 @@ class S1AudioGenerator : public AudioStreamPlayer {
             if (stream_generator.is_valid())
                 mix_rate = stream_generator->get_mix_rate();
         }
+
+        high_pass_filter.sample_rate = mix_rate;
     }
 
     void _process(double delta) override {};
@@ -235,23 +278,20 @@ class S1AudioGenerator : public AudioStreamPlayer {
                     int frames_available = generator_playback->get_frames_available();
 
                     if (frames_available > 0) {
-                        // WARNING THIS WILL PRINT A LOT!!
-                        // print("frames_available: " + UtilityFunctions::str(frames_available));
-
-                        // increment = frequency / mix_rate;  // calculate increment
-
-                        // push all possible frames
-                        // make the audio buffer small in the AudioStreamGenerator to decrease the delay (set it down to
-                        // about 0.02 seconds)
+                        // fastest in c++ to pack a buffer
+                        PackedVector2Array buffer;
+                        buffer.resize(frames_available);
                         for (int i = 0; i < frames_available; i++) {
-                            float signal = _get_signal();
+                            auto signal = _get_signal();
+                            signal = powf(10.0f, signal / 20.0f);  // apply volume as decibels
 
-                            signal = std::pow(10.0f, signal / 20.0f);  // apply volume as decibels
+                            signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
 
-                            Vector2 frame = Vector2(1.0, 1.0) * signal;  // make a stero frame from a mono signal
-                            generator_playback->push_frame(frame);       // push the frame to the buffer
-                            // timer += increment;
+                            signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
+
+                            buffer[i] = Vector2(1.0, 1.0) * signal;
                         }
+                        generator_playback->push_buffer(buffer);
                     }
                 }
             }
@@ -316,7 +356,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
             signal += sin(timer * Math_TAU * _frequency) * add_level * note.volume;
         }
 
-        signal = CLAMP(signal, 0.0f, 1.0f);
+        // signal = CLAMP(signal, 0.0f, 1.0f);
 
         // for (int i = 0; i < notes.size(); i++)
         // {
@@ -423,6 +463,15 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
         timer += frequency / mix_rate;
 
+        // history buffer
+        if (history_buffer.size() != history_buffer_size) {
+            history_buffer.resize(history_buffer_size);
+            history_buffer_position = 0;
+        }
+        history_buffer[history_buffer_position] = signal;
+        history_buffer_position += 1;
+        history_buffer_position %= history_buffer_size;
+
         return signal;
     }
 
@@ -439,7 +488,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
         data.append(pcm_sample & 0xFF);         // Low byte
         data.append((pcm_sample >> 8) & 0xFF);  // High byte
     }
-    
+
     // array of floats, can remaim overdriven etc
     PackedFloat32Array _generate_audio_wave(int samples) {
         PackedFloat32Array wave;
@@ -509,8 +558,6 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
             //     // timer += increment;  // note the timer needs to be moved for all the signals to work
             // }
-
-
 
             audio_stream_wav->set_stereo(false);
 

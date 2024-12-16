@@ -22,6 +22,8 @@ C++ is very easy if you just start typing it!
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 
+// #include <s1_audio_generator.h>
+
 using namespace godot;
 
 class S1_UI_Draw : public Control {
@@ -31,10 +33,21 @@ class S1_UI_Draw : public Control {
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(Vector2i, grid_size, Vector2i(16, 16))
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(Vector2, cell_size, Vector2(8, 8))
 
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, cell_border, 1.0f)
+
+
     DECLARE_PROPERTY_SINGLE_FILE(Ref<Texture2D>, texture2d)
+
+
+    // DECLARE_PROPERTY_SINGLE_FILE(Ref<S1AudioGenerator>, s1_audio_generator) // we are not sure how to link this as an export
+
 
    private:
     RID canvas_rid;
+
+    const std::vector<int> key_pattern = {0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0};
+
+    const std::vector<String> note_pattern = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
    public:
     // subroutine example (can be called from GDScript)
@@ -43,7 +56,7 @@ class S1_UI_Draw : public Control {
     }
 
     // function with input example (can be called from GDScript)
-    String macro_test2(const String &input, int number) {  // a String doesn't need to be a %reference
+    String macro_test2(const String& input, int number) {  // a String doesn't need to be a %reference
 
         return input + String::num(number);
     }
@@ -55,8 +68,14 @@ class S1_UI_Draw : public Control {
         // CREATE_CLASSDB_BINDINGS(TemplateSFile, Variant::FLOAT, speed) // note Variant::FLOAT is also valid
         CREATE_VAR_BINDINGS(S1_UI_Draw, VECTOR2I, grid_size)  // note Variant::FLOAT is also valid
         CREATE_VAR_BINDINGS(S1_UI_Draw, VECTOR2, cell_size)   // note Variant::FLOAT is also valid
+        CREATE_VAR_BINDINGS(S1_UI_Draw, FLOAT, cell_border)   // note Variant::FLOAT is also valid
+
+
 
         CREATE_CLASS_BINDINGS(S1_UI_Draw, "Texture2D", texture2d)  // maybe the texture causes crashing?????? (i have ide crashes)
+
+        // CREATE_CLASS_BINDINGS(S1_UI_Draw, "S1AudioGenerator", s1_audio_generator)  // maybe the texture causes crashing?????? (i have ide crashes)
+
         // CREATE_CLASSDB_BINDINGS2(TemplateSFile, "RandomNumberGenerator", rng)
 
         // // ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed", PROPERTY_HINT_RANGE, "0,20,0.01"), "set_speed", "get_speed");
@@ -82,22 +101,37 @@ class S1_UI_Draw : public Control {
         rs->canvas_item_clear(canvas_rid);
     }
 
+    void draw_grid_cell(Vector2i position) {
+        auto rs = RenderingServer::get_singleton();
+
+
+        float y_lerp = position.y / (grid_size.y - 1.0); // the -1.0 makes a cast (could use float())
+        float x_lerp = position.x / (grid_size.x - 1.0);
+
+
+        auto position2 = Vector2(position) * cell_size;
+
+        auto rect = Rect2(position2, cell_size);
+
+        rect.position += Vector2(cell_border, cell_border);
+        rect.size -= Vector2(cell_border, cell_border) * 2.0f;
+
+
+        auto color = Color(x_lerp, 0, y_lerp);
+
+        rs->canvas_item_add_rect(canvas_rid, rect, color, false);
+    }
+
     void draw_grid() {
         auto rs = RenderingServer::get_singleton();
 
         for (int y = 0; y < grid_size.y; y++) {
-            // float y_lerp = y / (grid_size.y - 1.0); // the -1.0 makes a cast (could use float())
+            // 
 
             for (int x = 0; x < grid_size.x; x++) {
-                // float x_lerp = x / (grid_size.x - 1.0);
+                // 
 
-                auto position = Vector2(x, y) * cell_size;
-
-                auto rect = Rect2(position, cell_size);
-
-                auto color = Color(1, 0, 0);
-
-                rs->canvas_item_add_rect(canvas_rid, rect, color, false);
+                draw_grid_cell(Vector2i(x, y));
             }
         }
     }
@@ -119,28 +153,7 @@ class S1_UI_Draw : public Control {
 
         _create_canvas();
 
-        auto rs = RenderingServer::get_singleton();
-
-        // rng2.instantiate(); // ensure the ref is created, or linked to something (note the . as we access the value type Ref<>)
-
-        // if (rng2.is_valid())   // we don't need to check here after instantiate, but this is the memory safe pattern
-        //     rng2->randomize(); // the use a ref, use the pointer syntax (warning this would crash if the rng2 didn't exist, sometimes you should check)
-
-        auto rect = Rect2(Vector2(0, 0), Vector2(32, 32));
-
-        auto color = Color(1, 0, 1);
-
-        // RenderingServer::get_singleton()->canvas_item_add_texture_rect(canvas_rid, rect, texture2d, false, color,false);
-
-        rs->canvas_item_add_rect(canvas_rid, rect, color, true);
-
-        rs->canvas_item_add_circle(canvas_rid, Vector2(), 16.0, Color(1, 0.5, 0), true);
-
-        // RenderingServer.canvas_item_add_circle(ci_rid, Vector2.ZERO, 16.0, Color.AQUAMARINE, true) # works but not rect
-
-        // RenderingServer.canvas_item_add_rect(ci_rid, Rect2(Vector2(), Vector2(32, 16) ) , Color.DARK_RED, true   )
-
-        // draw_grid();
+        draw_grid();
     };
     ~S1_UI_Draw() {
         print("~S1_UI_Draw()...");
@@ -150,29 +163,16 @@ class S1_UI_Draw : public Control {
     void _ready() override {
     };
     void _process(double delta) override {
-        queue_redraw();
+        // queue_redraw();
+
+        // draw_grid();
     };
     void _physics_process(double delta) override {
 
     };
     void _draw() override {
 
-        // // draw a grid of colors as a visual demo
-        // for (int y = 0; y < grid_size.y; y++)
-        // {
-        //     float y_lerp = y / (grid_size.y - 1.0); // the -1.0 makes a cast (could use float())
 
-        //     for (int x = 0; x < grid_size.x; x++)
-        //     {
-        //         float x_lerp = x / (grid_size.x - 1.0);
-
-        //         Color color = Color(x_lerp, 0.5, y_lerp); // x/y normal
-        //         //         // Color color = Color::from_hsv(fmod(data_value, 1.0), 1.0, 1.0);
-        //         draw_rect(Rect2(Vector2(x, y), Vector2(1, 1)), color, true, 0.0, true);
-
-        //         // draw_texture()
-        //     }
-        // }
     };
 };
 

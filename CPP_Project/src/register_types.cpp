@@ -9,15 +9,16 @@
 #include "watersim.h" // water sim example (Eulerian Fluid Simulator)
 #include "template.h" // template, do not modify but copy, included for debug
 #include "template_sfile.h" // testing one file ideas
-#include "sound_generator.h" // sound generator example
 
 // s1 files
 #include "s1_audio_generator.h" // single file new one
 #include "s1_ui_draw.h" //
 
 
-#include "freeverb.h" //single file reverb effect
-#include "audio_effect_template.h"
+// #include "freeverb.h"
+// #include "audio_effect_template.h"
+#include "s1_reverb.h"
+
 
 
 #include "mesh_generator.h"
@@ -42,19 +43,23 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(WaterSim); 
 	GDREGISTER_CLASS(Template);
 	GDREGISTER_CLASS(TemplateSFile); 
-	GDREGISTER_CLASS(SoundGenerator);
+
 
 	GDREGISTER_CLASS(S1AudioGenerator); // sort in file
 	GDREGISTER_CLASS(S1_UI_Draw);
-	
+
 	GDREGISTER_CLASS(MeshGenerator);
 
 	// my audio effect
-	GDREGISTER_CLASS(Freeverb);
-	GDREGISTER_CLASS(FreeverbInstance);
+	// GDREGISTER_CLASS(Freeverb);
+	// GDREGISTER_CLASS(FreeverbInstance);
 
-	GDREGISTER_CLASS(AudioEffectTemplate); // seems to be appearing as template
-	GDREGISTER_CLASS(AudioEffectTemplateInstance); // seems to be appearing as template
+	GDREGISTER_CLASS(S1Reverb);
+	GDREGISTER_CLASS(S1ReverbInstance);
+
+
+	// GDREGISTER_CLASS(AudioEffectTemplate); // seems to be appearing as template
+	// GDREGISTER_CLASS(AudioEffectTemplateInstance); // seems to be appearing as template
 
 	
 

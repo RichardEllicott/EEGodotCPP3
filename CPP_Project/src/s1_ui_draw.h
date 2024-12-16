@@ -149,14 +149,14 @@ class S1_UI_Draw : public Control {
     // }
 
     S1_UI_Draw() {
-        print("S1_UI_Draw()...");
+        // print("S1_UI_Draw()...");
 
         _create_canvas();
 
         draw_grid();
     };
     ~S1_UI_Draw() {
-        print("~S1_UI_Draw()...");
+        // print("~S1_UI_Draw()...");
         _delete_canvas();
     };
 

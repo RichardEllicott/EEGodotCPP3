@@ -81,11 +81,10 @@ script = ExtResource("1_2wici")
 s1_audio_gen = NodePath("../S1AudioGenerator")
 key_count = 61
 key_wrap = 1000
-counter = 36329
+counter = 190806
 key_size = Vector2(16, 64)
 white_stylebox = ExtResource("5_5s8iu")
 black_stylebox = ExtResource("6_yomti")
-press_color = null
 
 [node name="0" type="Panel" parent="keyboard"]
 layout_mode = 0
@@ -347,194 +346,170 @@ theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="37" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 64.0
-offset_right = 32.0
-offset_bottom = 128.0
+offset_left = 592.0
+offset_right = 608.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="38" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 32.0
-offset_top = 64.0
-offset_right = 48.0
-offset_bottom = 128.0
+offset_left = 608.0
+offset_right = 624.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="39" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 48.0
-offset_top = 64.0
-offset_right = 64.0
-offset_bottom = 128.0
+offset_left = 624.0
+offset_right = 640.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="40" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 64.0
-offset_top = 64.0
-offset_right = 80.0
-offset_bottom = 128.0
+offset_left = 640.0
+offset_right = 656.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="41" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 80.0
-offset_top = 64.0
-offset_right = 96.0
-offset_bottom = 128.0
+offset_left = 656.0
+offset_right = 672.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="42" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 96.0
-offset_top = 64.0
-offset_right = 112.0
-offset_bottom = 128.0
+offset_left = 672.0
+offset_right = 688.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="43" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 112.0
-offset_top = 64.0
-offset_right = 128.0
-offset_bottom = 128.0
+offset_left = 688.0
+offset_right = 704.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="44" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 128.0
-offset_top = 64.0
-offset_right = 144.0
-offset_bottom = 128.0
+offset_left = 704.0
+offset_right = 720.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="45" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 144.0
-offset_top = 64.0
-offset_right = 160.0
-offset_bottom = 128.0
+offset_left = 720.0
+offset_right = 736.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="46" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 160.0
-offset_top = 64.0
-offset_right = 176.0
-offset_bottom = 128.0
+offset_left = 736.0
+offset_right = 752.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="47" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 176.0
-offset_top = 64.0
-offset_right = 192.0
-offset_bottom = 128.0
+offset_left = 752.0
+offset_right = 768.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="48" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 192.0
-offset_top = 64.0
-offset_right = 208.0
-offset_bottom = 128.0
+offset_left = 768.0
+offset_right = 784.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="49" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 208.0
-offset_top = 64.0
-offset_right = 224.0
-offset_bottom = 128.0
+offset_left = 784.0
+offset_right = 800.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="50" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 224.0
-offset_top = 64.0
-offset_right = 240.0
-offset_bottom = 128.0
+offset_left = 800.0
+offset_right = 816.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="51" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 240.0
-offset_top = 64.0
-offset_right = 256.0
-offset_bottom = 128.0
+offset_left = 816.0
+offset_right = 832.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="52" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 256.0
-offset_top = 64.0
-offset_right = 272.0
-offset_bottom = 128.0
+offset_left = 832.0
+offset_right = 848.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="53" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 272.0
-offset_top = 64.0
-offset_right = 288.0
-offset_bottom = 128.0
+offset_left = 848.0
+offset_right = 864.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="54" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 288.0
-offset_top = 64.0
-offset_right = 304.0
-offset_bottom = 128.0
+offset_left = 864.0
+offset_right = 880.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="55" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 304.0
-offset_top = 64.0
-offset_right = 320.0
-offset_bottom = 128.0
+offset_left = 880.0
+offset_right = 896.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="56" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 320.0
-offset_top = 64.0
-offset_right = 336.0
-offset_bottom = 128.0
+offset_left = 896.0
+offset_right = 912.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="57" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 336.0
-offset_top = 64.0
-offset_right = 352.0
-offset_bottom = 128.0
+offset_left = 912.0
+offset_right = 928.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="58" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 352.0
-offset_top = 64.0
-offset_right = 368.0
-offset_bottom = 128.0
+offset_left = 928.0
+offset_right = 944.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("6_yomti")
 
 [node name="59" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 368.0
-offset_top = 64.0
-offset_right = 384.0
-offset_bottom = 128.0
+offset_left = 944.0
+offset_right = 960.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="60" type="Panel" parent="keyboard"]
 layout_mode = 0
-offset_left = 384.0
-offset_top = 64.0
-offset_right = 400.0
-offset_bottom = 128.0
+offset_left = 960.0
+offset_right = 976.0
+offset_bottom = 64.0
 theme_override_styles/panel = ExtResource("5_5s8iu")
 
 [node name="GridContainer" type="GridContainer" parent="."]

@@ -35,7 +35,7 @@ var notes: Array[int] = [0, 4, 5, 7]
 
 @export var hover_color = Color.PALE_VIOLET_RED
 
-@export var press_color = Color.ROYAL_BLUE
+@export var pressed_color = Color.ROYAL_BLUE
 
 func _input(event):
     
@@ -81,8 +81,10 @@ func _process(delta: float) -> void:
         
         if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
                 _synth_add_note(id)
+                control.modulate = pressed_color
         else:
             _synth_clear_note(id)
+            control.modulate = Color.WHITE
             
             
             
@@ -130,7 +132,6 @@ var pressed_keys = {}
 
 
 func _synth_add_note(key: float, volume: float = 1.0, duration: float = 1.0):
-    
     if is_instance_valid(s1_audio_gen):
         s1_audio_gen.add_note(key, volume, duration)
         
@@ -145,12 +146,20 @@ func _synth_clear_note(key: float):
 
     
 func _on_key_up(key: float):
-    #print("_on_key_up ", key)
-    #var pitch = 440.0*2**(key/12.0)
+    
+    if int(key) in key_to_control:
+        var control =  key_to_control[int(key)]
+        control.modulate = Color.WHITE
+        
     _synth_clear_note(key)
         
 
 func _on_key_down(key: float):
+    
+    if int(key) in key_to_control:
+        var control =  key_to_control[int(key)]
+        control.modulate = pressed_color
+
     _synth_add_note(key)
         
 
@@ -232,14 +241,17 @@ func _on_mouse_exited(id: int, control: Control) -> void:
         _synth_clear_note(id)
 
 
-var controls = []
+#var controls = []
 var control_to_note = {}
 
 
+var key_to_control = {}
+
 func _setup():
     
-    controls = []
+    #controls = []
     control_to_note = {}
+    key_to_control = {}
     
     
     
@@ -259,6 +271,7 @@ func _setup():
         
         #key.position = offset * i
         node.position = offset * i
+        
         
         if i > key_wrap:
             node.position.x -= key_size.x * key_wrap
@@ -283,6 +296,7 @@ func _setup():
         node.mouse_entered.connect(_on_mouse_entered.bind(i, node))
         node.mouse_exited.connect(_on_mouse_exited.bind(i, node))
         
-        controls.append(node)
+        #controls.append(node)
         
         control_to_note[node] = i
+        key_to_control[i] = node

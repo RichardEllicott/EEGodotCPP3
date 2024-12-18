@@ -70,7 +70,7 @@ class AnalogPeakSimulator {
     }
 };
 
-class MyHighPassFilter {
+class MyHighPassFilterOld {
    public:
     float cutoff_frequency;    // Cutoff frequency in Hz
     float sample_rate;         // Sample rate in Hz
@@ -78,7 +78,7 @@ class MyHighPassFilter {
     float prev_input = 0.0f;   // Previous input sample
     float prev_output = 0.0f;  // Previous output sample
 
-    MyHighPassFilter(float cutoff, float sampleRate)
+    MyHighPassFilterOld(float cutoff, float sampleRate)
         : cutoff_frequency(cutoff), sample_rate(sampleRate) {
         // Calculate alpha based on the cutoff frequency
         float rc = 1.0f / (2.0f * Math_PI * cutoff_frequency);
@@ -93,6 +93,55 @@ class MyHighPassFilter {
         return output;
     }
 };
+
+
+class MyFilter {
+   public:
+    float cutoff_frequency;    // Cutoff frequency in Hz
+    float sample_rate;         // Sample rate in Hz
+    float alpha;               // Filter coefficient
+    float prev_input = 0.0f;   // Previous input sample
+    float prev_output = 0.0f;  // Previous output sample
+    bool is_high_pass = true;  // Default to high-pass mode
+
+    MyFilter(float cutoff, float sampleRate, bool highPass = true)
+        : cutoff_frequency(cutoff), sample_rate(sampleRate), is_high_pass(highPass) {
+        updateAlpha();
+    }
+
+    void set_cutoff(float cutoff) {
+        cutoff_frequency = cutoff;
+        updateAlpha();
+    }
+
+    void set_mode(bool highPass) {
+        is_high_pass = highPass;
+    }
+
+    float process(float input) {
+        if (is_high_pass) {
+            // High-pass filter
+            float output = alpha * (prev_output + input - prev_input);
+            prev_input = input;
+            prev_output = output;
+            return output;
+        } else {
+            // Low-pass filter
+            float output = prev_output + alpha * (input - prev_output);
+            prev_output = output;
+            return output;
+        }
+    }
+
+   private:
+    void updateAlpha() {
+        float rc = 1.0f / (2.0f * Math_PI * cutoff_frequency);
+        alpha = rc / (rc + (1.0f / sample_rate));
+    }
+};
+
+
+
 
 class S1AudioGenerator : public AudioStreamPlayer {
     GDCLASS(S1AudioGenerator, AudioStreamPlayer)
@@ -117,7 +166,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
     DECLARE_PROPERTY_SINGLE_FILE(PackedFloat32Array, poly_notes)
 
    private:
-    MyHighPassFilter high_pass_filter = MyHighPassFilter(10.0f, mix_rate);
+    MyFilter high_pass_filter = MyFilter(10.0f, mix_rate); // passing above 10Hz prevents bottom outs
 
    public:
     void macro_test() {
@@ -224,7 +273,10 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
         _update_sample_rate();  // trys to copy the sample rate to this object fro the streams
 
-        start_audio_thread();
+        start_audio_thread(); // start the thread
+
+
+
     };
     ~S1AudioGenerator() {
         stop_audio_thread();
@@ -278,9 +330,9 @@ class S1AudioGenerator : public AudioStreamPlayer {
                     int frames_available = generator_playback->get_frames_available();
 
                     if (frames_available > 0) {
-                        // fastest in c++ to pack a buffer
-                        PackedVector2Array buffer;
-                        buffer.resize(frames_available);
+                        // fastest in c++ to pack a buffer at once
+                        PackedVector2Array buffer; // create an stereo audio buffer
+                        buffer.resize(frames_available); // set it's size in one (faster than appending)
                         for (int i = 0; i < frames_available; i++) {
                             auto signal = _get_signal();
                             signal = powf(10.0f, signal / 20.0f);  // apply volume as decibels
@@ -289,9 +341,10 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
                             signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
 
-                            buffer[i] = Vector2(1.0, 1.0) * signal;
+                            buffer[i] = Vector2(1.0, 1.0) * signal; // set the buffer value
                         }
                         generator_playback->push_buffer(buffer);
+                        
                     }
                 }
             }
@@ -582,7 +635,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
    public:
     void start_audio_thread() {
-        print("start_audio_thread...");
+        // print("start_audio_thread...");
 
         if (audio_thread_running)
             return;  // Avoid starting multiple threads.

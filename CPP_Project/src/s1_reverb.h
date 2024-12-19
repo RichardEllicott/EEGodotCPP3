@@ -102,7 +102,7 @@ class S1ReverbInstance : public AudioEffectInstance {
 #pragma region TYPE1
 
         // Initialize comb filters
-        int comb_sizes[8] = {1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617};
+        int comb_sizes[8] = {1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617}; // same as the very orginal freeverb! (rubbish)
         for (int size : comb_sizes) {
             CombFilter comb;
             comb.buffer.resize(size, 0.0f);

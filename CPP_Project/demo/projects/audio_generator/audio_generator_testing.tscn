@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://rqvua0ko8us1"]
+[gd_scene load_steps=14 format=3 uid="uid://rqvua0ko8us1"]
 
 [ext_resource type="Script" path="res://projects/audio_generator/keyboard.gd" id="1_2wici"]
 [ext_resource type="AudioStream" uid="uid://c4o2vcvsklkbk" path="res://sounds/sine.wav" id="1_vhpcd"]
 [ext_resource type="Script" path="res://projects/audio_generator/s1_audio_generator.gd" id="1_woxpj"]
 [ext_resource type="Script" path="res://projects/audio_generator/render_server_example.gd" id="3_3kod2"]
 [ext_resource type="Texture2D" uid="uid://e61vh63y5b13" path="res://textures/proto.png" id="3_ustcw"]
+[ext_resource type="Script" path="res://projects/audio_generator/s_1_ui_draw.gd" id="3_uuvam"]
 [ext_resource type="StyleBox" uid="uid://yb3h1lk5rrtb" path="res://projects/audio_generator/white_key.stylebox" id="5_5s8iu"]
 [ext_resource type="StyleBox" uid="uid://cujb6x8toppuo" path="res://projects/audio_generator/black_key.stylebox" id="6_yomti"]
 [ext_resource type="Script" path="res://projects/audio_generator/draw_waveform_test.gd" id="8_pv65f"]
@@ -39,6 +40,40 @@ rotation = 1.5003
 texture = SubResource("GradientTexture2D_rm6ia")
 metadata/_edit_lock_ = true
 
+[node name="VIROID TITLE" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TITLE" type="Label" parent="VIROID TITLE"]
+layout_mode = 0
+offset_top = -8.0
+offset_right = 420.0
+offset_bottom = 167.0
+scale = Vector2(0.25, 0.25)
+theme_override_font_sizes/font_size = 128
+text = "viROID"
+
+[node name="TITLE2" type="Label" parent="VIROID TITLE"]
+layout_mode = 0
+offset_left = 134.0
+offset_top = 6.0
+offset_right = 905.0
+offset_bottom = 94.0
+scale = Vector2(0.25, 0.25)
+theme_override_font_sizes/font_size = 64
+text = "performance synthesizer"
+vertical_alignment = 2
+
+[node name="TextureRect3" type="TextureRect" parent="VIROID TITLE"]
+layout_mode = 0
+offset_left = 106.0
+offset_top = 4.0
+offset_right = 131.0
+offset_bottom = 27.0
+texture = ExtResource("9_efg0v")
+expand_mode = 1
+
 [node name="S1AudioGenerator" type="S1AudioGenerator" parent="."]
 frequency = 55.0
 audio_stream_wav = ExtResource("1_vhpcd")
@@ -50,11 +85,13 @@ script = ExtResource("1_woxpj")
 [node name="S1_UI_Draw" type="S1_UI_Draw" parent="."]
 grid_size = Vector2i(4, 4)
 cell_size = Vector2(32, 32)
+s1_audio_generator = NodePath("../S1AudioGenerator")
 layout_mode = 0
-offset_left = 177.0
-offset_top = 816.0
-offset_right = 342.0
-offset_bottom = 982.0
+offset_left = 103.0
+offset_top = 121.0
+offset_right = 268.0
+offset_bottom = 287.0
+script = ExtResource("3_uuvam")
 
 [node name="render_server_example" type="Control" parent="."]
 anchors_preset = 0
@@ -81,7 +118,7 @@ script = ExtResource("1_2wici")
 s1_audio_gen = NodePath("../S1AudioGenerator")
 key_count = 61
 key_wrap = 1000
-counter = 190806
+counter = 223166
 key_size = Vector2(16, 64)
 white_stylebox = ExtResource("5_5s8iu")
 black_stylebox = ExtResource("6_yomti")
@@ -561,30 +598,3 @@ offset_right = 107.0
 offset_bottom = 137.0
 script = ExtResource("8_pv65f")
 s1_audio_generator = NodePath("../S1AudioGenerator")
-
-[node name="TITLE" type="Label" parent="."]
-layout_mode = 0
-offset_top = -8.0
-offset_right = 186.0
-offset_bottom = 37.0
-theme_override_font_sizes/font_size = 32
-text = "viROID"
-
-[node name="TITLE2" type="Label" parent="."]
-layout_mode = 0
-offset_left = 139.0
-offset_top = -13.0
-offset_right = 325.0
-offset_bottom = 32.0
-theme_override_font_sizes/font_size = 16
-text = "performance synthesizer"
-vertical_alignment = 2
-
-[node name="TextureRect3" type="TextureRect" parent="."]
-layout_mode = 0
-offset_left = 106.0
-offset_top = 4.0
-offset_right = 131.0
-offset_bottom = 27.0
-texture = ExtResource("9_efg0v")
-expand_mode = 1

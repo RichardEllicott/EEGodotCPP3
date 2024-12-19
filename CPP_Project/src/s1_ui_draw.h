@@ -18,11 +18,13 @@ C++ is very easy if you just start typing it!
 #include <macros.h>  // my macros to help declare properties
 
 // #include <godot_cpp/classes/sprite2d.hpp>
+#include <s1_audio_generator.h>
+
 #include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/node2d.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
-
-// #include <s1_audio_generator.h>
 
 using namespace godot;
 
@@ -35,12 +37,9 @@ class S1_UI_Draw : public Control {
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, cell_border, 1.0f)
 
-
     DECLARE_PROPERTY_SINGLE_FILE(Ref<Texture2D>, texture2d)
 
-
-    // DECLARE_PROPERTY_SINGLE_FILE(Ref<S1AudioGenerator>, s1_audio_generator) // we are not sure how to link this as an export
-
+    DECLARE_PROPERTY_SINGLE_FILE(NodePath, s1_audio_generator)  // we are not sure how to link this as an export
 
    private:
     RID canvas_rid;
@@ -50,9 +49,39 @@ class S1_UI_Draw : public Control {
     const std::vector<String> note_pattern = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
    public:
+    // allows getting a node as the type like:
+    // auto audio_gen2 = get_node_as<NodeType>(node_path);
+    // // return nullptr if no node
+    template <typename T>
+    T* get_node_as(const NodePath& path) {
+        Node* node_ptr = get_node_or_null(path);
+        return Object::cast_to<T>(node_ptr);
+    }
+
+    // S1AudioGenerator* _s1_audio_generator = nullptr;
+
+    auto get_s1_audio_generator_ptr() {
+        auto node_ptr = get_node_or_null(s1_audio_generator);
+        auto ret_ptr = Object::cast_to<S1AudioGenerator>(node_ptr);
+        return ret_ptr;
+    }
+
     // subroutine example (can be called from GDScript)
     void macro_test() {
         UtilityFunctions::print("macro_test from c++!!!");
+
+
+        auto audio_gen2 = get_node_as<S1AudioGenerator>(s1_audio_generator);
+        // auto audio_gen2 = get_node_as<Ref<S1AudioGenerator>>(s1_audio_generator); // doesn't work
+
+        // // Check if the pointer is not null
+        if (audio_gen2) {
+            print("test cast sucess!!");
+
+            //     print("test ref cast sucess!!");
+        }
+
+        // Ref<S1AudioGenerator> = test;
     }
 
     // function with input example (can be called from GDScript)
@@ -70,11 +99,9 @@ class S1_UI_Draw : public Control {
         CREATE_VAR_BINDINGS(S1_UI_Draw, VECTOR2, cell_size)   // note Variant::FLOAT is also valid
         CREATE_VAR_BINDINGS(S1_UI_Draw, FLOAT, cell_border)   // note Variant::FLOAT is also valid
 
-
-
         CREATE_CLASS_BINDINGS(S1_UI_Draw, "Texture2D", texture2d)  // maybe the texture causes crashing?????? (i have ide crashes)
 
-        // CREATE_CLASS_BINDINGS(S1_UI_Draw, "S1AudioGenerator", s1_audio_generator)  // maybe the texture causes crashing?????? (i have ide crashes)
+        CREATE_VAR_BINDINGS(S1_UI_Draw, NODE_PATH, s1_audio_generator)
 
         // CREATE_CLASSDB_BINDINGS2(TemplateSFile, "RandomNumberGenerator", rng)
 
@@ -104,10 +131,8 @@ class S1_UI_Draw : public Control {
     void draw_grid_cell(Vector2i position) {
         auto rs = RenderingServer::get_singleton();
 
-
-        float y_lerp = position.y / (grid_size.y - 1.0); // the -1.0 makes a cast (could use float())
+        float y_lerp = position.y / (grid_size.y - 1.0);  // the -1.0 makes a cast (could use float())
         float x_lerp = position.x / (grid_size.x - 1.0);
-
 
         auto position2 = Vector2(position) * cell_size;
 
@@ -115,7 +140,6 @@ class S1_UI_Draw : public Control {
 
         rect.position += Vector2(cell_border, cell_border);
         rect.size -= Vector2(cell_border, cell_border) * 2.0f;
-
 
         auto color = Color(x_lerp, 0, y_lerp);
 
@@ -126,10 +150,10 @@ class S1_UI_Draw : public Control {
         auto rs = RenderingServer::get_singleton();
 
         for (int y = 0; y < grid_size.y; y++) {
-            // 
+            //
 
             for (int x = 0; x < grid_size.x; x++) {
-                // 
+                //
 
                 draw_grid_cell(Vector2i(x, y));
             }
@@ -161,9 +185,10 @@ class S1_UI_Draw : public Control {
     };
 
     void _ready() override {
+        queue_redraw();
     };
     void _process(double delta) override {
-        // queue_redraw();
+        queue_redraw();
 
         // draw_grid();
     };
@@ -171,7 +196,6 @@ class S1_UI_Draw : public Control {
 
     };
     void _draw() override {
-
 
     };
 };

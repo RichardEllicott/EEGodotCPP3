@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://rqvua0ko8us1"]
+[gd_scene load_steps=15 format=3 uid="uid://rqvua0ko8us1"]
 
 [ext_resource type="Script" path="res://projects/audio_generator/keyboard.gd" id="1_2wici"]
 [ext_resource type="AudioStream" uid="uid://c4o2vcvsklkbk" path="res://sounds/sine.wav" id="1_vhpcd"]
@@ -10,6 +10,7 @@
 [ext_resource type="StyleBox" uid="uid://cujb6x8toppuo" path="res://projects/audio_generator/black_key.stylebox" id="6_yomti"]
 [ext_resource type="Script" path="res://projects/audio_generator/draw_waveform_test.gd" id="8_pv65f"]
 [ext_resource type="Texture2D" uid="uid://defktopg4ajan" path="res://textures/img.icons8.png" id="9_efg0v"]
+[ext_resource type="AudioStream" uid="uid://ugk7blvy42hd" path="res://sounds/ambient/Jungle Sounds (192kbit_AAC).ogg" id="11_dxdsu"]
 
 [sub_resource type="Gradient" id="Gradient_7i3av"]
 offsets = PackedFloat32Array(0, 0.714976)
@@ -118,7 +119,7 @@ script = ExtResource("1_2wici")
 s1_audio_gen = NodePath("../S1AudioGenerator")
 key_count = 61
 key_wrap = 1000
-counter = 223166
+counter = 253392
 key_size = Vector2(16, 64)
 white_stylebox = ExtResource("5_5s8iu")
 black_stylebox = ExtResource("6_yomti")
@@ -598,3 +599,7 @@ offset_right = 107.0
 offset_bottom = 137.0
 script = ExtResource("8_pv65f")
 s1_audio_generator = NodePath("../S1AudioGenerator")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_dxdsu")
+bus = &"Reverb"

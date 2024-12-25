@@ -20,6 +20,10 @@
 #include "s1_reverb.h"
 
 
+#include "sine_example.h" // single file sine example for testing
+#include "s1_audio/s2_audio_generator.h"
+
+
 
 #include "mesh_generator.h"
 #pragma endregion
@@ -49,6 +53,12 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(S1_UI_Draw);
 
 	GDREGISTER_CLASS(MeshGenerator);
+
+	GDREGISTER_CLASS(SineExample); // Sine example
+
+
+	GDREGISTER_CLASS(S2AudioGenerator);
+
 
 	// my audio effect
 	// GDREGISTER_CLASS(Freeverb);

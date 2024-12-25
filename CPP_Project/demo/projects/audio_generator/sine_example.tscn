@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=4 uid="uid://chwwo3albwyhs"]
+
+[ext_resource type="Script" path="res://projects/audio_generator/sine_example.gd" id="1_ogg57"]
+
+[sub_resource type="AudioStreamWAV" id="AudioStreamWAV_fx7pt"]
+data = PackedByteArray("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")
+format = 1
+loop_mode = 1
+loop_end = 801
+
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_m4u71"]
+
+[node name="SineExample" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SineExample" type="SineExample" parent="."]
+timer = 0.0181633
+audio_stream_wav = SubResource("AudioStreamWAV_fx7pt")
+stream = SubResource("AudioStreamGenerator_m4u71")
+script = ExtResource("1_ogg57")

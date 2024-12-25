@@ -13,6 +13,10 @@ make an AudioStreamGenerator for this to work
 #include <helper.h>  // includes a print function
 #include <macros.h>  // my macros to help declare properties
 
+#include <s1_audio/s1_audio_filter.h>
+
+
+
 // #include <godot_cpp/classes/sprite2d.hpp>
 #include <godot_cpp/classes/audio_stream.hpp>                     // AudioStreamPlayer
 #include <godot_cpp/classes/audio_stream_generator.hpp>           // AudioStreamGenerator
@@ -78,76 +82,9 @@ class AnalogPeakSimulator {
     }
 };
 
-class ResonantFilter {
-   private:
-    float cutoff_frequency;    // Cutoff frequency in Hz
-    float sample_rate;         // Sample rate in Hz
-    float alpha;               // Filter coefficient
-    float resonance = 0.0f;    // Resonance amount (0 = no resonance)
-    float prev_input = 0.0f;   // Previous input sample
-    float prev_output = 0.0f;  // Previous output sample
-    bool is_high_pass = true;  // Default to high-pass mode
-
-   public:
-    ResonantFilter(float cutoff, float sampleRate, bool highPass = true)
-        : cutoff_frequency(cutoff), sample_rate(sampleRate), is_high_pass(highPass) {
-        updateAlpha();
-    }
-
-    void set_cutoff(float cutoff) {
-        cutoff_frequency = cutoff;
-        updateAlpha();
-    }
-
-    void set_sample_rate(float _sample_rate) {
-        sample_rate = _sample_rate;
-    }
-
-    void set_resonance(float res) {
-        resonance = res;
-    }
-
-    void set_mode(bool highPass) {
-        is_high_pass = highPass;
-    }
-
-    float process(float input) {
-        float output;
-        if (is_high_pass) {
-            // High-pass filter with resonance
-            output = alpha * (prev_output + input - prev_input) - resonance * prev_output;
-        } else {
-            // Low-pass filter with resonance
-            output = prev_output + alpha * (input - prev_output) - resonance * prev_output;
-        }
-
-        // Update state
-        prev_input = input;
-        prev_output = output;
-        return output;
-    }
-
-   private:
-    void updateAlpha() {
-        float rc = 1.0f / (2.0f * Math_PI * cutoff_frequency);
-        alpha = rc / (rc + (1.0f / sample_rate));
-    }
-};
-
-// class S1WaveReader {
-
-//     AudioStreamWAV audio_stream;
-
-//     S1WaveReader(AudioStreamWAV audio_stream_p) {
-//         audio_stream = audio_stream_p;
-//     }
-
-//     ~S1WaveReader() {
-//     }
-// };
-
 class S1WaveTable {
 };
+
 
 class S1ViroidSynth {
    public:
@@ -195,7 +132,7 @@ class S1ViroidSynth {
             if (use_tails) {  // tail mode refactor
                 Note note = notes[pitch];
 
-                if (!note.playing_tail) { // if not a tail, don't restart the note
+                if (!note.playing_tail) {  // if not a tail, don't restart the note
                     return;
                 }
 
@@ -305,19 +242,21 @@ class S1ViroidSynth {
 
             for (int i = 0; i < frames_available; i++) {
             }
-        }
+        } else {
+            float increment = frequency / mix_rate;  // orginal pattern
 
-        for (int i = 0; i < frames_available; i++) {
-            auto signal = SIGNAL_poly();
-            timer += frequency / mix_rate;
+            for (int i = 0; i < frames_available; i++) {
+                auto signal = SIGNAL_poly();
+                timer += increment;
 
-            // signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
+                // signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
 
-            signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
+                signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
 
-            signal = pow(10.0, volume_db / 20.0);  // apply volume as decibels
+                signal = pow(10.0, volume_db / 20.0);  // apply volume as decibels
 
-            buffer[i] = Vector2(1.0f, 1.0f) * signal;  // set the buffer value
+                buffer[i] = Vector2(1.0f, 1.0f) * signal;  // set the buffer value
+            }
         }
 
         return buffer;
@@ -442,7 +381,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
     S1ViroidSynth viroid_syth = S1ViroidSynth();
 
    private:
-    ResonantFilter high_pass_filter = ResonantFilter(10.0f, mix_rate);  // passing above 10Hz prevents bottom outs
+    S1AudioFilter high_pass_filter = S1AudioFilter(10.0f, mix_rate);  // passing above 10Hz prevents bottom outs
 
    public:
     void macro_test() {
@@ -618,30 +557,18 @@ class S1AudioGenerator : public AudioStreamPlayer {
         buffer.resize(frames_available);  // set it's size in one (faster than appending)
 
         for (int i = 0; i < frames_available; i++) {
-            float signal;
+            
 
-            switch (mode) {
-                case 44:
+            float signal = _get_signal();
 
-                    break;
+            timer += frequency / mix_rate;
 
-                default:
+            // signal *= pow(10.0, volume_db / 20.0);  // apply volume as decibels
+            // signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
 
-                    signal = _get_signal();
+            signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
 
-                    timer += frequency / mix_rate;
-
-                    signal = powf(10.0f, signal / 20.0f);  // apply volume as decibels
-
-                    signal = pow(10.0, volume_db / 20.0);  // apply volume as decibels
-
-                    signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
-
-                    signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
-
-                    buffer[i] = Vector2(1.0, 1.0) * signal;  // set the buffer value
-                    break;
-            }
+            buffer[i] = Vector2(1.0, 1.0) * signal;  // set the buffer value
         }
 
         return buffer;

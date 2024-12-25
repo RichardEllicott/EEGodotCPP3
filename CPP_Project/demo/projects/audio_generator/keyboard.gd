@@ -5,6 +5,7 @@ extends Control
 
 
 @export var s1_audio_gen: S1AudioGenerator
+@export var s2_audio_gen: S2AudioGenerator
 
 
 @export var key_count := 13

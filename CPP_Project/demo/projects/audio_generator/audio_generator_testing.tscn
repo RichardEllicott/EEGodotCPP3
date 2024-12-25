@@ -1,8 +1,8 @@
 [gd_scene load_steps=15 format=3 uid="uid://rqvua0ko8us1"]
 
 [ext_resource type="Script" path="res://projects/audio_generator/keyboard.gd" id="1_2wici"]
-[ext_resource type="AudioStream" uid="uid://c4o2vcvsklkbk" path="res://sounds/sine.wav" id="1_vhpcd"]
 [ext_resource type="Script" path="res://projects/audio_generator/s1_audio_generator.gd" id="1_woxpj"]
+[ext_resource type="AudioStream" uid="uid://bp3iebibmhv24" path="res://sounds/square.wav" id="2_c5lht"]
 [ext_resource type="Script" path="res://projects/audio_generator/render_server_example.gd" id="3_3kod2"]
 [ext_resource type="Texture2D" uid="uid://e61vh63y5b13" path="res://textures/proto.png" id="3_ustcw"]
 [ext_resource type="Script" path="res://projects/audio_generator/s_1_ui_draw.gd" id="3_uuvam"]
@@ -77,10 +77,12 @@ expand_mode = 1
 
 [node name="S1AudioGenerator" type="S1AudioGenerator" parent="."]
 frequency = 55.0
-audio_stream_wav = ExtResource("1_vhpcd")
+mode = 44
+audio_stream_wav = ExtResource("2_c5lht")
+timer = 14151.4
 stream = SubResource("AudioStreamGenerator_s67uc")
 autoplay = true
-bus = &"Reverb"
+bus = &"REVERB"
 script = ExtResource("1_woxpj")
 
 [node name="S1_UI_Draw" type="S1_UI_Draw" parent="."]
@@ -119,7 +121,7 @@ script = ExtResource("1_2wici")
 s1_audio_gen = NodePath("../S1AudioGenerator")
 key_count = 61
 key_wrap = 1000
-counter = 253392
+counter = 281979
 key_size = Vector2(16, 64)
 white_stylebox = ExtResource("5_5s8iu")
 black_stylebox = ExtResource("6_yomti")
@@ -602,4 +604,3 @@ s1_audio_generator = NodePath("../S1AudioGenerator")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("11_dxdsu")
-bus = &"Reverb"

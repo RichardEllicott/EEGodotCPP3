@@ -31,6 +31,8 @@ using namespace godot;
 //
 // they are lighter than objects it's appropiate apparently but would make little difference
 //
+
+#pragma region NOTE
 struct Note {
     float pitch;   // note value where 0 is middle C (440hz)
     float volume;  // Volume or intensity, typically in the range [0, 1]
@@ -38,16 +40,22 @@ struct Note {
 
     float start_time;
 
+    // A D S R
+
+    float attack = 1.0f;  // larger longer
+    float decay = 0.0f;   // use small fractions for long decay
+
+    float sustain = 1.0f;
+    float release = 1.0f;
+
+    bool playing_tail = false;  // when true we will do the tail
+
+    // return pitch val to chromatic scale
     float get_frequency() {
         return 2.0f * pow(2.0f, pitch / 12.0f);
     }
-
-    // // Constructor
-    // Note(float pitch = 440.0f, float volume = 1.0f, float duration = 1.0)
-    //     : pitch(pitch), volume(volume),
-    // {
-    // }
 };
+#pragma endregion
 
 // RC-like envelope follower
 class AnalogPeakSimulator {
@@ -70,7 +78,6 @@ class AnalogPeakSimulator {
     }
 };
 
-
 class ResonantFilter {
    private:
     float cutoff_frequency;    // Cutoff frequency in Hz
@@ -92,7 +99,7 @@ class ResonantFilter {
         updateAlpha();
     }
 
-    void set_sample_rate(float _sample_rate){
+    void set_sample_rate(float _sample_rate) {
         sample_rate = _sample_rate;
     }
 
@@ -127,20 +134,299 @@ class ResonantFilter {
     }
 };
 
+// class S1WaveReader {
+
+//     AudioStreamWAV audio_stream;
+
+//     S1WaveReader(AudioStreamWAV audio_stream_p) {
+//         audio_stream = audio_stream_p;
+//     }
+
+//     ~S1WaveReader() {
+//     }
+// };
+
+class S1WaveTable {
+};
+
+class S1ViroidSynth {
+   public:
+    float mix_rate = 44100;  // in hz
+
+    std::unordered_map<float, Note> notes;
+
+    float timer = 0.0f;  // in seconds
+
+    int print_count = 0;       // debug
+    int print_mod = 1024 * 4;  // debug
+
+    float frequency = 55;
+
+    float volume = 1.0f;  // linear volume (not db)
+
+    float add_level = 0.5f;
+
+    float volume_db = -12.0f;  // linear volume (not db)
+
+    float pulse_width = 0.5;
+
+    int mode = 44;
+
+    static float _SAW(float x) {
+        return fmod(x, 1.0f) * 2.0f - 1.0f;
+    }
+
+    // square, pulse width 0 to 1.0
+    static float _SQR(float x, float pw) {
+        return (fmod(x, 1.0f) < pw) ? 1.0f : -1.0f;
+    }
+
+    static float _SIN(float x) {
+        return sin(x * Math_TAU);
+    }
+
+    // this is all wrong with regard to tails, instead we will make say an 8/16 poly synth
+
+    // functions for adding notes, which we'll add from gdscript (to handle the controls)
+    void add_note(float pitch, float volume = 1.0f, float duration = -1) {
+        // print("add note " + String::num_real(frequency));
+
+        if (notes.find(pitch) != notes.end()) {
+            if (use_tails) {  // tail mode refactor
+                Note note = notes[pitch];
+
+                if (!note.playing_tail) { // if not a tail, don't restart the note
+                    return;
+                }
+
+            } else {
+                return;  // if the note is already playing, don't restart the note
+            }
+        }
+
+        Note note = Note();
+        note.pitch = pitch;
+        note.volume = volume;
+        note.duration = duration;
+        note.start_time = timer;
+
+        notes[pitch] = note;
+    }
+
+    bool use_tails = true;
+
+    void clear_note(float pitch) {
+        if (use_tails) {
+            if (notes.find(pitch) != notes.end()) {
+                Note note = notes[pitch];
+                note.playing_tail = true;
+            }
+
+            // notes.erase(pitch);
+        } else {
+            notes.erase(pitch);
+        }
+    }
+
+    void clear_notes() {
+        notes.clear();
+    }
+
+    float SIGNAL_poly()  // 4
+    {
+        print_count++;
+
+        float signal = 0.0f;
+
+        for (const auto &pair : notes) {
+            float key = pair.first;
+            Note note = pair.second;
+
+            float _frequency = note.get_frequency();
+
+            float time_playing = timer - note.start_time;  // time note has been playing
+
+            float volume = note.volume;
+
+            volume -= time_playing * note.decay;  // apply decay (linear)
+            // // volume *= 1.0f / time_playing; // apply decay // non linear
+
+            volume = MAX(volume, 0.0);  // volume can't be negative
+
+            // get the attack gate position
+            float attack_gate = time_playing / note.attack;
+            attack_gate = MIN(attack_gate, 1.0f);  // can't be higher than 1
+
+            volume *= attack_gate;
+
+            if (print_count % print_mod == 0) {
+                // print("volume");
+                // print(volume);
+            }
+
+            // signal += _SAW(time_playing * _frequency) * add_level * volume;
+            signal += _SIN(time_playing * _frequency) * add_level * volume;
+            // signal += _SQR(time_playing * _frequency, pulse_width) * add_level * volume;
+        }
+
+        return signal;
+    }
+
+    // get an audio buffer array, stero signal ready to push
+    PackedVector2Array _get_audio_buffer(int frames_available) {
+        PackedVector2Array buffer;  // create an stereo audio buffer
+
+        buffer.resize(frames_available);  // set it's size in one (faster than appending)
+
+        if (mode == 44) {
+            for (const auto &pair : notes) {
+                float key = pair.first;
+                Note note = pair.second;
+
+                float _frequency = note.get_frequency();
+
+                float time_playing = timer - note.start_time;  // time note has been playing
+
+                float volume = note.volume;
+
+                volume -= time_playing * note.decay;  // apply decay (linear)
+                                                      // // volume *= 1.0f / time_playing; // apply decay // non linear
+
+                volume = MAX(volume, 0.0);  // volume can't be negative
+
+                // get the attack gate position
+                float attack_gate = time_playing / note.attack;
+                attack_gate = MIN(attack_gate, 1.0f);  // can't be higher than 1
+
+                volume *= attack_gate;
+
+                // signal += _SIN(time_playing * _frequency) * add_level * volume;
+            }
+
+            for (int i = 0; i < frames_available; i++) {
+            }
+        }
+
+        for (int i = 0; i < frames_available; i++) {
+            auto signal = SIGNAL_poly();
+            timer += frequency / mix_rate;
+
+            // signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
+
+            signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
+
+            signal = pow(10.0, volume_db / 20.0);  // apply volume as decibels
+
+            buffer[i] = Vector2(1.0f, 1.0f) * signal;  // set the buffer value
+        }
+
+        return buffer;
+    }
+};
+
+class S1WaveHelper {
+   public:
+    // Ref<AudioStreamWAV> audio_stream_wav;  // a godot ref, note this might keep the thing in memory
+    // AudioStreamWAV &audio_stream;  // C++ ref?? or pointer are choices
+
+    static const int wave_lerp_mode = 0;
+
+    static const int print_mod2 = 1024 * 4;
+    static const int print_count2 = 0;
+
+   protected:
+    // Helper to decode 16-bit PCM sample from PackedByteArray
+    static int16_t decode_sample(const PackedByteArray &data, int index) {
+        if (index + 1 >= data.size()) {
+            return 0;
+        }
+        // Combine two bytes into a signed 16-bit value
+        return static_cast<int16_t>((data[index + 1] << 8) | (data[index]));
+    }
+
+   public:
+    static float read_audio_stream_wav(Ref<AudioStreamWAV> audio_stream_wav, float sample_pos_f) {
+        float signal = 0.0;
+
+        if (audio_stream_wav.is_valid()) {
+            int format = audio_stream_wav->get_format();
+
+            if (format != AudioStreamWAV::FORMAT_16_BITS) {
+                // UtilityFunctions::print("Unsupported format. Only PCM16 is supported.");
+                return 0.0f;
+            }
+
+            PackedByteArray audio_bytes = audio_stream_wav->get_data();
+
+            int channels = audio_stream_wav->is_stereo() ? 2 : 1;  // one or two channels (we don't yet support 2)
+
+            int bytes_per_sample = 2;  // 16-bit PCM is 2 bytes per sample
+
+            int total_samples = audio_bytes.size() / (channels * bytes_per_sample);
+
+            // Calculate the sample position
+            int sample_pos = sample_pos_f;  // cast to in for actual sample pos
+
+            float lerp_pos = sample_pos_f - sample_pos;
+
+            int sample_pos2 = (sample_pos + 1);
+
+            sample_pos %= total_samples;
+            sample_pos2 %= total_samples;
+
+            // if (sample_pos < 0 || sample_pos >= total_samples - 1) {
+            //     return 0.0f;  // Out of bounds
+            // }
+
+            // Retrieve the two samples for interpolation
+            int sample1_index = sample_pos * channels * bytes_per_sample;
+            int sample2_index = sample_pos2 * channels * bytes_per_sample;
+
+            int16_t sample1 = decode_sample(audio_bytes, sample1_index);
+            int16_t sample2 = decode_sample(audio_bytes, sample2_index);
+
+            float sample1f = static_cast<float>(sample1) / 32768.0f;
+            float sample2f = static_cast<float>(sample2) / 32768.0f;
+
+            switch (wave_lerp_mode) {
+                case 0:
+                    signal = sample1f;
+                    break;
+
+                case 1:
+
+                    // float lerped_sample = sample2f * lerp_pos + sample1f * (1.0f - lerp_pos); // reduces to:
+                    float lerped_sample = sample1f + lerp_pos * (sample2f - sample1f);  // reduced (note i avoid the library to avoid doubles)
+                    signal = lerped_sample;
+
+                    break;
+            }
+        }
+
+        if (print_count2 % print_mod2 == 0) {
+            // print("samples:");
+            // print(sample1f);
+            // print(sample2f);
+        }
+
+        return signal;
+    };
+};
+
 class S1AudioGenerator : public AudioStreamPlayer {
     GDCLASS(S1AudioGenerator, AudioStreamPlayer)
 
     // // these macros create the variable and also get/set functions
-    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(bool, enabled, false)     // unused
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mix_rate, 44100)     // samples per a second (hz)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, frequency, 220)    // frequency of tone generator (hz) (default A3)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pulse_width, 0.5)  // pulse widh of some waves like square
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mode, 4)             // 0=sin 1=square 2=saw 3=wave
 
-    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume_dB, -24)  // decibels (only for the generator stream, not render)
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume_db, -24)  // decibels (only for the generator stream, not render)
 
     // DECLARE_PROPERTY_SINGLE_FILE(Ref<AudioStream>, audio_stream)
     DECLARE_PROPERTY_SINGLE_FILE(Ref<AudioStreamWAV>, audio_stream_wav)  // read and write to this wav file
+    DECLARE_PROPERTY_SINGLE_FILE(Ref<AudioStream>, audio_stream)         // read and write to this wav file
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, render_length, 1.0)  // length (seconds) of sample to render to wav
 
@@ -148,6 +434,12 @@ class S1AudioGenerator : public AudioStreamPlayer {
     // read and write to this wav file .... I THINK MADE A CRASH WHEN WE ADDED IT BUT OKAY!?
     // not sure about the memory saftey as not initilized
     DECLARE_PROPERTY_SINGLE_FILE(PackedFloat32Array, poly_notes)
+
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, timer, 0.0f)
+
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, wave_lerp_mode, 0)  // 0 none, 1 linear, used for reading wave file
+
+    S1ViroidSynth viroid_syth = S1ViroidSynth();
 
    private:
     ResonantFilter high_pass_filter = ResonantFilter(10.0f, mix_rate);  // passing above 10Hz prevents bottom outs
@@ -167,21 +459,25 @@ class S1AudioGenerator : public AudioStreamPlayer {
    protected:
     static void _bind_methods() {
         // // these macros create the bindings for the properties
-        CREATE_VAR_BINDINGS(S1AudioGenerator, BOOL, enabled)
         CREATE_VAR_BINDINGS(S1AudioGenerator, INT, mix_rate)
         CREATE_VAR_BINDINGS(S1AudioGenerator, FLOAT, frequency)
         CREATE_VAR_BINDINGS(S1AudioGenerator, FLOAT, pulse_width)
         CREATE_VAR_BINDINGS(S1AudioGenerator, INT, mode)
 
-        CREATE_VAR_BINDINGS(S1AudioGenerator, FLOAT, volume_dB)
+        CREATE_VAR_BINDINGS(S1AudioGenerator, FLOAT, volume_db)
 
         // CREATE_CLASS_BINDINGS(S1AudioGenerator, "AudioStream", audio_stream)
         CREATE_CLASS_BINDINGS(S1AudioGenerator, "AudioStreamWAV", audio_stream_wav)
+        CREATE_CLASS_BINDINGS(S1AudioGenerator, "AudioStream", audio_stream)
 
         CREATE_VAR_BINDINGS(S1AudioGenerator, FLOAT, render_length)
 
         // CREATE_VAR_BINDINGS(S1AudioGenerator, ARRAY, poly_notes)
         CREATE_VAR_BINDINGS(S1AudioGenerator, Variant::PACKED_FLOAT32_ARRAY, poly_notes)
+
+        CREATE_VAR_BINDINGS(S1AudioGenerator, FLOAT, timer)
+
+        CREATE_VAR_BINDINGS(S1AudioGenerator, INT, wave_lerp_mode)
 
         // manual binding of methods
         // note the macro pattern is recognised by my gdscript plugins
@@ -211,7 +507,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
     // this timer is actually not updated by the process loop exactly, but by each individual frame loaded in
     // "_update_generator_buffer" so it is also moved by the sample saving output
-    float timer = 0.0;
+    // float timer = 0.0;
 
     float increment;  // calculate as (frequency / mix_rate)
 
@@ -225,22 +521,32 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
    public:
     // functions for adding notes, which we'll add from gdscript (to handle the controls)
-    void add_note(float _note, float volume = 1.0f, float duration = -1) {
+    void add_note(float pitch, float volume = 1.0f, float duration = -1) {
         // print("add note " + String::num_real(frequency));
 
-        Note note = Note();
-        note.pitch = _note;
-        note.volume = volume;
+        if (notes.find(pitch) != notes.end()) return;  // if the note is already playing, block restarting
 
-        notes[_note] = note;
+        Note note = Note();
+        note.pitch = pitch;
+        note.volume = volume;
+        note.duration = duration;
+        note.start_time = timer;
+
+        notes[pitch] = note;
+
+        viroid_syth.add_note(pitch, volume, duration);  // NEW
     }
 
     void clear_note(float pitch) {
         notes.erase(pitch);
+
+        viroid_syth.clear_note(pitch);  // NEW
     }
 
     void clear_notes() {
         notes.clear();
+
+        viroid_syth.clear_notes();  // NEW
     }
 
    public:
@@ -294,7 +600,55 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
     int print_cycle = 60;  // slows the printing down from loops, printing only every 60 frames
 
+    // get an audio buffer array, stero signal ready to push
+    PackedVector2Array _get_audio_buffer(int frames_available) {
+        if (mode == 44) {  // bypass refactor // this overrides so i can speed up buffer load
+            viroid_syth.timer = timer;
+            viroid_syth.mix_rate = mix_rate;
+            viroid_syth.frequency = frequency;
+
+            auto ret = viroid_syth._get_audio_buffer(frames_available);
+            timer = viroid_syth.timer;
+
+            return ret;
+        }
+
+        PackedVector2Array buffer;  // create an stereo audio buffer
+
+        buffer.resize(frames_available);  // set it's size in one (faster than appending)
+
+        for (int i = 0; i < frames_available; i++) {
+            float signal;
+
+            switch (mode) {
+                case 44:
+
+                    break;
+
+                default:
+
+                    signal = _get_signal();
+
+                    timer += frequency / mix_rate;
+
+                    signal = powf(10.0f, signal / 20.0f);  // apply volume as decibels
+
+                    signal = pow(10.0, volume_db / 20.0);  // apply volume as decibels
+
+                    signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
+
+                    signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
+
+                    buffer[i] = Vector2(1.0, 1.0) * signal;  // set the buffer value
+                    break;
+            }
+        }
+
+        return buffer;
+    }
+
     // feed the AudioStreamGeneratorPlayback buffer if we are is_playing()
+    // we call this in our thread process over and over
     void _update_generator_buffer() {
         if (is_playing()) {  // this method needs no cache as we use this node
             counter++;
@@ -306,22 +660,10 @@ class S1AudioGenerator : public AudioStreamPlayer {
                 Ref<AudioStreamGeneratorPlayback> generator_playback = playback;  // attempt cast with ref system
                 if (generator_playback.is_valid())                                // if valid
                 {
-                    int frames_available = generator_playback->get_frames_available();
+                    int frames_available = generator_playback->get_frames_available();  // only pack buffer if frames available
 
                     if (frames_available > 0) {
-                        // fastest in c++ to pack a buffer at once
-                        PackedVector2Array buffer;        // create an stereo audio buffer
-                        buffer.resize(frames_available);  // set it's size in one (faster than appending)
-                        for (int i = 0; i < frames_available; i++) {
-                            auto signal = _get_signal();
-                            signal = powf(10.0f, signal / 20.0f);  // apply volume as decibels
-
-                            signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
-
-                            signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
-
-                            buffer[i] = Vector2(1.0, 1.0) * signal;  // set the buffer value
-                        }
+                        PackedVector2Array buffer = _get_audio_buffer(frames_available);
                         generator_playback->push_buffer(buffer);
                     }
                 }
@@ -336,6 +678,20 @@ class S1AudioGenerator : public AudioStreamPlayer {
         // _update_generator_buffer();
     };
 
+#pragma region MATHS_WAVES_SIMPLE
+    static float _SAW(float x) {
+        return fmod(x, 1.0f) * 2.0f - 1.0f;
+    }
+
+    static float _SQR(float x, float pw) {
+        return (fmod(x, 1.0f) < pw) ? 1.0f : -1.0f;
+    }
+
+    static float _SIN(float x) {
+        return sin(x * Math_TAU);
+    }
+#pragma endregion
+
     float SIGNAL_sine()  // 0
     {
         return sin(timer * Math_TAU);
@@ -343,17 +699,17 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
     float SIGNAL_square()  // 1
     {
-        float phase = fmod(timer, 1.0f);
-        return (phase < pulse_width) ? 1.0f : -1.0f;
+        return _SQR(timer, pulse_width);
     }
 
     float SIGNAL_saw()  // 2
     {
         // float signal =  UtilityFunctions::floorf(fmod(position, 1.0) + 0.5f);
 
-        float phase = fmod(timer, 1.0f);
-        float signal = phase * 2.0f - 1.0f;
-        return signal;
+        return _SAW(timer);
+        // float phase = fmod(timer, 1.0f);
+        // float signal = phase * 2.0f - 1.0f;
+        // return signal;
     }
 
     float SIGNAL_special()  // 3
@@ -365,9 +721,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
     float SIGNAL_poly()  // 4
     {
-        // float signal = SIGNAL_sine();
-        // signal = apply_warmth(signal, 2.0f);
-        // return signal;
+        print_count2++;
 
         float signal = 0.0f;
         float add_level = 1.0f;
@@ -384,18 +738,37 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
             float _frequency = note.get_frequency();
 
-            signal += sin(timer * Math_TAU * _frequency) * add_level * note.volume;
+            float time_playing = timer - note.start_time;  // time note has been playing
+
+            float volume = note.volume;
+
+            volume -= time_playing * note.decay;  // apply decay (linear)
+                                                  // // volume *= 1.0f / time_playing; // apply decay // non linear
+
+            volume = MAX(volume, 0.0);  // volume can't be negative
+
+            // get the attack gate position
+            float attack_gate = time_playing / note.attack;
+            attack_gate = MIN(attack_gate, 1.0f);  // can't be higher than 1
+
+            volume *= attack_gate;
+
+            if (print_count2 % print_mod2 == 0) {
+                // print("volume");
+                // print(volume);
+            }
+
+            // signal += _SAW(time_playing * _frequency) * add_level * volume;
+            signal += _SIN(time_playing * _frequency) * add_level * volume;
         }
-
-        // signal = CLAMP(signal, 0.0f, 1.0f);
-
-        // for (int i = 0; i < notes.size(); i++)
-        // {
-        //     Note note = notes[i];
-        // }
 
         return signal;
     }
+
+#pragma region DECODE_WAVE
+
+    int print_mod2 = 1024 * 4;
+    int print_count2 = 0;
 
    protected:
     // Helper to decode 16-bit PCM sample from PackedByteArray
@@ -409,63 +782,25 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
    public:
     // read the wav file as a signal
+
+    // int wave_lerp_mode = 0;  // 0 none, 1 linear
+
     float SIGNAL_wave() {
+        print_count2++;
+
         float signal = 0.0;
 
-        if (audio_stream_wav.is_valid()) {
-            PackedByteArray data = audio_stream_wav->get_data();
-
-            int format = audio_stream_wav->get_format();
-
-            // int sample_rate = audio_stream_wav->get_mix_rate();
-
-            if (format != AudioStreamWAV::FORMAT_16_BITS) {
-                // UtilityFunctions::print("Unsupported format. Only PCM16 is supported.");
-                return 0.0f;
-            }
-
-            // bool stereo = audio_stream_wav->get_stereo();
-
-            // int channels = audio_stream_wav->get_channels();
-
-            int channels = audio_stream_wav->is_stereo() ? 2 : 1;  // one or two channels
-
-            int bytes_per_sample = 2;  // 16-bit PCM is 2 bytes per sample
-
-            int total_samples = data.size() / (channels * bytes_per_sample);
-
-            // Calculate the sample position
-            int sample_pos = static_cast<int>(timer * mix_rate);
-
-            sample_pos %= total_samples;  // should cause a loop?? my bit
-
-            if (sample_pos < 0 || sample_pos >= total_samples - 1) {
-                return 0.0f;  // Out of bounds
-            }
-
-            // Retrieve the two samples for interpolation
-            int sample1_index = sample_pos * channels * bytes_per_sample;
-            int sample2_index = (sample_pos + 1) * channels * bytes_per_sample;
-
-            int16_t sample1 = decode_sample(data, sample1_index);
-            int16_t sample2 = decode_sample(data, sample2_index);
-
-            // Perform linear interpolation
-            float fraction = (timer * mix_rate) - sample_pos;
-
-            return sample1 + (sample2 - sample1) * fraction;
-
-            // int sample_rate = audio_stream_wav->get_sample_rate();
-            // int channels = audio_stream_wav->get_channels();
-            // int format = audio_stream_wav->get_format();
-
-            // }
-        }
+        signal = S1WaveHelper::read_audio_stream_wav(audio_stream_wav, timer * mix_rate);
 
         return signal;
     }
 
-    // get current signal (note only call once per cycle as it moves the timer)
+#pragma endregion
+
+    // get current signal
+    // note call after:
+    //     timer += frequency / mix_rate;
+    //
     float _get_signal() {
         float signal;
 
@@ -492,8 +827,6 @@ class S1AudioGenerator : public AudioStreamPlayer {
                 signal = 0.0;
         }
 
-        timer += frequency / mix_rate;
-
         // history buffer
         if (history_buffer.size() != history_buffer_size) {
             history_buffer.resize(history_buffer_size);
@@ -505,6 +838,8 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
         return signal;
     }
+
+#pragma region GENERATE_WAVE
 
     // pack a float to bytes on the wav data (from signal to bytes)
     // used to generate wav
@@ -520,25 +855,28 @@ class S1AudioGenerator : public AudioStreamPlayer {
         data.append((pcm_sample >> 8) & 0xFF);  // High byte
     }
 
-    // array of floats, can remaim overdriven etc
+    // generate audio as array of floats (single channel)
     PackedFloat32Array _generate_audio_wave(int samples) {
         PackedFloat32Array wave;
         wave.resize(samples);
         timer = 0.0;  // WARNING resets the timer
         for (int i = 0; i < samples; i++) {
             float signal = _get_signal();
+            timer += frequency / mix_rate;  // increment the timer
             wave[i] = signal;
         }
         return wave;
     }
 
-    // 16 bit audio file, 2 bytes per sample, single channel
+    // generate audio as a PackedByteArray (16byte, single channel, audio file at sample_rate)
+    // REDUNDANT
     PackedByteArray _generate_audio_bytes(int samples) {
         PackedByteArray data;
         data.resize(samples * 2);
         timer = 0.0;  // WARNING resets the timer
         for (int i = 0; i < samples; i++) {
             float signal = _get_signal();
+            timer += frequency / mix_rate;
             signal = CLAMP(signal, -1.0f, 1.0f);
 
             int16_t pcm_sample = static_cast<int16_t>(signal * 32767);  // Scale to 16-bit signed integer range
@@ -603,6 +941,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
 
         _generate_wav();
     }
+#pragma endregion
 
 #pragma region THREADS
 
@@ -624,20 +963,7 @@ class S1AudioGenerator : public AudioStreamPlayer {
         audio_thread = std::thread([this]() {
             while (audio_thread_running)
             {
-
                 _update_generator_buffer();
-
-                // int frames_available = playback->get_frames_available();
-
-                // for (int i = 0; i < frames_available; i++)
-                // {
-
-                //     float signal = _get_signal();
-                //     signal = std::pow(10.0f, signal / 20.0f);   // apply volume as decibels
-                //     Vector2 frame = Vector2(1.0, 1.0) * signal; // make a stero frame from a mono signal
-                //     playback->push_frame(frame);                // push the frame to the buffer
-                //     timer += increment;
-                // }
             } });
     }
 
@@ -647,6 +973,17 @@ class S1AudioGenerator : public AudioStreamPlayer {
         if (audio_thread.joinable()) {
             audio_thread.join();
         }
+    }
+
+#pragma endregion
+
+#ifdef BOBCAT
+#endif
+
+#pragma region TEST
+
+    void test() {
+        print("test");
     }
 
 #pragma endregion

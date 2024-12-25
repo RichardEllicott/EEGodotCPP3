@@ -18,6 +18,23 @@ ColumnLimit: 0 # column limits are dumb on widescreen!
 PointerAlignment: Left
 
 
+ReflowMacros: false
+StatementMacros: ['#pragma']
+KeepEmptyLinesAtMacroStart: true
+SortIncludes: false
+
+
+
+
+
+
+# IndentCaseLabels: false
+
+# StatementMacros: ['#pragma region', '#pragma endregion']
+
+
+
+
 
 
 # # Control the alignment of escaped newlines in macro definitions

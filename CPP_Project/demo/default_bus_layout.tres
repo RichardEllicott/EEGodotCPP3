@@ -1,23 +1,19 @@
 [gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://dgyc52vfv2v00"]
 
-[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_veif5"]
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_iei4j"]
 resource_name = "Reverb"
-room_size = 1.0
-wet = 1.0
 
-[sub_resource type="S1Reverb" id="S1Reverb_scxam"]
-enabled = true
-spread = 4.0
-resource_name = "S1Reverb"
+[sub_resource type="AudioEffectFilter" id="AudioEffectFilter_uc22t"]
+resource_name = "Filter"
 
 [resource]
-bus/1/name = &"Reverb"
+bus/1/name = &"REVERB"
 bus/1/solo = false
 bus/1/mute = false
 bus/1/bypass_fx = false
-bus/1/volume_db = 2.44924
+bus/1/volume_db = 0.0
 bus/1/send = &"Master"
-bus/1/effect/0/effect = SubResource("AudioEffectReverb_veif5")
-bus/1/effect/0/enabled = false
-bus/1/effect/1/effect = SubResource("S1Reverb_scxam")
-bus/1/effect/1/enabled = false
+bus/1/effect/0/effect = SubResource("AudioEffectReverb_iei4j")
+bus/1/effect/0/enabled = true
+bus/1/effect/1/effect = SubResource("AudioEffectFilter_uc22t")
+bus/1/effect/1/enabled = true

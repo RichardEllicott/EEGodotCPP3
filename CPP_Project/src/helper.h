@@ -55,6 +55,12 @@ static const double RAD_TO_DEG = 180.0 / Math_PI;  // multiply by this to conver
 // 	return sin(2 * Math_PI * carrier_freq * x + modulation_index * sin(2 * Math_PI * modulating_freq * x));
 // }
 
+// lerp template function
+template <typename T>
+T my_lerp(T a, T b, T alpha) {
+    return a + (b - a) * alpha;
+}
+
 static void print(String input)  // string (normal)
 {
     godot::UtilityFunctions::print(input);
@@ -81,11 +87,6 @@ static void print(double input)  // double
 //
 // should return nullptr if no valid node
 //
-
-
-
-
-
 
 // static void format(String input){
 // 	String::format();

@@ -17,7 +17,6 @@ grow_vertical = 2
 
 [node name="S2AudioGenerator" type="S2AudioGenerator" parent="."]
 mode = 1
-timer = 2.27935
 stream = SubResource("AudioStreamGenerator_q5asf")
 autoplay = true
 

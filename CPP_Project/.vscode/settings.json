@@ -62,7 +62,8 @@
         "xloctime": "cpp",
         "xmemory": "cpp",
         "xtr1common": "cpp",
-        "s1_audio_filter": "cpp"
+        "s1_audio_filter": "cpp",
+        "random": "cpp"
     },
     "godotTools.editorPath.godot4": "c:\\Program Files\\Godot\\Godot_v4.3-stable_mono_win64\\Godot_v4.3-stable_mono_win64.exe"
 }

@@ -9,6 +9,9 @@
 #include <helper.h>  // includes a print function
 
 #include <s1_audio/s1_audio_filter.h>
+
+#include <s1_audio/s1_poly_synth.h>
+
 // #include <s1_audio_filter.h>
 
 #include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer
@@ -21,11 +24,17 @@
 
 using namespace godot;
 
-
 class S2AudioGenerator : public AudioStreamPlayer {
     GDCLASS(S2AudioGenerator, AudioStreamPlayer)
 
     // note these are my custom macros (look in macros.h)
+
+    enum Mode {
+        SINE_TEST,
+        POLY_SYNTH,
+    };
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mode, 0)  // timer for the signal position
+
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mix_rate, 44100)           // samples per a second (hz)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, frequency, 220)          // frequency of tone generator (hz) (default A3)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume_db, -12)          // volume db
@@ -33,18 +42,31 @@ class S2AudioGenerator : public AudioStreamPlayer {
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, render_length, 1.0)      // for rendering to wave example
     DECLARE_PROPERTY_SINGLE_FILE(Ref<AudioStreamWAV>, audio_stream_wav)  // read and write to this wav file
 
-    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mode, 0)  // timer for the signal position
-
    public:
-    enum Mode {
-        MODE1,
-        MODE2,
-        MODE3
-    };
+    // hooks to the synth
+    void add_note(float pitch, float volume = 1.0f) {
+        // print("S2AudioGenerator add_note: " + godot::String::num(pitch));
+        poly_synth.add_note(pitch, volume);
+    }
+
+    void clear_note(float pitch) {
+        // print("S2AudioGenerator clear_note: " + godot::String::num(pitch));
+        poly_synth.clear_note(pitch);
+    }
+
+    void clear_notes() {
+        // print("clear_notes...");
+        poly_synth.clear_notes();
+    }
+
+    S1PolySynth poly_synth = S1PolySynth();  // my new synth
 
    protected:
     static void _bind_methods() {
         // note these are my custom macros (look in macros.h)
+
+        CREATE_VAR_BINDINGS(S2AudioGenerator, INT, mode)
+
         CREATE_VAR_BINDINGS(S2AudioGenerator, FLOAT, mix_rate);
         CREATE_VAR_BINDINGS(S2AudioGenerator, FLOAT, frequency);
         CREATE_VAR_BINDINGS(S2AudioGenerator, FLOAT, volume_db);
@@ -53,6 +75,11 @@ class S2AudioGenerator : public AudioStreamPlayer {
         CREATE_CLASS_BINDINGS(S2AudioGenerator, "AudioStreamWAV", audio_stream_wav)
 
         ClassDB::bind_method(D_METHOD("macro_generate_wav"), &S2AudioGenerator::macro_generate_wav);
+
+        // add notes for poly mode
+        ClassDB::bind_method(D_METHOD("add_note", "pitch", "volume"), &S2AudioGenerator::add_note);
+        ClassDB::bind_method(D_METHOD("clear_note", "pitch"), &S2AudioGenerator::clear_note);
+        ClassDB::bind_method(D_METHOD("clear_notes"), &S2AudioGenerator::clear_notes);
 
         // Bind the enum constants .... we tried and failed to add enumerator export!
         // just crash??
@@ -78,30 +105,37 @@ class S2AudioGenerator : public AudioStreamPlayer {
         stop_audio_thread();
     };
 
-    // signal to generate, you can replace this
-    float _get_signal() {
-        return sin(timer * Math_TAU * frequency);
-    }
-
     // get an audio buffer array, stero signal ready to push
+    // THIS IS THE MAIN FUNCTION NOW, so using arrays instead of single values (for speed)
     PackedVector2Array _get_audio_buffer(int frames_available) {
         PackedVector2Array buffer;  // create an stereo audio buffer
 
-        buffer.resize(frames_available);  // set it's size in one (faster than appending)
+        if (mode == 0) {  // sine wave test
 
-        float increment = 1.0 / mix_rate;  // the increment is the time in seconds of one frame
+            buffer.resize(frames_available);  // set it's size in one (faster than appending)
 
-        for (int i = 0; i < frames_available; i++) {
-            float signal = _get_signal();
-            timer += increment;
+            float increment = 1.0 / mix_rate;  // the increment is the time in seconds of one frame
 
-            signal *= pow(10.0, volume_db / 20.0);  // apply volume as decibels (like -12 db for example, 0 is neutral)
+            for (int i = 0; i < frames_available; i++) {
+                float signal = sin(timer * Math_TAU * frequency);
+                timer += increment;
 
-            // signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
+                signal *= pow(10.0, volume_db / 20.0);  // apply volume as decibels (like -12 db for example, 0 is neutral)
 
-            signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
+                // signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
 
-            buffer[i] = Vector2(1.0, 1.0) * signal;  // set the buffer value
+                signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
+
+                buffer[i] = Vector2(1.0, 1.0) * signal;  // set the buffer value
+            }
+        } else if (mode == 1) {  // synth mode
+
+            if (frames_available) {
+                // poly_synth.timer = timer;  // we sync these variables
+                poly_synth.mix_rate = mix_rate;
+                buffer = poly_synth._get_audio_buffer(frames_available);
+                // timer = poly_synth.timer;  // ensure the timer here matches the synth
+            }
         }
 
         return buffer;

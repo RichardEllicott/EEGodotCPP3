@@ -53,7 +53,7 @@ func _input(event):
         for i in keyboard_keys.size():
             var key = keyboard_keys[i]
             if event.keycode == key:
-                print("key %s was pressed!" % i)
+                #print("key %s was pressed!" % i)
                 
                 if event.pressed:
                     _on_key_down(i)
@@ -81,10 +81,12 @@ func _process(delta: float) -> void:
         var id: int = hovering[control]
         
         if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+            
+               
                 _synth_add_note(id)
                 control.modulate = pressed_color
         else:
-            _synth_clear_note(id)
+            #_synth_clear_note(id)
             control.modulate = Color.WHITE
             
             
@@ -132,16 +134,29 @@ func clear_children():
 var pressed_keys = {}
 
 
-func _synth_add_note(key: float, volume: float = 1.0, duration: float = 1.0):
+func _synth_add_note(key: float, volume: float = 1.0):
+    
+    
+    
+    
     if is_instance_valid(s1_audio_gen):
-        s1_audio_gen.add_note(key, volume, duration)
+        s1_audio_gen.add_note(key, volume, 1.0)
         
+        
+    if is_instance_valid(s2_audio_gen): # new generator
+        #print("synth add note")
+        s2_audio_gen.add_note(key, volume)
+
         
 func _synth_clear_note(key: float):
     
     if is_instance_valid(s1_audio_gen):
         s1_audio_gen.clear_note(key)
+        
+        
 
+    if is_instance_valid(s2_audio_gen): # new generator
+        s2_audio_gen.clear_note(key)
 
 
 
@@ -239,7 +254,7 @@ func _on_mouse_exited(id: int, control: Control) -> void:
         control.modulate = Color.WHITE
         hovering.erase(control)
         
-        _synth_clear_note(id)
+        #_synth_clear_note(id)
 
 
 #var controls = []

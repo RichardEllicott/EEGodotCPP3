@@ -43,6 +43,98 @@ using namespace godot;
 //     }
 // };
 
+// copied
+class S2WaveHelper {
+   public:
+    // Ref<AudioStreamWAV> audio_stream_wav;  // a godot ref, note this might keep the thing in memory
+    // AudioStreamWAV &audio_stream;  // C++ ref?? or pointer are choices
+
+    static const int wave_lerp_mode = 0;
+
+    static const int print_mod2 = 1024 * 4;
+    static const int print_count2 = 0;
+
+   protected:
+    // Helper to decode 16-bit PCM sample from PackedByteArray
+    static int16_t decode_sample(const PackedByteArray &data, int index) {
+        if (index + 1 >= data.size()) {
+            return 0;
+        }
+        // Combine two bytes into a signed 16-bit value
+        return static_cast<int16_t>((data[index + 1] << 8) | (data[index]));
+    }
+
+   public:
+    static float read_audio_stream_wav(Ref<AudioStreamWAV> audio_stream_wav, float sample_pos_f) {
+        float signal = 0.0;
+
+        if (audio_stream_wav.is_valid()) {
+            int format = audio_stream_wav->get_format();
+
+            if (format != AudioStreamWAV::FORMAT_16_BITS) {
+                // UtilityFunctions::print("Unsupported format. Only PCM16 is supported.");
+                return 0.0f;
+            }
+
+            PackedByteArray audio_bytes = audio_stream_wav->get_data();
+
+            int channels = audio_stream_wav->is_stereo() ? 2 : 1;  // one or two channels (we don't yet support 2)
+
+            int bytes_per_sample = 2;  // 16-bit PCM is 2 bytes per sample
+
+            int total_samples = audio_bytes.size() / (channels * bytes_per_sample);
+
+            // Calculate the sample position
+            int sample_pos = sample_pos_f;  // cast to in for actual sample pos
+
+            float lerp_pos = sample_pos_f - sample_pos;
+
+            int sample_pos2 = (sample_pos + 1);
+
+            sample_pos %= total_samples;
+            sample_pos2 %= total_samples;
+
+            // if (sample_pos < 0 || sample_pos >= total_samples - 1) {
+            //     return 0.0f;  // Out of bounds
+            // }
+
+            // Retrieve the two samples for interpolation
+            int sample1_index = sample_pos * channels * bytes_per_sample;
+            int sample2_index = sample_pos2 * channels * bytes_per_sample;
+
+            int16_t sample1 = decode_sample(audio_bytes, sample1_index);
+            int16_t sample2 = decode_sample(audio_bytes, sample2_index);
+
+            float sample1f = static_cast<float>(sample1) / 32768.0f;
+            float sample2f = static_cast<float>(sample2) / 32768.0f;
+
+            switch (wave_lerp_mode) {
+                case 0:
+                    signal = sample1f;
+                    break;
+
+                case 1:
+
+                    // float lerped_sample = sample2f * lerp_pos + sample1f * (1.0f - lerp_pos); // reduces to:
+                    float lerped_sample = sample1f + lerp_pos * (sample2f - sample1f);  // reduced (note i avoid the library to avoid doubles)
+                    signal = lerped_sample;
+
+                    break;
+            }
+        }
+
+        if (print_count2 % print_mod2 == 0) {
+            // print("samples:");
+            // print(sample1f);
+            // print(sample2f);
+        }
+
+        return signal;
+    };
+};
+
+
+
 // one mono synth, that is used by S1Viroid2
 class S1PolySynthChannel {
    private:

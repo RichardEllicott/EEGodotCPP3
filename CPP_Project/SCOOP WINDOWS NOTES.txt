@@ -1,0 +1,16 @@
+commands for project:
+
+navigate to:
+    cd ~\Documents\GitHub\Godot\EEGodotCPP3\CPP_Project\
+
+compile:
+    clear; scons
+
+launch godot:
+    clear; godot .\demo\project.godot;
+
+
+
+using scoop now
+
+scoop install gcc

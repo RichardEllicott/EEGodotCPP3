@@ -72,6 +72,7 @@ class S2AudioGenerator : public AudioStreamPlayer {
         CREATE_VAR_BINDINGS(S2AudioGenerator, FLOAT, volume_db);
         CREATE_VAR_BINDINGS(S2AudioGenerator, FLOAT, timer);
         CREATE_VAR_BINDINGS(S2AudioGenerator, FLOAT, render_length)
+        
         CREATE_CLASS_BINDINGS(S2AudioGenerator, "AudioStreamWAV", audio_stream_wav)
 
         ClassDB::bind_method(D_METHOD("macro_generate_wav"), &S2AudioGenerator::macro_generate_wav);

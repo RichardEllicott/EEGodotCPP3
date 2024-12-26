@@ -149,7 +149,7 @@ func _synth_add_note(key: float, volume: float = 1.0):
 
         
 func _synth_clear_note(key: float):
-    
+        
     if is_instance_valid(s1_audio_gen):
         s1_audio_gen.clear_note(key)
         

@@ -7,6 +7,9 @@ extends Control
 @export var s1_audio_gen: S1AudioGenerator
 @export var s2_audio_gen: S2AudioGenerator
 
+@export var poly_synth: PolySynth
+
+
 
 @export var key_count := 13
 @export var key_wrap := 36
@@ -26,7 +29,6 @@ var seq_timer: float = 0.0
 var notes: Array[int] = [0, 4, 5, 7]
 
 
-
 @export var key_size = Vector2(32, 128)
 
 @export var white_stylebox: StyleBox
@@ -38,8 +40,75 @@ var notes: Array[int] = [0, 4, 5, 7]
 
 @export var pressed_color = Color.ROYAL_BLUE
 
+
+# 0 1 2 3 4 5 6 7 8 9
+
+
+# 0 3 5 7
+
+# minus might give more
+# 11 2 4 6
+
+# add 1
+# 1 4 6 8
+
+# add 2
+# 2 5 7 9  # repeat 4 7
+
+# add 3
+# 3 6 8 10 # repeat 3 6 8
+
+# add 4
+# 4 7 9 11
+
+
+
+@export var joypad_scale = [0, 3, 5, 7]
+
 func _input(event):
     
+    
+    
+    if event is InputEventJoypadButton:
+        
+        if event.pressed:
+            if event.button_index == JOY_BUTTON_A:
+                _synth_add_note(joypad_scale[0])
+            if event.button_index == JOY_BUTTON_B:
+                _synth_add_note(joypad_scale[1])
+            if event.button_index == JOY_BUTTON_X:
+                _synth_add_note(joypad_scale[2])
+            if event.button_index == JOY_BUTTON_Y:
+                _synth_add_note(joypad_scale[3])
+                
+        else:
+            if event.button_index == JOY_BUTTON_A:
+                _synth_clear_note(joypad_scale[0])
+            if event.button_index == JOY_BUTTON_B:
+                _synth_clear_note(joypad_scale[1])
+            if event.button_index == JOY_BUTTON_X:
+                _synth_clear_note(joypad_scale[2])
+            if event.button_index == JOY_BUTTON_Y:
+                _synth_clear_note(joypad_scale[3])
+            
+            
+            
+            # Handle stick movement
+    elif event is InputEventJoypadMotion:
+        #if event.device == 0:  # Check the device ID
+        if event.axis == JOY_AXIS_LEFT_X:
+            print("Left stick X-axis moved: ", event.axis_value)
+        elif event.axis == JOY_AXIS_LEFT_Y:
+            print("Left stick Y-axis moved: ", event.axis_value)
+            
+        #if event.device == 0 and event.button_index == JOY_BUTTON_A:
+            #if event.pressed:
+                #print("Button A pressed!")
+            #else:
+                #print("Button A released!")    
+                
+                
+                
     
     if event is InputEventMouseMotion:
         
@@ -134,10 +203,12 @@ func clear_children():
 var pressed_keys = {}
 
 
+@export var root_note: float = -24;
+
+
 func _synth_add_note(key: float, volume: float = 1.0):
     
-    
-    
+    key += root_note
     
     if is_instance_valid(s1_audio_gen):
         s1_audio_gen.add_note(key, volume, 1.0)
@@ -146,10 +217,19 @@ func _synth_add_note(key: float, volume: float = 1.0):
     if is_instance_valid(s2_audio_gen): # new generator
         #print("synth add note")
         s2_audio_gen.add_note(key, volume)
-
+        
+    
+     # new
+    if is_instance_valid(poly_synth):
+        poly_synth.add_note(key, volume)
         
 func _synth_clear_note(key: float):
-        
+
+
+    key += root_note
+
+
+
     if is_instance_valid(s1_audio_gen):
         s1_audio_gen.clear_note(key)
         
@@ -158,7 +238,9 @@ func _synth_clear_note(key: float):
     if is_instance_valid(s2_audio_gen): # new generator
         s2_audio_gen.clear_note(key)
 
-
+    # new
+    if is_instance_valid(poly_synth):
+        poly_synth.clear_note(key)
 
     
 func _on_key_up(key: float):

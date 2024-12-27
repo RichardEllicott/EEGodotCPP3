@@ -61,26 +61,6 @@ struct Note {
 };
 #pragma endregion
 
-// RC-like envelope follower
-class AnalogPeakSimulator {
-   private:
-    float peak;       // Current peak value
-    float decayRate;  // How quickly the peak falls
-
-   public:
-    AnalogPeakSimulator(float initialPeak = 0.0f, float decay = 0.01f)
-        : peak(initialPeak), decayRate(decay) {}
-
-    float process(float input) {
-        // Simulate voltage stability (smooth peak-following)
-        if (input > peak) {
-            peak = input;  // Instant peak rise
-        } else {
-            peak -= decayRate * (peak - input);  // Smooth decay
-        }
-        return peak;
-    }
-};
 
 class S1WaveTable {
 };

@@ -1,10 +1,26 @@
-[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://dgyc52vfv2v00"]
+[gd_resource type="AudioBusLayout" load_steps=6 format=3 uid="uid://dgyc52vfv2v00"]
+
+[sub_resource type="AudioEffectHighPassFilter" id="AudioEffectHighPassFilter_bwcqw"]
+resource_name = "HighPassFilter"
+cutoff_hz = 20.0
 
 [sub_resource type="AudioEffectReverb" id="AudioEffectReverb_iei4j"]
 resource_name = "Reverb"
+room_size = 1.0
+damping = 0.32
 
-[sub_resource type="AudioEffectFilter" id="AudioEffectFilter_uc22t"]
-resource_name = "Filter"
+[sub_resource type="AudioEffectLimiter" id="AudioEffectLimiter_tgo60"]
+resource_name = "Limiter"
+threshold_db = -7.1
+soft_clip_db = 4.0
+soft_clip_ratio = 20.0
+
+[sub_resource type="AudioEffectDistortion" id="AudioEffectDistortion_ibk4h"]
+resource_name = "Distortion"
+pre_gain = 26.44
+
+[sub_resource type="AudioEffectSpectrumAnalyzer" id="AudioEffectSpectrumAnalyzer_wftgo"]
+resource_name = "SpectrumAnalyzer"
 
 [resource]
 bus/0/volume_db = -1.12151
@@ -12,9 +28,15 @@ bus/1/name = &"REVERB"
 bus/1/solo = false
 bus/1/mute = false
 bus/1/bypass_fx = false
-bus/1/volume_db = -15.795
+bus/1/volume_db = -1.51703
 bus/1/send = &"Master"
-bus/1/effect/0/effect = SubResource("AudioEffectReverb_iei4j")
-bus/1/effect/0/enabled = false
-bus/1/effect/1/effect = SubResource("AudioEffectFilter_uc22t")
+bus/1/effect/0/effect = SubResource("AudioEffectHighPassFilter_bwcqw")
+bus/1/effect/0/enabled = true
+bus/1/effect/1/effect = SubResource("AudioEffectReverb_iei4j")
 bus/1/effect/1/enabled = false
+bus/1/effect/2/effect = SubResource("AudioEffectLimiter_tgo60")
+bus/1/effect/2/enabled = true
+bus/1/effect/3/effect = SubResource("AudioEffectDistortion_ibk4h")
+bus/1/effect/3/enabled = false
+bus/1/effect/4/effect = SubResource("AudioEffectSpectrumAnalyzer_wftgo")
+bus/1/effect/4/enabled = true

@@ -55,30 +55,38 @@ static const double RAD_TO_DEG = 180.0 / Math_PI;  // multiply by this to conver
 // 	return sin(2 * Math_PI * carrier_freq * x + modulation_index * sin(2 * Math_PI * modulating_freq * x));
 // }
 
-// lerp template function
+
+
+// add my lerp function to global namespace
+#ifndef LERP
+#define LERP
 template <typename T>
-T my_lerp(T a, T b, T alpha) {
+T lerp(T a, T b, T alpha) {
     return a + (b - a) * alpha;
 }
+#endif
+
+
+
 
 static void print(String input)  // string (normal)
 {
-    godot::UtilityFunctions::print(input);
+    UtilityFunctions::print(input);
 }
 
 static void print(int input)  // int
 {
-    godot::String s = godot::String::num(input);
+    String s = String::num(input);
     print(s);
 }
 static void print(float input)  // float
 {
-    godot::String s = godot::String::num(input);
+    String s = String::num(input);
     print(s);
 }
 static void print(double input)  // double
 {
-    godot::String s = godot::String::num(input);
+    String s = String::num(input);
     print(s);
 }
 

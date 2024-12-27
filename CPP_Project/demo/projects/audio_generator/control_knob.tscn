@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://brxy6ohod2rcg"]
+
+[ext_resource type="Script" path="res://projects/audio_generator/control_knob.gd" id="1_he7rp"]
+
+[node name="attack" type="Control" node_paths=PackedStringArray("target_node")]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 3
+anchors_preset = 0
+focus_mode = 2
+script = ExtResource("1_he7rp")
+step_distance = null
+sensitivity = 0.75
+knob_back_color = Color(1, 0.975, 0.5, 1)
+target_node = NodePath("")
+target_float = "attack"

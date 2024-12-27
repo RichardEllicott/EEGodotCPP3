@@ -59,7 +59,7 @@ class S2AudioGenerator : public AudioStreamPlayer {
         poly_synth.clear_notes();
     }
 
-    S1PolySynth poly_synth = S1PolySynth();  // my new synth
+    _S1PolySynth poly_synth = _S1PolySynth();  // my new synth
 
    protected:
     static void _bind_methods() {

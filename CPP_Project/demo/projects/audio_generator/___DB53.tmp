@@ -1,0 +1,573 @@
+[gd_scene load_steps=10 format=4 uid="uid://bayqqxghuhpq1"]
+
+[ext_resource type="Texture2D" uid="uid://defktopg4ajan" path="res://textures/img.icons8.png" id="1_r6ky4"]
+[ext_resource type="Script" path="res://projects/audio_generator/poly_synth.gd" id="5_shhx0"]
+[ext_resource type="Script" path="res://projects/audio_generator/control_knob.gd" id="6_axeci"]
+[ext_resource type="Texture2D" uid="uid://b67v4u2h4vlx5" path="res://textures/control_knob2.png" id="6_uq4cp"]
+[ext_resource type="Script" path="res://projects/audio_generator/keyboard.gd" id="7_1qxrc"]
+[ext_resource type="StyleBox" uid="uid://yb3h1lk5rrtb" path="res://projects/audio_generator/white_key.stylebox" id="8_lirem"]
+[ext_resource type="StyleBox" uid="uid://cujb6x8toppuo" path="res://projects/audio_generator/black_key.stylebox" id="9_3n27f"]
+
+[sub_resource type="AudioStreamWAV" id="AudioStreamWAV_lxax0"]
+data = PackedByteArray("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")
+format = 1
+loop_mode = 1
+loop_end = 1603
+
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_5mllp"]
+buffer_length = 0.02
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VIROID TITLE" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TITLE" type="Label" parent="VIROID TITLE"]
+layout_mode = 0
+offset_top = -8.0
+offset_right = 420.0
+offset_bottom = 167.0
+scale = Vector2(0.25, 0.25)
+theme_override_font_sizes/font_size = 128
+text = "viROID"
+
+[node name="TITLE2" type="Label" parent="VIROID TITLE"]
+layout_mode = 0
+offset_left = 134.0
+offset_top = 6.0
+offset_right = 905.0
+offset_bottom = 94.0
+scale = Vector2(0.25, 0.25)
+theme_override_font_sizes/font_size = 64
+text = "synthesizer"
+vertical_alignment = 2
+
+[node name="TextureRect3" type="TextureRect" parent="VIROID TITLE"]
+layout_mode = 0
+offset_left = 106.0
+offset_top = 4.0
+offset_right = 131.0
+offset_bottom = 27.0
+texture = ExtResource("1_r6ky4")
+expand_mode = 1
+
+[node name="keyboard" type="Control" parent="." node_paths=PackedStringArray("poly_synth")]
+layout_mode = 3
+anchors_preset = 0
+offset_top = 30.0
+offset_bottom = 30.0
+script = ExtResource("7_1qxrc")
+poly_synth = NodePath("../PolySynth")
+key_count = 61
+key_wrap = 1000
+counter = 285707
+key_size = Vector2(16, 64)
+white_stylebox = ExtResource("8_lirem")
+black_stylebox = ExtResource("9_3n27f")
+
+[node name="0" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_right = 16.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="1" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 16.0
+offset_right = 32.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="2" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 32.0
+offset_right = 48.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="3" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 48.0
+offset_right = 64.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="4" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 64.0
+offset_right = 80.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="5" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 80.0
+offset_right = 96.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="6" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 96.0
+offset_right = 112.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="7" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 112.0
+offset_right = 128.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="8" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 128.0
+offset_right = 144.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="9" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 144.0
+offset_right = 160.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="10" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 160.0
+offset_right = 176.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="11" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 176.0
+offset_right = 192.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="12" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 192.0
+offset_right = 208.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="13" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 208.0
+offset_right = 224.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="14" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 224.0
+offset_right = 240.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="15" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 240.0
+offset_right = 256.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="16" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 256.0
+offset_right = 272.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="17" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 272.0
+offset_right = 288.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="18" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 288.0
+offset_right = 304.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="19" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 304.0
+offset_right = 320.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="20" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 320.0
+offset_right = 336.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="21" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 336.0
+offset_right = 352.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="22" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 352.0
+offset_right = 368.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="23" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 368.0
+offset_right = 384.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="24" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 384.0
+offset_right = 400.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="25" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 400.0
+offset_right = 416.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="26" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 416.0
+offset_right = 432.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="27" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 432.0
+offset_right = 448.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="28" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 448.0
+offset_right = 464.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="29" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 464.0
+offset_right = 480.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="30" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 480.0
+offset_right = 496.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="31" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 496.0
+offset_right = 512.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="32" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 512.0
+offset_right = 528.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="33" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 528.0
+offset_right = 544.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="34" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 544.0
+offset_right = 560.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="35" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 560.0
+offset_right = 576.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="36" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 576.0
+offset_right = 592.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="37" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 592.0
+offset_right = 608.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="38" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 608.0
+offset_right = 624.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="39" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 624.0
+offset_right = 640.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="40" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 640.0
+offset_right = 656.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="41" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 656.0
+offset_right = 672.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="42" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 672.0
+offset_right = 688.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="43" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 688.0
+offset_right = 704.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="44" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 704.0
+offset_right = 720.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="45" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 720.0
+offset_right = 736.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="46" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 736.0
+offset_right = 752.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="47" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 752.0
+offset_right = 768.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="48" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 768.0
+offset_right = 784.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="49" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 784.0
+offset_right = 800.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="50" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 800.0
+offset_right = 816.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="51" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 816.0
+offset_right = 832.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="52" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 832.0
+offset_right = 848.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="53" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 848.0
+offset_right = 864.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="54" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 864.0
+offset_right = 880.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="55" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 880.0
+offset_right = 896.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="56" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 896.0
+offset_right = 912.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="57" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 912.0
+offset_right = 928.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="58" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 928.0
+offset_right = 944.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("9_3n27f")
+
+[node name="59" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 944.0
+offset_right = 960.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="60" type="Panel" parent="keyboard"]
+layout_mode = 0
+offset_left = 960.0
+offset_right = 976.0
+offset_bottom = 64.0
+theme_override_styles/panel = ExtResource("8_lirem")
+
+[node name="VSlider" type="VSlider" parent="."]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 143.0
+offset_right = 131.0
+offset_bottom = 315.0
+
+[node name="HSlider" type="HSlider" parent="."]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 229.0
+offset_right = 319.0
+offset_bottom = 245.0
+
+[node name="CheckButton" type="CheckButton" parent="."]
+layout_mode = 0
+offset_left = 119.0
+offset_top = 269.0
+offset_right = 163.0
+offset_bottom = 293.0
+
+[node name="OptionButton" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 204.0
+offset_top = 256.0
+offset_right = 236.0
+offset_bottom = 276.0
+item_count = 3
+popup/item_0/text = "test1"
+popup/item_1/text = "test2"
+popup/item_1/id = 1
+popup/item_2/text = "test3"
+popup/item_2/id = 2
+
+[node name="Control" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 170.0
+offset_top = 303.0
+offset_right = 210.0
+offset_bottom = 343.0
+
+[node name="PolySynth" type="PolySynth" parent="."]
+timer = 1.4691
+render_length = 0.0363636
+sustain = 1.0
+release = 1.0
+waveform = 2
+audio_stream_wav = SubResource("AudioStreamWAV_lxax0")
+stream = SubResource("AudioStreamGenerator_5mllp")
+autoplay = true
+bus = &"REVERB"
+script = ExtResource("5_shhx0")
+
+[node name="control_knob" type="Control" parent="."]
+layout_mode = 1
+anchor_right = 0.153
+anchor_bottom = 0.233
+offset_left = 198.0
+offset_top = 142.0
+offset_right = 61.744
+offset_bottom = 31.016
+script = ExtResource("6_axeci")
+
+[node name="TextureRect" type="TextureRect" parent="control_knob"]
+layout_mode = 0
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+pivot_offset = Vector2(32, 32)
+texture = ExtResource("6_uq4cp")

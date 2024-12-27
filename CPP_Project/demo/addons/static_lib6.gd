@@ -990,9 +990,12 @@ static func _rad_to_deg(input):
 
 
 # like blender nodes
-func map_range(input, from_min, from_max, to_min, to_max):
-    
-    pass
+func map_range(in_min: float, in_max: float, out_min: float, out_max: float, value: float) -> float:
+    # Avoid division by zero if input range is 0
+    if in_max == in_min:
+        return out_min
+    # Map the value from the input range to the output range
+    return out_min + (value - in_min) * (out_max - out_min) / (in_max - in_min)
     
     
     

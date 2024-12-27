@@ -15,6 +15,61 @@ only usable from c++
 
 using namespace godot;
 
+
+
+// // RC-like envelope follower
+// class AnalogPeakSimulator {
+//    private:
+//     float peak;       // Current peak value
+//     float decayRate;  // How quickly the peak falls
+
+//    public:
+//     AnalogPeakSimulator(float initialPeak = 0.0f, float decay = 0.01f)
+//         : peak(initialPeak), decayRate(decay) {}
+
+//     float process(float input) {
+//         // Simulate voltage stability (smooth peak-following)
+//         if (input > peak) {
+//             peak = input;  // Instant peak rise
+//         } else {
+//             peak -= decayRate * (peak - input);  // Smooth decay
+//         }
+//         return peak;
+//     }
+// };
+
+
+class AnalogPeakSimulator {
+
+public:
+
+    float peak;         // Current peak value
+    float decay_rate;    // How quickly the peak falls
+    float sample_rate;  // Sample rate to adjust decay timing
+
+    // Constructor with initial peak, decay rate, and sample rate
+    AnalogPeakSimulator(float initialPeak = 0.0f, float decay = 0.01f, float sampleRate = 44100.0f)
+        : peak(initialPeak), decay_rate(decay), sample_rate(sampleRate) {}
+
+    // Process the input sample
+    float process(float input) {
+        // Adjust decay rate based on sample rate
+        float adjustedDecayRate = decay_rate / sample_rate;
+
+        // Simulate voltage stability (smooth peak-following)
+        if (input > peak) {
+            peak = input;  // Instant peak rise
+        } else {
+            peak -= adjustedDecayRate * (peak - input);  // Smooth decay
+        }
+        return peak;
+    }
+};
+
+
+
+
+
 // multi purpose filter
 class S1AudioFilter {
    private:

@@ -301,6 +301,12 @@ class PolySynth : public AudioStreamPlayer {
     void macro_generate_wav() {
         render_length = 1.0 / frequency * 8.0;  // 8 cycles
 
+        poly_synth.clear_notes();
+        poly_synth.add_note(0);
+
+
+        
+
         _generate_wav();
     }
 

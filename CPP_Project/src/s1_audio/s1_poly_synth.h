@@ -30,7 +30,6 @@ to keep complexity down, we have a seperate wrapper for Godot that will link thi
 
 using namespace godot;
 
-// add my lerp function to global namespace
 #ifndef LERP
 #define LERP
 template <typename T>
@@ -39,35 +38,28 @@ T lerp(T a, T b, T alpha) {
 }
 #endif
 
+#ifndef MIDI_PITCH_FUNCT
+#define MIDI_PITCH_FUNCT
+
+// https://inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies
+float note_to_frequency(int midi_note = 69) {
+    return 440.0f * pow(2.0f, (midi_note - 69) / 12.0f);
+}
+
+int frequency_to_note(float frequency) {
+    return round(69 + 12 * log2(frequency / 440.0f));
+}
+
+#endif
+
+
+
+
+
+
 // forward references
 class _S1PolySynth;
 class _S1PolySynthChannel;
-
-
-
-
-// struct S1PolySynthNote {
-//     float pitch;   // note value where 0 is middle C (440hz)
-//     float volume;  // Volume or intensity, typically in the range [0, 1]
-//     float duration;
-
-//     float start_time;
-
-//     // A D S R
-
-//     float attack = 1.0f;  // larger longer
-//     float decay = 0.0f;   // use small fractions for long decay
-
-//     float sustain = 1.0f;
-//     float release = 1.0f;
-
-//     bool playing_tail = false;  // when true we will do the tail
-
-//     // return pitch val to chromatic scale
-//     float get_frequency() {
-//         return 2.0f * pow(2.0f, pitch / 12.0f);
-//     }
-// };
 
 // copied
 class S2WaveHelper {
@@ -159,48 +151,14 @@ class S2WaveHelper {
     };
 };
 
-
 // one mono synth, that is used by S1Viroid2
 class _S1PolySynthChannel {
 #pragma region CONSTRUCTOR
 
    public:
-    // std::weak_ptr<S1PolySynth> synth;
-    // explicit S1PolySynthChannel(std::shared_ptr<S1PolySynth> parent_synth) : synth(parent_synth) {}
 
-    //    private:
-    //     Ref<S1PolySynth> _parent;
-    //     // warning this Ref pattern would only work in Godot itself
-    //     // would need to change toa weakref system, Gemeni had details
-
-    //    public:
-    //     S1PolySynthChannel(Ref<S1PolySynth> parent) {
-    //         _parent = parent;
-    //     }
-
-    // ~S1PolySynthChannel() {
-    // }
-    // #pragma endregion
-
-    _S1PolySynth* parent;
-    // _S1PolySynthChannel(_S1PolySynth* _parent) {
-    //     parent = _parent;
-    // }
-
-    //      _S1PolySynth& parent;
-    // _S1PolySynthChannel( _S1PolySynth& _parent) {
-    //     parent = _parent;
-    // }
-
-    // trying even putting refs here causes errors
-
-    // Ref<_S1PolySynth> parent; // no compile
-    // _S1PolySynth* parent; // no cpmpile either i think
-
-    // _S1PolySynth parent; // even this no compile! trying order of classes??
-
-    // _S1PolySynthChannel() {
-    // }
+    // const _S1PolySynth* parent;
+    
 
 #pragma endregion
 
@@ -208,8 +166,7 @@ class _S1PolySynthChannel {
     float _mix_rate = 44100;
 
     // S1AudioFilter filter = S1AudioFilter(220.0f, _mix_rate, S1AudioFilter::LOW);
-    LowPassFilter filter = LowPassFilter( _mix_rate, 220.0f, 0.5f);
-
+    LowPassFilter filter = LowPassFilter(_mix_rate, 220.0f, 0.5f);
 
    public:
     float frequency = 55.0;  // this is in hz, it should be set when we trigger the channel
@@ -227,7 +184,7 @@ class _S1PolySynthChannel {
 
     int envelope_stage = 0;  // 0 = holding, 1 = released, -1 to delete
 
-    bool filter_enabled = true;
+    bool filter_enabled = false;
 
     // Pulse Width Modulation
     float pulse_width_mod = 0.0f;
@@ -320,11 +277,17 @@ class _S1PolySynthChannel {
         filter.set_sample_rate(mix_rate);
     }
 
-    // set note where 0 = A4, 1 = A#4, 2 = B4, 3 = C5
-    // see:
-    // https://inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies
-    //
+ 
+
+
+    // set note where 0 = C4 (9 semitones below A4)
     void set_note(float note_value) {
+
+        // https://inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies
+        // (69) 440hz is A4
+        // (60) C4 is 9 semitones down
+
+        note_value -= 9; // move the A4 down to C4 .... (so 0 = C4)
         frequency = 440.0f * pow(2.0f, note_value / 12.0f);  // 0 is A4 (440 Hz), the A above middle C
     }
 
@@ -431,7 +394,7 @@ class _S1PolySynth {
 
     float filter_pitch_tracking = 1.0f;
 
-    bool filter_enabled = true;
+    bool filter_enabled = false;
     float filter_frequency = 440.0f;
     float filter_resonance = 1.0f;
 
@@ -475,6 +438,8 @@ class _S1PolySynth {
             print("S1PolySynth add_note: " + String::num(note));
 
             _S1PolySynthChannel channel = _S1PolySynthChannel();  // create a new channel
+            // _S1PolySynthChannel channel = _S1PolySynthChannel(this);  // create a new channel
+            // channel.parent = this; // I WANTED THIS TO BE ENFORCED IN CONSTRUCTOR
 
             // channel.parent = this;
 

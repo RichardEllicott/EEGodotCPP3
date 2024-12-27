@@ -14,7 +14,7 @@ format = 1
 loop_mode = 1
 loop_end = 1603
 
-[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_5mllp"]
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_hcsh7"]
 buffer_length = 0.02
 
 [node name="Control" type="Control"]
@@ -69,6 +69,7 @@ counter = 285707
 key_size = Vector2(16, 64)
 white_stylebox = ExtResource("8_lirem")
 black_stylebox = ExtResource("9_3n27f")
+root_note = -12.0
 
 [node name="0" type="Panel" parent="keyboard"]
 layout_mode = 0
@@ -539,17 +540,16 @@ offset_bottom = 343.0
 
 [node name="PolySynth" type="PolySynth" parent="."]
 volume_db = 0.0
-timer = 1.4691
+timer = 9.96197
 render_length = 0.0363636
 sustain = 1.0
 release = 1.0
-filter_frequency = 1000.0
+filter_frequency = 10000.0
 waveform = 2
 audio_stream_wav = SubResource("AudioStreamWAV_lxax0")
-stream = SubResource("AudioStreamGenerator_5mllp")
+stream = SubResource("AudioStreamGenerator_hcsh7")
 volume_db = 0.0
 autoplay = true
-bus = &"REVERB"
 script = ExtResource("5_shhx0")
 
 [node name="GridContainer" type="GridContainer" parent="."]

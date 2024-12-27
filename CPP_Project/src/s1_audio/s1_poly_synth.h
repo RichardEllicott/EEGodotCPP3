@@ -52,14 +52,19 @@ int frequency_to_note(float frequency) {
 
 #endif
 
+// forward references .. they don't fully solve the issue in c++ where i might need to seperate this file to h and cpp
+class S1PolySynth;
+class S1PolySynthChannel;
 
-
-
-
-
-// forward references
-class _S1PolySynth;
-class _S1PolySynthChannel;
+// a solution to our problems would be header files
+// class S1PolySynth {
+//     // ADSR
+//     float attack;
+//     float attack_level;
+//     float decay;
+//     float sustain;
+//     float release;
+// };
 
 // copied
 class S2WaveHelper {
@@ -152,13 +157,11 @@ class S2WaveHelper {
 };
 
 // one mono synth, that is used by S1Viroid2
-class _S1PolySynthChannel {
+class S1PolySynthChannel {
 #pragma region CONSTRUCTOR
 
    public:
-
-    // const _S1PolySynth* parent;
-    
+    S1PolySynth* parent;
 
 #pragma endregion
 
@@ -277,17 +280,13 @@ class _S1PolySynthChannel {
         filter.set_sample_rate(mix_rate);
     }
 
- 
-
-
     // set note where 0 = C4 (9 semitones below A4)
     void set_note(float note_value) {
-
         // https://inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies
         // (69) 440hz is A4
         // (60) C4 is 9 semitones down
 
-        note_value -= 9; // move the A4 down to C4 .... (so 0 = C4)
+        note_value -= 9;                                     // move the A4 down to C4 .... (so 0 = C4)
         frequency = 440.0f * pow(2.0f, note_value / 12.0f);  // 0 is A4 (440 Hz), the A above middle C
     }
 
@@ -300,7 +299,13 @@ class _S1PolySynthChannel {
             float decay_env = 1.0f - CLAMP(position / decay, 0.0f, 1.0f);  // decay envelope (decay from start of note)
             decay_env = lerp(attack_level, sustain, decay_env);
 
-            float attack_env = CLAMP(position / attack, 0.0f, 1.0f);  // attack envelope
+            // float attack = parent->attack;
+            // float& attack = parent->attack;  // Create a reference to parent's attack
+
+            // attack = parent->attack; // test explode??
+
+            float attack_env = CLAMP(position / attack, 0.0f, 1.0f);  // Use the reference
+
             decay_env = lerp(0.0f, attack_level, attack_env);
 
             return decay_env * attack_env;
@@ -378,7 +383,7 @@ class _S1PolySynthChannel {
 
 // tackling poly different to allow filters
 // using node to allow Ref<>
-class _S1PolySynth {
+class S1PolySynth {
    public:
     float mix_rate = 44100;  // in hz
 
@@ -411,9 +416,9 @@ class _S1PolySynth {
 
     // std::unordered_map<float, Note> notes;  // current notes
 
-    std::unordered_map<float, _S1PolySynthChannel> channels;  // current notes
+    std::unordered_map<float, S1PolySynthChannel> channels;  // current notes
 
-    int max_channels = 32;
+    int max_channels = 32;  // -1 infinite
 
     enum Mode {
         MONO,
@@ -424,7 +429,7 @@ class _S1PolySynth {
 
     Ref<RandomNumberGenerator> rng;
 
-    _S1PolySynth() {
+    S1PolySynth() {
         rng.instantiate();
         rng->set_seed(0);
     }
@@ -437,9 +442,9 @@ class _S1PolySynth {
         if (channels.find(note) == channels.end()) {
             print("S1PolySynth add_note: " + String::num(note));
 
-            _S1PolySynthChannel channel = _S1PolySynthChannel();  // create a new channel
+            S1PolySynthChannel channel = S1PolySynthChannel();  // create a new channel
             // _S1PolySynthChannel channel = _S1PolySynthChannel(this);  // create a new channel
-            // channel.parent = this; // I WANTED THIS TO BE ENFORCED IN CONSTRUCTOR
+            channel.parent = this;  // I WANTED THIS TO BE ENFORCED IN CONSTRUCTOR
 
             // channel.parent = this;
 
@@ -454,7 +459,7 @@ class _S1PolySynth {
         } else {
             // print("S1PolySynth FAILED add_note: " + godot::String::num(note));
 
-            _S1PolySynthChannel& channel = channels[note];  // channel already present
+            S1PolySynthChannel& channel = channels[note];  // channel already present
 
             if (channel.envelope_stage != 0) {  // released or finish, so retrigger
                 channel.set_note(note);
@@ -469,7 +474,7 @@ class _S1PolySynth {
             // print("S1PolySynth clear_note: " + godot::String::num(note));
             // print("channels.size: " + godot::String::num(channels.size()));
 
-            _S1PolySynthChannel& channel = channels[note];
+            S1PolySynthChannel& channel = channels[note];
 
             // channel.envelope_release_height = 1.0;
 

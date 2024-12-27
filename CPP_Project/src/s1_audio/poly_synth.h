@@ -77,7 +77,7 @@ class PolySynth : public AudioStreamPlayer {
         poly_synth.clear_notes();
     }
 
-    _S1PolySynth poly_synth = _S1PolySynth();  // my new synth
+    S1PolySynth poly_synth = S1PolySynth();  // my new synth
 
    protected:
     static void _bind_methods() {
@@ -299,13 +299,15 @@ class PolySynth : public AudioStreamPlayer {
     }
 
     void macro_generate_wav() {
-        render_length = 1.0 / frequency * 8.0;  // 8 cycles
+        // render_length = 1.0 / frequency * 8.0;  // 8 cycles
+
+        // render_length = 0.25;
 
         poly_synth.clear_notes();
         poly_synth.add_note(0);
 
 
-        
+
 
         _generate_wav();
     }

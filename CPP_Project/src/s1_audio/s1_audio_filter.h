@@ -15,8 +15,6 @@ only usable from c++
 
 using namespace godot;
 
-
-
 // // RC-like envelope follower
 // class AnalogPeakSimulator {
 //    private:
@@ -38,13 +36,10 @@ using namespace godot;
 //     }
 // };
 
-
 class AnalogPeakSimulator {
-
-public:
-
+   public:
     float peak;         // Current peak value
-    float decay_rate;    // How quickly the peak falls
+    float decay_rate;   // How quickly the peak falls
     float sample_rate;  // Sample rate to adjust decay timing
 
     // Constructor with initial peak, decay rate, and sample rate
@@ -66,9 +61,53 @@ public:
     }
 };
 
+// new from chat gp:
+// Improved Low-Pass Filter with Resonance
+//
+class LowPassFilter {
+   public:
+    LowPassFilter(float sampleRate, float cutoffFrequency, float resonance)
+        : _sampleRate(sampleRate), _cutoffFrequency(cutoffFrequency), _resonance(resonance) {
+        calculateCoefficients();
+    }
 
+    void set_cutoff(float cutoff) {
+        _cutoffFrequency = cutoff;
+        calculateCoefficients();
+    }
 
+    void set_sample_rate(float sampleRate) {
+        _sampleRate = sampleRate;
+        calculateCoefficients();
+    }
 
+    void set_resonance(float resonance) {
+        _resonance = resonance;
+    }
+
+    float process(float input) {
+        // State variable filter equations
+        float bandPass = _band + _cutoff * (input - _low - _resonance * _band);
+        float lowPass = _low + _cutoff * _band;
+
+        _band = bandPass;
+        _low = lowPass;
+
+        return _low;
+    }
+
+   private:
+    float _sampleRate;
+    float _cutoffFrequency;
+    float _resonance;
+    float _cutoff;
+    float _low = 0.0f;
+    float _band = 0.0f;
+
+    void calculateCoefficients() {
+        _cutoff = 2.0f * sinf(3.14159f * _cutoffFrequency / _sampleRate);
+    }
+};
 
 // multi purpose filter
 class S1AudioFilter {

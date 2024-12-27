@@ -2,14 +2,22 @@
 
 [ext_resource type="Script" path="res://projects/audio_generator/control_knob.gd" id="1_he7rp"]
 
-[node name="attack" type="Control" node_paths=PackedStringArray("target_node")]
-custom_minimum_size = Vector2(64, 64)
+[node name="attack" type="Control" node_paths=PackedStringArray("label")]
+custom_minimum_size = Vector2(64, 80)
 layout_mode = 3
 anchors_preset = 0
 focus_mode = 2
 script = ExtResource("1_he7rp")
 step_distance = null
 sensitivity = 0.75
+label = NodePath("Label")
 knob_back_color = Color(1, 0.975, 0.5, 1)
-target_node = NodePath("")
 target_float = "attack"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 61.0
+offset_right = 54.0
+offset_bottom = 84.0
+text = "0.67"

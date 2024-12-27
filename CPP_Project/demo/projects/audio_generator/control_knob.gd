@@ -49,10 +49,10 @@ var drag_start_position: Vector2 # save mouse pos when we drag (as confining the
 @export var arc_radius: float = 28.0 - 4.0
 @export var arc_width: float = 8.0
 
-@export var line_start_offset = 4.0
-@export var line_end_offset = 28.0
+@export var line_start_offset: float = 4.0
+@export var line_end_offset: float = 28.0
 
-@export var line_width = 4.0
+@export var line_width: float = 4.0
 
 
 @export var draw_offset: Vector2 = Vector2(32, 32)
@@ -105,6 +105,9 @@ func _ready():
     set_focus_mode(FOCUS_ALL)
     
     queue_redraw()
+    
+    if use_name_as_variable_name:
+        target_float = name
     
 
 
@@ -163,12 +166,8 @@ func _gui_input(event):
         
         
         var actual_position: float = get_actual_position()
-        print("set actual_position ", actual_position)
-        if is_instance_valid(target_node):
-            
-            if use_name_as_variable_name:
-                target_float = name
-            
+        #print("set actual_position ", actual_position)
+        if is_instance_valid(target_node):            
             target_node.set(target_float, actual_position)
         dial_changed.emit(actual_position) # signal to show new position
         

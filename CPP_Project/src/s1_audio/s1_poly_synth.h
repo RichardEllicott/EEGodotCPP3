@@ -39,6 +39,13 @@ T lerp(T a, T b, T alpha) {
 }
 #endif
 
+// forward references
+class _S1PolySynth;
+class _S1PolySynthChannel;
+
+
+
+
 // struct S1PolySynthNote {
 //     float pitch;   // note value where 0 is middle C (440hz)
 //     float volume;  // Volume or intensity, typically in the range [0, 1]
@@ -153,8 +160,6 @@ class S2WaveHelper {
 };
 
 
-
-
 // one mono synth, that is used by S1Viroid2
 class _S1PolySynthChannel {
 #pragma region CONSTRUCTOR
@@ -177,7 +182,7 @@ class _S1PolySynthChannel {
     // }
     // #pragma endregion
 
-    // _S1PolySynth* parent;
+    _S1PolySynth* parent;
     // _S1PolySynthChannel(_S1PolySynth* _parent) {
     //     parent = _parent;
     // }
@@ -194,15 +199,17 @@ class _S1PolySynthChannel {
 
     // _S1PolySynth parent; // even this no compile! trying order of classes??
 
-    _S1PolySynthChannel() {
-    }
+    // _S1PolySynthChannel() {
+    // }
 
 #pragma endregion
 
    private:
     float _mix_rate = 44100;
 
-    S1AudioFilter filter = S1AudioFilter(220.0f, _mix_rate, S1AudioFilter::LOW);
+    // S1AudioFilter filter = S1AudioFilter(220.0f, _mix_rate, S1AudioFilter::LOW);
+    LowPassFilter filter = LowPassFilter( _mix_rate, 220.0f, 0.5f);
+
 
    public:
     float frequency = 55.0;  // this is in hz, it should be set when we trigger the channel
@@ -405,8 +412,6 @@ class _S1PolySynthChannel {
         }
     }
 };
-
-
 
 // tackling poly different to allow filters
 // using node to allow Ref<>

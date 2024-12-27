@@ -554,10 +554,10 @@ script = ExtResource("5_shhx0")
 
 [node name="GridContainer" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 437.0
-offset_top = 197.0
-offset_right = 477.0
-offset_bottom = 237.0
+offset_left = 603.0
+offset_top = 153.0
+offset_right = 871.0
+offset_bottom = 317.0
 columns = 4
 
 [node name="attack" parent="GridContainer" node_paths=PackedStringArray("target_node") instance=ExtResource("6_fa2w0")]
@@ -567,28 +567,36 @@ target_node = NodePath("../../PolySynth")
 [node name="decay" parent="GridContainer" node_paths=PackedStringArray("target_node") instance=ExtResource("6_fa2w0")]
 layout_mode = 2
 target_node = NodePath("../../PolySynth")
+target_float = "decay"
 
 [node name="sustain" parent="GridContainer" node_paths=PackedStringArray("target_node") instance=ExtResource("6_fa2w0")]
 layout_mode = 2
 target_node = NodePath("../../PolySynth")
+target_float = "sustain"
 
 [node name="release" parent="GridContainer" node_paths=PackedStringArray("target_node") instance=ExtResource("6_fa2w0")]
 layout_mode = 2
 range_max = 4.0
 target_node = NodePath("../../PolySynth")
+target_float = "release"
 
 [node name="filter_frequency" parent="GridContainer" node_paths=PackedStringArray("target_node") instance=ExtResource("6_fa2w0")]
 layout_mode = 2
 range_max = 1000.0
 target_node = NodePath("../../PolySynth")
+target_float = "filter_frequency"
 
 [node name="filter_resonance" parent="GridContainer" node_paths=PackedStringArray("target_node") instance=ExtResource("6_fa2w0")]
 layout_mode = 2
+range_min = 0.5
+range_max = 4.0
 target_node = NodePath("../../PolySynth")
+target_float = "filter_resonance"
 
 [node name="pulse_width" parent="GridContainer" node_paths=PackedStringArray("target_node") instance=ExtResource("6_fa2w0")]
 layout_mode = 2
 target_node = NodePath("../../PolySynth")
+target_float = "pulse_width"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 0

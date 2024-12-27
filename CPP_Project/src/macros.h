@@ -44,7 +44,9 @@ private:                                                                   \
 	TYPE NAME;
 
 
-
+// the same as the single file template, but allowing setting a default value (cleaner)
+// we can use this alone with:
+// CREATE_VAR_BINDINGS and CREATE_CLASS_BINDINGS
 #define DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(TYPE, NAME, DEFAULT) \
 public:                                                                    \
 	TYPE get_##NAME() { return NAME; };                                    \

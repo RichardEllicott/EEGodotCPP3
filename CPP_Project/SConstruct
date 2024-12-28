@@ -7,7 +7,7 @@ env = SConscript("godot-cpp/SConstruct")
 
 ## MY EXTRAS
 ## adding muparser, expression parsing can be used for waves
-muparser_dir = 'mylib/muparser/'
+muparser_dir = 'external/muparser/'
 env.Append(CPPPATH=[muparser_dir])  # Include path for headers
 env.Append(SOURCES=[
     muparser_dir + '/src/muParser.cpp',

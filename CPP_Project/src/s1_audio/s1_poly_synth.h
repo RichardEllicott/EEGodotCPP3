@@ -26,6 +26,11 @@ to keep complexity down, we have a seperate wrapper for Godot that will link thi
 // #include <stdlib.h>
 #include <unordered_map>  // strange i have to add this?
 
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+
 // #include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer
 
 using namespace godot;
@@ -203,12 +208,10 @@ class S1PolySynthChannel {
     float phase_modulation = 0.0f;
     float phase_modulation_frequency = 1.0f;
 
-
     float frequency_modulation = 0.0f;
     float frequency_modulation_frequency = 1.0f;
 
     float pitch_bend = 1.0f;
-
 
     void set_filter_frequency(float filter_frequency) {
         filter.set_cutoff(filter_frequency);
@@ -457,7 +460,6 @@ class S1PolySynth {
     float phase_modulation = 0.0f;
     float phase_modulation_frequency = 1.0f;
 
-
     float pitch_bend = 1.0f;
 
     // copy all the vars to the channels
@@ -526,14 +528,44 @@ class S1PolySynth {
         rng->set_seed(0);
     }
 
+    //     void split_godot_string(const String &command) {
+    //     Array tokens = command.split(" "); // Split by spaces
 
-    String send_command(String){
+    //     for (int i = 0; i < tokens.size(); ++i) {
+    //         String token = tokens[i];
+    //         godot::UtilityFunctions::print(token); // Prints each token
+    //     }
+    // }
 
+    // REFLECTABLE(
+    //     else if (name == "attack") my_var = std::stoi(value);
+    //     else if (name == "decay") another_var = std::stof(value);
+    // )
+
+
+
+    String send_command(String command_string) {
+        // split the string
+        auto split = command_string.split(" ", false);
+        while (split.size() < 3)  // ensure length is 3
+            split.append("");
+
+        auto command = split[0];
+        auto par1 = split[1];
+        auto par2 = split[2];
+
+        if (command == "test") {
+            return "testing 123...";
+
+
+        } else if (command == "set") {
+            
+
+        } else if (command == "set") {
+        }
 
         return "test";
     }
-
-
 
     // the release enevelope pattern looks a bit complicated
     void add_note(float note, float volume = 1.0f) {
@@ -547,7 +579,7 @@ class S1PolySynth {
             }
 
             S1PolySynthChannel channel = S1PolySynthChannel();  // create a new channel
-            channel.parent = this;  // I WANTED THIS TO BE ENFORCED IN CONSTRUCTOR
+            channel.parent = this;                              // I WANTED THIS TO BE ENFORCED IN CONSTRUCTOR
 
             channel.set_note(note);
             channel.start_time = timer;
@@ -579,9 +611,9 @@ class S1PolySynth {
 
             if (channel.envelope_stage == 0) {  // if we have a playing note
 
-                channel.envelope_release_height = channel._get_envelope1(); // save the height of the envelop so release tails matches
-                channel.envelope_stage = 1; // set the enevelope stage to 1 (release)
-                channel.release_time = timer; // save the release time
+                channel.envelope_release_height = channel._get_envelope1();  // save the height of the envelop so release tails matches
+                channel.envelope_stage = 1;                                  // set the enevelope stage to 1 (release)
+                channel.release_time = timer;                                // save the release time
             }
 
             // channels.erase(note);  // no exception is called
@@ -625,11 +657,10 @@ class S1PolySynth {
             // this allows iterating and chanding the target, note the auto& refs
             for (auto& pair : channels) {
                 auto& channel = pair.second;  // Use reference to modify the original object
-                channel.timer = timer;  // Sync the timer
+                channel.timer = timer;        // Sync the timer
                 signal += channel._get_signal() * add_level;
             }
 #endif
-
 
 #pragma region SUM_AND_PRUNE
 #ifdef ROUTE2

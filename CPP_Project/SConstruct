@@ -1,13 +1,31 @@
 #!/usr/bin/env python
 import os
 import sys
+from subprocess import call
+
+##
+## AUTOMATICLY DOWNLOAD AND COMPILE GODOT 4.3 BINDINGS
+## https://github.com/godotengine/godot-cpp/tree/4.3
+##
+godot_cpp_dir = "godot-cpp/"
+if not os.path.exists(godot_cpp_dir):
+    print("Downloading godot-cpp 4.3 branch...")
+    call(["git", "clone", "-b", "4.3", "--single-branch", "https://github.com/godotengine/godot-cpp.git", godot_cpp_dir])
+    print("Building godot-cpp...")
+    call(["scons", "-C", godot_cpp_dir, "platform=linux", "generate_bindings=yes"])
+
+
 
 env = SConscript("godot-cpp/SConstruct")
 
 
-## MY EXTRAS
-## adding muparser, expression parsing can be used for waves
+## AUTOMATICLY DOWNLOAD AND COMPILE EXTRAS
+## download muparser, warning depending on muparser when it can change could be a bit dangerous
+## maybe lock this to a version at some point (8/12/2024)
 muparser_dir = 'external/muparser/'
+if not os.path.exists(muparser_dir):
+    print("muParser not found, downloading...")
+    call(["git", "clone", "https://github.com/beltoforion/muparser.git", muparser_dir])
 env.Append(CPPPATH=[muparser_dir])  # Include path for headers
 env.Append(SOURCES=[
     muparser_dir + '/src/muParser.cpp',
@@ -18,6 +36,8 @@ env.Append(SOURCES=[
     muparser_dir + '/src/muParserTokenReader.cpp',
 ])
 ## endregion
+
+
 
 
 # For reference:

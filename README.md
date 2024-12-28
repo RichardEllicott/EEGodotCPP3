@@ -8,17 +8,12 @@
 ```
 pip install scons
 ```
-- get the [c++ bindings](https://github.com/godotengine/godot-cpp/tree/4.3) and put them in the root directory
-- open the terminal and navigate to the project's root directory
-- compile the c++ bindings by running the command scons in the directory
+simply navigate to the directory and run scons:
 ```
-cd .\godot-cpp\
 scons
 ```
-- if you get any compile problems refer to the Godot docs, you may need to install a compiler
-- setup an ide like [vs.code](https://code.visualstudio.com/)
-- to compile the project run scons in the root directory, check out the demo folder for a Godot project
-- source code to edit is in the src subfolder
-- the file register_types.cpp is set up to link all the modules to compile
-- i have custom macros in macros.h to reduce code for adding @export properties
-- two templates demonstrate basic functionality, the second template is a single file template bypassing the normal two file convention... it may be useful for beginners and fast code editing
+my scons file will automaticly download and godot-cpp, this can take some time so if you already have it you could copy it over before running scons
+https://github.com/godotengine/godot-cpp/tree/4.3
+
+
+i reccomend using [vs.code](https://code.visualstudio.com/) and installing microsoft's C++ tools, my ".clang-format" file enforces oldschool bracket style for the automayic formatting

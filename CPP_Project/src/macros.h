@@ -99,4 +99,30 @@ private:                                                                   \
 
 
 
+
+#define REFLECTABLE(...) \
+    void set(const std::string &name, const std::string &value) { \
+        if (false) {} \
+        __VA_ARGS__ \
+        else { std::cerr << "Unknown variable: " << name << std::endl; } \
+    }
+
+
+/*
+chatgp suggested, reflection simulation
+
+example 
+
+REFLECTABLE(
+        else if (name == "my_var") my_var = std::stoi(value);
+        else if (name == "another_var") another_var = std::stof(value);
+    )
+
+
+*/
+
+
+
+
+
 #endif

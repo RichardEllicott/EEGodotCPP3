@@ -14,3 +14,13 @@ launch godot:
 using scoop now
 
 scoop install gcc
+
+
+
+
+i have forgot i had to make some bindings so vs.code could see the objects
+i think:
+
+cd godot-cpp
+scons generate_bindings=yes  
+

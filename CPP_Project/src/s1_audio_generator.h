@@ -15,8 +15,6 @@ make an AudioStreamGenerator for this to work
 
 #include <s1_audio/s1_audio_filter.h>
 
-
-
 // #include <godot_cpp/classes/sprite2d.hpp>
 #include <godot_cpp/classes/audio_stream.hpp>                     // AudioStreamPlayer
 #include <godot_cpp/classes/audio_stream_generator.hpp>           // AudioStreamGenerator
@@ -61,10 +59,8 @@ struct Note {
 };
 #pragma endregion
 
-
 class S1WaveTable {
 };
-
 
 class S1ViroidSynth {
    public:
@@ -537,8 +533,6 @@ class S1AudioGenerator : public AudioStreamPlayer {
         buffer.resize(frames_available);  // set it's size in one (faster than appending)
 
         for (int i = 0; i < frames_available; i++) {
-            
-
             float signal = _get_signal();
 
             timer += frequency / mix_rate;

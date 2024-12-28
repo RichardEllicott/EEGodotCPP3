@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://cum8wqoxslotf"]
+
+[ext_resource type="Script" path="res://projects/audio_generator/ui_controls/spin_box_set_var.gd" id="1_2xdx4"]
+
+[node name="waveform" type="SpinBox"]
+offset_left = 97.0
+offset_top = 381.0
+offset_right = 180.063
+offset_bottom = 412.0
+max_value = 10.0
+rounded = true
+update_on_text_changed = true
+script = ExtResource("1_2xdx4")
+property_name = "waveform"

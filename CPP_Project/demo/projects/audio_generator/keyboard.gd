@@ -1,19 +1,32 @@
 """
+
+creates a keyboard but works different from buttons as we can hold the mouse and slide across the keys
+
+works as plain Control, but also now works with a HBoxContainer which might make UI layout easier
+
+
+
 """
 @tool
 extends Control
 
-
-@export var s1_audio_gen: S1AudioGenerator
-@export var s2_audio_gen: S2AudioGenerator
-
 @export var poly_synth: PolySynth
 
+@export_group("keyboard setup")
 
 
-@export var key_count := 13
-@export var key_wrap := 36
+@export var key_count: int = 61
+#@export var key_wrap: int = 36
 
+@export var start_key: int = 0
+
+
+@export var key_size = Vector2(16, 64)
+
+@export var white_stylebox: StyleBox
+@export var black_stylebox: StyleBox
+
+@export_group("")
 
 
 # Called when the node enters the scene tree for the first time.
@@ -26,13 +39,10 @@ var seq_timer: float = 0.0
 @export var seq_delay: float = 1.0
 @export var counter: int = 0
 
-var notes: Array[int] = [0, 4, 5, 7]
+#var notes: Array[int] = [0, 4, 5, 7]
 
 
-@export var key_size = Vector2(32, 128)
 
-@export var white_stylebox: StyleBox
-@export var black_stylebox: StyleBox
 
 @export var play_test_sequence := false
 
@@ -41,228 +51,20 @@ var notes: Array[int] = [0, 4, 5, 7]
 @export var pressed_color = Color.ROYAL_BLUE
 
 
-# 0 1 2 3 4 5 6 7 8 9
-
-
-# 0 3 5 7
-
-# minus might give more
-# 11 2 4 6
-
-# add 1
-# 1 4 6 8
-
-# add 2
-# 2 5 7 9  # repeat 4 7
-
-# add 3
-# 3 6 8 10 # repeat 3 6 8
-
-# add 4
-# 4 7 9 11
-
-
-
-@export var joypad_scale = [0, 3, 5, 7]
-
-func _input(event):
-    
-    
-    
-    if event is InputEventJoypadButton:
-        
-        if event.pressed:
-            if event.button_index == JOY_BUTTON_A:
-                _synth_add_note(joypad_scale[0])
-            if event.button_index == JOY_BUTTON_B:
-                _synth_add_note(joypad_scale[1])
-            if event.button_index == JOY_BUTTON_X:
-                _synth_add_note(joypad_scale[2])
-            if event.button_index == JOY_BUTTON_Y:
-                _synth_add_note(joypad_scale[3])
-                
-        else:
-            if event.button_index == JOY_BUTTON_A:
-                _synth_clear_note(joypad_scale[0])
-            if event.button_index == JOY_BUTTON_B:
-                _synth_clear_note(joypad_scale[1])
-            if event.button_index == JOY_BUTTON_X:
-                _synth_clear_note(joypad_scale[2])
-            if event.button_index == JOY_BUTTON_Y:
-                _synth_clear_note(joypad_scale[3])
-            
-            
-            
-            # Handle stick movement
-    elif event is InputEventJoypadMotion:
-        #if event.device == 0:  # Check the device ID
-        if event.axis == JOY_AXIS_LEFT_X:
-            print("Left stick X-axis moved: ", event.axis_value)
-        elif event.axis == JOY_AXIS_LEFT_Y:
-            print("Left stick Y-axis moved: ", event.axis_value)
-            
-        #if event.device == 0 and event.button_index == JOY_BUTTON_A:
-            #if event.pressed:
-                #print("Button A pressed!")
-            #else:
-                #print("Button A released!")    
-                
-                
-                
-    
-    if event is InputEventMouseMotion:
-        
-        
-        pass
-    
-    if event is InputEventKey:
-        #if event.keycode == KEY_A:
-            #print("T was pressed")
-        
-        for i in keyboard_keys.size():
-            var key = keyboard_keys[i]
-            if event.keycode == key:
-                #print("key %s was pressed!" % i)
-                
-                if event.pressed:
-                    _on_key_down(i)
-                else:
-                    _on_key_up(i)
-    
-    if event is InputEventMouseButton:
-        match event.button_index:
-            0:
-                if event.pressed():
-                    pass
-                else:
-                    pass
-                    
-                    
-                    
-
-
-func _process(delta: float) -> void:
-    
-    if not is_instance_valid(s1_audio_gen): return
-
-    
-    for control in hovering:
-        var id: int = hovering[control]
-        
-        if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-            
-               
-                _synth_add_note(id)
-                control.modulate = pressed_color
-        else:
-            #_synth_clear_note(id)
-            control.modulate = Color.WHITE
-            
-            
-            
-            
-
-func _physics_process(delta: float) -> void:
-    
-    
-    if not is_instance_valid(s1_audio_gen): return
-        
-        
-    if mouse0_down:
-        
-        pass
-        
-    seq_timer += delta
-    if seq_timer >= seq_delay:
-        seq_timer -= seq_delay
-        
-        s1_audio_gen.clear_note(notes[counter % notes.size()])
-        
-        counter += 1
-        
-        if play_test_sequence:     
-            s1_audio_gen.add_note(notes[counter % notes.size()], 1.0, 1.0)
-        
-        
-        
-        
-    
-        
-        
-        pass
-    pass
-    
-    
-func clear_children():
-    
-    for child in get_children():
-        remove_child(child)
-
-
+@export var octave: int = 0 # shift with the 
 
 var pressed_keys = {}
 
 
-@export var root_note: float = -24;
-
-
-func _synth_add_note(key: float, volume: float = 1.0):
-    
-    key += root_note
-    
-    if is_instance_valid(s1_audio_gen):
-        s1_audio_gen.add_note(key, volume, 1.0)
-        
-        
-    if is_instance_valid(s2_audio_gen): # new generator
-        #print("synth add note")
-        s2_audio_gen.add_note(key, volume)
-        
-    
-     # new
-    if is_instance_valid(poly_synth):
-        poly_synth.add_note(key, volume)
-        
-func _synth_clear_note(key: float):
-
-
-    key += root_note
+@export var root_note: float = -36;
 
 
 
-    if is_instance_valid(s1_audio_gen):
-        s1_audio_gen.clear_note(key)
-        
-        
+@export_group("keyboard and joystick")
 
-    if is_instance_valid(s2_audio_gen): # new generator
-        s2_audio_gen.clear_note(key)
-
-    # new
-    if is_instance_valid(poly_synth):
-        poly_synth.clear_note(key)
-
-    
-func _on_key_up(key: float):
-    
-    if int(key) in key_to_control:
-        var control =  key_to_control[int(key)]
-        control.modulate = Color.WHITE
-        
-    _synth_clear_note(key)
-        
-
-func _on_key_down(key: float):
-    
-    if int(key) in key_to_control:
-        var control =  key_to_control[int(key)]
-        control.modulate = pressed_color
-
-    _synth_add_note(key)
-        
 
 # like ableton live
-var keyboard_keys = [
+var keyboard_keys: Array[int] = [
     KEY_A, # C
     KEY_W, # C#
     KEY_S, # D
@@ -280,10 +82,13 @@ var keyboard_keys = [
     KEY_L, # D
 ]
 
+var octave_up_key = KEY_X
+var octave_down_key = KEY_Z
             
 var mouse0_down = false    
-        
-const key_pattern := [
+
+# standard key pattern of whites and blacks starting from C (1 is white, 0 black)
+const key_pattern: Array[int] = [
     0, # C
     1, # C#
     0, # D
@@ -297,7 +102,136 @@ const key_pattern := [
     1, # A#
     0 # B
     ]
+
+@export var joypad_scale = [0, 3, 5, 7]
+@export var joypad_keys = [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_X, JOY_BUTTON_Y]
             
+            
+@export_group("")
+
+
+func _input(event):
+    
+    if event is InputEventKey:
+        
+        for i in keyboard_keys.size(): # actual computer keyboard as keys
+            var key = keyboard_keys[i]
+            if event.keycode == key:                
+                if event.pressed:
+                    _on_key_down(i)
+                else:
+                    _on_key_up(i)
+
+        if event.pressed:
+            if event.keycode == octave_up_key:
+                octave += 1
+            elif event.keycode == octave_down_key:
+                octave -= 1
+    
+    elif event is InputEventJoypadButton: # joypad to play notes! funny
+        for i in joypad_keys.size(): # check all joypad keys
+            if event.button_index == joypad_keys[i]: # key match
+                if event.pressed:
+                     _synth_add_note(joypad_scale[i]) # add note
+                else:
+                    _synth_clear_note(joypad_scale[i]) # clear note
+        
+            
+    # Handle stick movement
+    elif event is InputEventJoypadMotion:
+        #if event.device == 0:  # Check the device ID
+        if event.axis == JOY_AXIS_LEFT_X:
+            print("Left stick X-axis moved: ", event.axis_value)
+        elif event.axis == JOY_AXIS_LEFT_Y:
+            print("Left stick Y-axis moved: ", event.axis_value)
+            
+
+                
+    elif event is InputEventMouseMotion:
+        pass
+        
+
+    
+    elif event is InputEventMouseButton:
+        match event.button_index:
+            0:
+                if event.pressed():
+                    pass
+                else:
+                    pass
+                    
+                    
+                    
+
+
+func _process(delta: float) -> void:
+    
+    for control in hovering:
+        var id: int = hovering[control]
+                
+        if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+                        
+            _synth_add_note(id)
+            control.modulate = pressed_color
+        else:
+            _synth_clear_note(id)
+            control.modulate = Color.WHITE
+            
+            
+            
+            
+
+func _physics_process(delta: float) -> void:
+    
+
+    pass
+    
+    
+func clear_children():
+    
+    for child in get_children():
+        remove_child(child)
+
+
+
+
+## finally call the synth
+func _synth_add_note(key: float, volume: float = 1.0):
+    
+    key += root_note
+        
+    if is_instance_valid(poly_synth):
+        poly_synth.add_note(key, volume)
+        
+func _synth_clear_note(key: float):
+
+    key += root_note
+
+    if is_instance_valid(poly_synth):
+        poly_synth.clear_note(key)
+
+    
+func _on_key_up(key: float):
+    
+    key += octave * 12.0
+    
+    if int(key) in key_to_control:
+        var control =  key_to_control[int(key)]
+        control.modulate = Color.WHITE
+        
+    _synth_clear_note(key)
+        
+
+func _on_key_down(key: float):
+    
+    key += octave * 12.0
+    
+    if int(key) in key_to_control:
+        var control =  key_to_control[int(key)]
+        control.modulate = pressed_color
+
+    _synth_add_note(key)
+        
             
 
 
@@ -324,19 +258,21 @@ func macro_test_key7():
 var hovering = {}
 
 func _on_mouse_entered(id: int, control: Control) -> void:
-    #print("_on_mouse_entered() ", ref)
+    #print("_on_mouse_entered() ", id)
     hovering[control] = id
     control.modulate = hover_color
 
 
 func _on_mouse_exited(id: int, control: Control) -> void:
-    #print("_on_mouse_exited() ", ref)
+    #print("_on_mouse_exited() ", id)
     
     if control in hovering:
         control.modulate = Color.WHITE
         hovering.erase(control)
         
-        #_synth_clear_note(id)
+        
+    _synth_clear_note(id)
+        
 
 
 #var controls = []
@@ -347,37 +283,31 @@ var key_to_control = {}
 
 func _setup():
     
-    #controls = []
     control_to_note = {}
     key_to_control = {}
-    
-    
     
     clear_children()
     
     for i in key_count:
         
-        var offset = Vector2(key_size.x, 0.0)
+        var offset = Vector2(key_size.x, 0.0) # position of key goes right to left
         
-        #StaticL
-        #var key: Button = StaticLib6.get_or_create_child(self, "%s" % i, Button)
-        #var node: ColorRect = StaticLib6.get_or_create_child(self, "%s" % i, ColorRect)
+        # i am using a Panel, it uses a stylebox which is nice and detects hovering
+        # the button click behaviour doesn't work for glisendo
+        # the TextureRect/ColorRect doesn't have a stylebox but could also work
         var node: Panel = StaticLib6.get_or_create_child(self, "%s" % i, Panel)
-
-        #key.size = key_size
-        node.size = key_size
-        
-        #key.position = offset * i
+        node.size = key_size        
         node.position = offset * i
         
+        node.custom_minimum_size = key_size # stop a HBoxContainer squishing me (if we use a HBoxContainer)
         
-        if i > key_wrap:
-            node.position.x -= key_size.x * key_wrap
-            node.position.y += key_size.y
-
+        #if i > key_wrap:
+            #node.position.x -= key_size.x * key_wrap
+            #node.position.y += key_size.y
         
-        if key_pattern[i % 12] == 0:
-            #node.add_theme_stylebox_override("normal", white_stylebox)
+        var ivory_ref = (i + start_key) + 24
+        
+        if key_pattern[ivory_ref % 12] == 0:
             node.add_theme_stylebox_override("panel", white_stylebox)
 
             #tex_rect.color = Color.WHITE

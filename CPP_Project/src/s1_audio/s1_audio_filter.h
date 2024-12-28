@@ -194,8 +194,13 @@ class S1AudioFilter {
                 break;
             case Mode::HIGH:
                 // High-pass filter
-                _high_output = _alpha * (_prev_output + input - _prev_input) - _resonance * _prev_output;
-                output = _high_output;
+                // _high_output = _alpha * (_prev_output + input - _prev_input) - _resonance * _prev_output;
+                // output = _high_output;
+
+                _low_output = _prev_output + _alpha * (input - _prev_output);  // Update low-pass
+                _high_output = input - _low_output;                            // Subtract low-pass from input
+                output = _high_output - _resonance * _high_output;             // Add resonance effect
+
                 break;
             case Mode::BAND:
                 // Band-pass filter

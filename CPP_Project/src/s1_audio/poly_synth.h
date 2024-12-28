@@ -38,7 +38,8 @@ class PolySynth : public AudioStreamPlayer {
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mix_rate, 44100)           // samples per a second (hz)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, frequency, 220)          // frequency of tone generator (hz) (default A3)
-    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume_db, -12)          // volume db
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume, 1.0f)          // volume db
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume_db, 0.0)          // volume db
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, timer, 0.0)              // timer for the signal position
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, render_length, 1.0)      // for rendering to wave example
     DECLARE_PROPERTY_SINGLE_FILE(Ref<AudioStreamWAV>, audio_stream_wav)  // read and write to this wav file
@@ -52,9 +53,16 @@ class PolySynth : public AudioStreamPlayer {
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pulse_width, 0.5f)
 
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pwm, 0.0f)
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pwm_frequency, 1.0f)
+
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, phase_modulation, 0.0f)
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, phase_modulation_frequency, 0.0f)
+
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(bool, filter_enabled, true)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, filter_frequency, 440.0f)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, filter_resonance, 1.0f)
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, filter_tracking, 0.0f)
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, waveform, 0)
 
@@ -87,6 +95,7 @@ class PolySynth : public AudioStreamPlayer {
 
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, mix_rate);
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, frequency);
+        CREATE_VAR_BINDINGS(PolySynth, FLOAT, volume);
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, volume_db);
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, timer);
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, render_length)
@@ -99,10 +108,18 @@ class PolySynth : public AudioStreamPlayer {
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, release)
 
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, pulse_width)
+        CREATE_VAR_BINDINGS(PolySynth, FLOAT, pwm)
+        CREATE_VAR_BINDINGS(PolySynth, FLOAT, pwm_frequency)
+
+        CREATE_VAR_BINDINGS(PolySynth, FLOAT, phase_modulation)
+        CREATE_VAR_BINDINGS(PolySynth, FLOAT, phase_modulation_frequency)
+
+
 
         CREATE_VAR_BINDINGS(PolySynth, BOOL, filter_enabled)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, filter_frequency)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, filter_resonance)
+        CREATE_VAR_BINDINGS(PolySynth, FLOAT, filter_tracking)
 
         CREATE_VAR_BINDINGS(PolySynth, INT, waveform)
 
@@ -133,14 +150,29 @@ class PolySynth : public AudioStreamPlayer {
 
    public:
     PolySynth() {
+        _update_sample_rate();
         start_audio_thread();
     };
     ~PolySynth() {
         stop_audio_thread();
     };
 
+    // set the mix_rate to the same as the AudioStreamGenerator
+    // i only do this once, so careful of changing the sample rate
+    void _update_sample_rate() {
+        // get sample rate
+        Ref<AudioStream> stream = get_stream();
+        if (stream.is_valid()) {
+            Ref<AudioStreamGenerator> stream_generator = stream;  // attempt cast
+            if (stream_generator.is_valid())
+                mix_rate = stream_generator->get_mix_rate();
+        }
 
-    // we might try and use a reference again later
+        // high_pass_filter.set_sample_rate(mix_rate);
+    }
+
+    // we might try and use a reference again later/
+    // but it's not too bad doing this as we do it once per a buffer not each frame
     void _sync_vars() {
         // SYNC VARS
         poly_synth.attack = attack;
@@ -151,15 +183,38 @@ class PolySynth : public AudioStreamPlayer {
         poly_synth.pulse_width = pulse_width;
         poly_synth.waveform = waveform;
 
+        poly_synth.pwm = pwm;
+        poly_synth.pwm_frequency = pwm_frequency;
+
+        poly_synth.phase_modulation = phase_modulation;
+        poly_synth.phase_modulation_frequency = phase_modulation_frequency;
+
         poly_synth.filter_enabled = filter_enabled;
         poly_synth.filter_frequency = filter_frequency;
         poly_synth.filter_resonance = filter_resonance;
+        poly_synth.filter_tracking = filter_tracking;
+
+        poly_synth.voume_db = volume_db;
+        poly_synth.volume = volume;
+
+    
     }
+
+    // TODO
+    std::vector<float> history_buffer;         // Store the past frames (values)
+    int history_buffer_size = mix_rate * 4.0;  // 4 seconds
+    int history_buffer_position = 0;
+
+
 
     // get an audio buffer array, stero signal ready to push
     // THIS IS THE MAIN FUNCTION NOW, so using arrays instead of single values (for speed)
     PackedVector2Array _get_audio_buffer(int frames_available) {
-
+        
+        // TODO
+        if (history_buffer.size() != history_buffer_size){
+            history_buffer.resize(history_buffer_size);
+        }
 
         _sync_vars();
 
@@ -305,9 +360,6 @@ class PolySynth : public AudioStreamPlayer {
 
         poly_synth.clear_notes();
         poly_synth.add_note(0);
-
-
-
 
         _generate_wav();
     }

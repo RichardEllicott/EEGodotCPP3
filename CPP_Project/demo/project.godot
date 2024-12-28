@@ -14,6 +14,10 @@ config/name="EEGodotCPP1_demo"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/viewport_width=1440
+
 [dotnet]
 
 project/assembly_name="EEGodotCPP1_demo"
@@ -21,3 +25,8 @@ project/assembly_name="EEGodotCPP1_demo"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/script_trigger/plugin.cfg")
+
+[gui]
+
+timers/tooltip_delay_sec=0.0
+timers/tooltip_delay_sec.editor_hint=0.0

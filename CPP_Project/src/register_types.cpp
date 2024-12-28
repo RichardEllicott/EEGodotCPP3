@@ -21,7 +21,9 @@
 
 
 #include "sine_example.h" // single file sine example for testing
-#include "s1_audio/s2_audio_generator.h"
+
+
+
 
 #include "s1_audio/poly_synth.h" // NEW FINAL
 
@@ -60,7 +62,6 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(SineExample); // Sine example
 
 
-	GDREGISTER_CLASS(S2AudioGenerator);
 	GDREGISTER_CLASS(PolySynth);
 
 

@@ -163,20 +163,27 @@ class S1PolySynthChannel {
    public:
     S1PolySynth* parent;
 
+    S1PolySynthChannel() {
+        rng.instantiate();  // not yet used
+        rng->randomize();
+    }
+
 #pragma endregion
 
    private:
     float _mix_rate = 44100;
 
-    // S1AudioFilter filter = S1AudioFilter(220.0f, _mix_rate, S1AudioFilter::LOW);
-    LowPassFilter filter = LowPassFilter(_mix_rate, 220.0f, 0.5f);
+    S1AudioFilter filter = S1AudioFilter(220.0f, _mix_rate, S1AudioFilter::LOW); // my first one
+    // LowPassFilter filter = LowPassFilter(_mix_rate, 220.0f, 0.5f); // trying to improve, seems to make the sound go though
+
+    Ref<RandomNumberGenerator> rng;
 
    public:
     float frequency = 55.0;  // this is in hz, it should be set when we trigger the channel
     float pulse_width = 1.0f / 3.0f;
 
     float volume = 1.0;  // multiply volume, set 0-1
-    // float gain_db = 0.0; // apply after volume, db gain
+    float volume_db = 0.0; // apply after volume, db gain
 
     // ADSR
     float attack = 0.125f;      // attack time
@@ -189,9 +196,12 @@ class S1PolySynthChannel {
 
     bool filter_enabled = false;
 
-    // Pulse Width Modulation
-    float pulse_width_mod = 0.0f;
-    float pulse_width_mod_freq = 1.0f;
+    // Pulse Width Modulation (in sync with frequency)
+    float pwm = 0.0f;
+    float pwm_frequency = 1.0f;
+
+    float phase_modulation = 0.0f;
+    float phase_modulation_frequency = 1.0f;
 
     void set_filter_frequency(float filter_frequency) {
         filter.set_cutoff(filter_frequency);
@@ -202,11 +212,13 @@ class S1PolySynthChannel {
     }
 
     enum Waveform {
-        SIN,
-        SAW,
-        SQUARE,
-        SAW2,  // normal SAW at pulsewidth 0.5,
-        SIN2
+        SIN,     // sine
+        SAW,     // saw
+        SQUARE,  // square with PWM (normal at 0.5)
+        SAW2,    // saw with PWM (normal at 0.5)
+        SIN2,    // sine with PWM (normal at 0.5)
+        SSAW,    // super saw (saw multiplied with 5th)
+        NOISE,   // random noise
     };
 
     int waveform = SQUARE;
@@ -335,21 +347,39 @@ class S1PolySynthChannel {
 
         float position = timer - start_time;  // timer is synced with parent
 
+        position *= frequency;
+
+        if (phase_modulation > 0.0) {
+            position += phase_modulation * sin(position * Math_TAU * phase_modulation_frequency);  // phase modulation
+        }
+        float _pulse_width = pulse_width;
+
+        if (pwm > 0.0) {
+            _pulse_width += pwm * sin(position * Math_TAU * pwm_frequency);  // pulse width modulation
+        }
+
         switch (waveform) {
             case SIN:
-                signal += _SIN(position * frequency);
+                signal += _SIN(position);
                 break;
             case SAW:
-                signal += _SAW(position * frequency);
+                signal += _SAW(position);
                 break;
             case SQUARE:
-                signal += _SQR(position * frequency, pulse_width);
+                signal += _SQR(position, _pulse_width);
                 break;
             case SAW2:
-                signal += _SAW2(position * frequency, pulse_width);
+                signal += _SAW2(position, _pulse_width);
                 break;
             case SIN2:
-                signal += _SIN2(position * frequency, pulse_width);
+                signal += _SIN2(position, _pulse_width);
+                break;
+            case SSAW:
+                signal += _SAW(position);
+                signal *= _SAW(position * 1.5);
+                break;
+            case NOISE:
+                signal += rng->randf() * 2.0 - 1.0;
                 break;
         }
 
@@ -393,17 +423,17 @@ class S1PolySynth {
 
     float add_level = 0.5f;  // poly add level
 
-    float gain_db = 0.0f;  // linear volume (not db)
+    // volume is handled here, not on the channels
+    float volume = 1.0f;
+    float voume_db = 0.0f;  // linear volume (not db)
 
-    float pulse_width = 0.5f;
-
-    float filter_pitch_tracking = 1.0f;
-
+    // seperate filters for each channel get these values
     bool filter_enabled = false;
     float filter_frequency = 440.0f;
     float filter_resonance = 1.0f;
+    float filter_tracking = 0.0f;
 
-    int test_signal = 0;
+    int test_signal = 0;  // 0 = none, 1 = sine, 2 = noise
 
     // ADSR
     float attack = 0.125f;  // attack time
@@ -412,7 +442,57 @@ class S1PolySynth {
     float sustain = 0.5f;  // sustain level
     float release = 1.0f;
 
+    float pulse_width = 0.5f;
     int waveform = 0;
+    float pwm = 0.0f;
+    float pwm_frequency = 1.0f;
+
+    float phase_modulation = 0.0f;
+    float phase_modulation_frequency = 1.0f;
+
+    // copy all the vars to the channels
+    // i might change this later to have channels reference parent
+    // but for now we have circular reference issues that need a different file structre
+    void _sync_channel_vars() {
+        for (auto& pair : channels) {
+            auto& channel = pair.second;  // Use reference to modify the original object
+
+            // ADSR
+            channel.attack = attack;
+            channel.attack_level = attack_level;
+            channel.decay = decay;
+            channel.sustain = sustain;
+            channel.release = release;
+
+            // pulse width
+            channel.pulse_width = pulse_width;
+            channel.waveform = waveform;
+            channel.pwm = pwm;
+            channel.pwm_frequency = pwm_frequency;
+
+            channel.phase_modulation = phase_modulation;
+            channel.phase_modulation_frequency = phase_modulation_frequency;
+
+            // filter tracking
+            float _filter_frequency = filter_frequency;
+            if (filter_tracking > 0.0) {
+                float ratio = channel.frequency / 440.0f;
+                float _filter_frequency = _filter_frequency * pow(ratio, filter_tracking);
+            }
+            // filter
+            channel.filter_enabled = filter_enabled;
+            channel.set_filter_frequency(_filter_frequency);
+            channel.set_filter_resonance(filter_resonance);
+
+            // channel.
+        }
+    }
+
+
+    // WARNING mix rate just set once
+    S1AudioFilter high_pass_filter = S1AudioFilter(10.0f, 44100, S1AudioFilter::HIGH); // my first one
+    // S1AudioFilter high_pass_filter = S1AudioFilter(5000.0f, 44100, S1AudioFilter::LOW); // my first one
+
 
     // std::unordered_map<float, Note> notes;  // current notes
 
@@ -440,7 +520,7 @@ class S1PolySynth {
 
         // Key is not present
         if (channels.find(note) == channels.end()) {
-            print("S1PolySynth add_note: " + String::num(note));
+            // print("S1PolySynth add_note: " + String::num(note));
 
             S1PolySynthChannel channel = S1PolySynthChannel();  // create a new channel
             // _S1PolySynthChannel channel = _S1PolySynthChannel(this);  // create a new channel
@@ -499,28 +579,6 @@ class S1PolySynth {
     int print_modulo = 1024 * 16;
     int print_count = 0;
 
-    void _sync_channel_vars() {
-        for (auto& pair : channels) {
-            auto& channel = pair.second;  // Use reference to modify the original object
-
-            // SYNC VARS, may be ennefiencient??
-            channel.attack = attack;
-            channel.attack_level = attack_level;
-            channel.decay = decay;
-            channel.sustain = sustain;
-            channel.release = release;
-            channel.pulse_width = pulse_width;
-            channel.waveform = waveform;
-
-            channel.filter_enabled = filter_enabled;
-
-            channel.set_filter_frequency(filter_frequency);
-            channel.set_filter_resonance(filter_resonance);
-
-            // channel.
-        }
-    }
-
     // get an audio buffer array, stero signal ready to push
     PackedVector2Array _get_audio_buffer(int frames_available) {
         PackedVector2Array buffer;  // create an stereo audio buffer
@@ -567,9 +625,13 @@ class S1PolySynth {
                 }
             }
 
-            signal *= pow(10.0, gain_db / 20.0);  // apply volume as decibels (like -12 db for example, 0 is neutral)
+             // high pass master to try and stop bottom outs
+             // SEEMS TO BE A PROBLEM?? SILENT??
+            signal = high_pass_filter.process(signal);
 
-            // signal = high_pass_filter.process(signal);  // high pass to stop bottom outs
+            signal *= volume;
+            signal *= pow(10.0, voume_db / 20.0);  // apply volume as decibels (like -12 db for example, 0 is neutral)
+
 
             signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
 

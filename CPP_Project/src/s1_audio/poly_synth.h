@@ -51,6 +51,9 @@ class PolySynth : public AudioStreamPlayer {
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, sustain, 0.5f)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, release, 0.125f)
 
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pitch_bend, 1.0f)
+
+
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pulse_width, 0.5f)
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pwm, 0.0f)
@@ -85,6 +88,16 @@ class PolySynth : public AudioStreamPlayer {
         poly_synth.clear_notes();
     }
 
+
+
+
+    // send a command, new pattern to try and reduce variables and allow setting up routing
+    String send_command(String command){
+        return poly_synth.send_command(command);
+    }
+
+
+
     S1PolySynth poly_synth = S1PolySynth();  // my new synth
 
    protected:
@@ -106,6 +119,9 @@ class PolySynth : public AudioStreamPlayer {
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, decay)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, sustain)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, release)
+
+        CREATE_VAR_BINDINGS(PolySynth, FLOAT, pitch_bend)
+
 
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, pulse_width)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, pwm)
@@ -131,6 +147,10 @@ class PolySynth : public AudioStreamPlayer {
         ClassDB::bind_method(D_METHOD("add_note", "pitch", "volume"), &PolySynth::add_note);
         ClassDB::bind_method(D_METHOD("clear_note", "pitch"), &PolySynth::clear_note);
         ClassDB::bind_method(D_METHOD("clear_notes"), &PolySynth::clear_notes);
+
+
+        ClassDB::bind_method(D_METHOD("send_command", "command"), &PolySynth::add_note);
+
 
         // Bind the enum constants .... we tried and failed to add enumerator export!
         // just crash??
@@ -182,6 +202,8 @@ class PolySynth : public AudioStreamPlayer {
         poly_synth.release = release;
         poly_synth.pulse_width = pulse_width;
         poly_synth.waveform = waveform;
+
+        poly_synth.pitch_bend = pitch_bend;
 
         poly_synth.pwm = pwm;
         poly_synth.pwm_frequency = pwm_frequency;

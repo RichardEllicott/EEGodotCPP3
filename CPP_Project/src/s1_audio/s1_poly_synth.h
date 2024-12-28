@@ -173,7 +173,7 @@ class S1PolySynthChannel {
    private:
     float _mix_rate = 44100;
 
-    S1AudioFilter filter = S1AudioFilter(220.0f, _mix_rate, S1AudioFilter::LOW); // my first one
+    S1AudioFilter filter = S1AudioFilter(220.0f, _mix_rate, S1AudioFilter::LOW);  // my first one
     // LowPassFilter filter = LowPassFilter(_mix_rate, 220.0f, 0.5f); // trying to improve, seems to make the sound go though
 
     Ref<RandomNumberGenerator> rng;
@@ -182,8 +182,8 @@ class S1PolySynthChannel {
     float frequency = 55.0;  // this is in hz, it should be set when we trigger the channel
     float pulse_width = 1.0f / 3.0f;
 
-    float volume = 1.0;  // multiply volume, set 0-1
-    float volume_db = 0.0; // apply after volume, db gain
+    float volume = 1.0;     // multiply volume, set 0-1
+    float volume_db = 0.0;  // apply after volume, db gain
 
     // ADSR
     float attack = 0.125f;      // attack time
@@ -202,6 +202,13 @@ class S1PolySynthChannel {
 
     float phase_modulation = 0.0f;
     float phase_modulation_frequency = 1.0f;
+
+
+    float frequency_modulation = 0.0f;
+    float frequency_modulation_frequency = 1.0f;
+
+    float pitch_bend = 1.0f;
+
 
     void set_filter_frequency(float filter_frequency) {
         filter.set_cutoff(filter_frequency);
@@ -347,7 +354,7 @@ class S1PolySynthChannel {
 
         float position = timer - start_time;  // timer is synced with parent
 
-        position *= frequency;
+        position *= (frequency * pitch_bend);
 
         if (phase_modulation > 0.0) {
             position += phase_modulation * sin(position * Math_TAU * phase_modulation_frequency);  // phase modulation
@@ -450,49 +457,54 @@ class S1PolySynth {
     float phase_modulation = 0.0f;
     float phase_modulation_frequency = 1.0f;
 
+
+    float pitch_bend = 1.0f;
+
     // copy all the vars to the channels
     // i might change this later to have channels reference parent
     // but for now we have circular reference issues that need a different file structre
-    void _sync_channel_vars() {
+
+    void _sync_channel_vars(S1PolySynthChannel& channel) {
+        // ADSR
+        channel.attack = attack;
+        channel.attack_level = attack_level;
+        channel.decay = decay;
+        channel.sustain = sustain;
+        channel.release = release;
+
+        channel.pitch_bend = pitch_bend;
+
+        // pulse width
+        channel.pulse_width = pulse_width;
+        channel.waveform = waveform;
+        channel.pwm = pwm;
+        channel.pwm_frequency = pwm_frequency;
+
+        channel.phase_modulation = phase_modulation;
+        channel.phase_modulation_frequency = phase_modulation_frequency;
+
+        // filter tracking
+        float _filter_frequency = filter_frequency;
+        if (filter_tracking > 0.0) {
+            float ratio = channel.frequency / 440.0f;
+            float _filter_frequency = _filter_frequency * pow(ratio, filter_tracking);
+        }
+        // filter
+        channel.filter_enabled = filter_enabled;
+        channel.set_filter_frequency(_filter_frequency);
+        channel.set_filter_resonance(filter_resonance);
+    }
+
+    void _sync_all_channels_vars() {
         for (auto& pair : channels) {
             auto& channel = pair.second;  // Use reference to modify the original object
-
-            // ADSR
-            channel.attack = attack;
-            channel.attack_level = attack_level;
-            channel.decay = decay;
-            channel.sustain = sustain;
-            channel.release = release;
-
-            // pulse width
-            channel.pulse_width = pulse_width;
-            channel.waveform = waveform;
-            channel.pwm = pwm;
-            channel.pwm_frequency = pwm_frequency;
-
-            channel.phase_modulation = phase_modulation;
-            channel.phase_modulation_frequency = phase_modulation_frequency;
-
-            // filter tracking
-            float _filter_frequency = filter_frequency;
-            if (filter_tracking > 0.0) {
-                float ratio = channel.frequency / 440.0f;
-                float _filter_frequency = _filter_frequency * pow(ratio, filter_tracking);
-            }
-            // filter
-            channel.filter_enabled = filter_enabled;
-            channel.set_filter_frequency(_filter_frequency);
-            channel.set_filter_resonance(filter_resonance);
-
-            // channel.
+            _sync_channel_vars(channel);
         }
     }
 
-
     // WARNING mix rate just set once
-    S1AudioFilter high_pass_filter = S1AudioFilter(10.0f, 44100, S1AudioFilter::HIGH); // my first one
+    S1AudioFilter high_pass_filter = S1AudioFilter(10.0f, 44100, S1AudioFilter::HIGH);  // my first one
     // S1AudioFilter high_pass_filter = S1AudioFilter(5000.0f, 44100, S1AudioFilter::LOW); // my first one
-
 
     // std::unordered_map<float, Note> notes;  // current notes
 
@@ -514,6 +526,15 @@ class S1PolySynth {
         rng->set_seed(0);
     }
 
+
+    String send_command(String){
+
+
+        return "test";
+    }
+
+
+
     // the release enevelope pattern looks a bit complicated
     void add_note(float note, float volume = 1.0f) {
         // auto x = channels.size();
@@ -522,11 +543,11 @@ class S1PolySynth {
         if (channels.find(note) == channels.end()) {
             // print("S1PolySynth add_note: " + String::num(note));
 
-            S1PolySynthChannel channel = S1PolySynthChannel();  // create a new channel
-            // _S1PolySynthChannel channel = _S1PolySynthChannel(this);  // create a new channel
-            channel.parent = this;  // I WANTED THIS TO BE ENFORCED IN CONSTRUCTOR
+            if (channels.size() > max_channels) {
+            }
 
-            // channel.parent = this;
+            S1PolySynthChannel channel = S1PolySynthChannel();  // create a new channel
+            channel.parent = this;  // I WANTED THIS TO BE ENFORCED IN CONSTRUCTOR
 
             channel.set_note(note);
             channel.start_time = timer;
@@ -556,15 +577,11 @@ class S1PolySynth {
 
             S1PolySynthChannel& channel = channels[note];
 
-            // channel.envelope_release_height = 1.0;
-
             if (channel.envelope_stage == 0) {  // if we have a playing note
 
-                channel.envelope_release_height = channel._get_envelope1();
-
-                channel.envelope_stage = 1;
-                // channel.start_time = timer;
-                channel.release_time = timer;
+                channel.envelope_release_height = channel._get_envelope1(); // save the height of the envelop so release tails matches
+                channel.envelope_stage = 1; // set the enevelope stage to 1 (release)
+                channel.release_time = timer; // save the release time
             }
 
             // channels.erase(note);  // no exception is called
@@ -587,7 +604,7 @@ class S1PolySynth {
 
         float increment = 1.0f / mix_rate;  // the increment is the time in seconds of one frame
 
-        _sync_channel_vars();  // sync the variables, we might try to eliminate this pattern
+        _sync_all_channels_vars();  // sync the variables, we might try to eliminate this pattern
 
         for (int i = 0; i < frames_available; i++) {
             float signal = 0.0f;
@@ -603,13 +620,19 @@ class S1PolySynth {
                     break;
             }
 
-#ifdef DONOTSHOW
+#define ROUTE1
+#ifdef ROUTE1
             // this allows iterating and chanding the target, note the auto& refs
             for (auto& pair : channels) {
                 auto& channel = pair.second;  // Use reference to modify the original object
+                channel.timer = timer;  // Sync the timer
+                signal += channel._get_signal() * add_level;
             }
 #endif
 
+
+#pragma region SUM_AND_PRUNE
+#ifdef ROUTE2
             // iterate all the channels, adding the signals
             // this iteration pattern keeps a ref, allows deleting the channels where the release has ended
             for (auto it = channels.begin(); it != channels.end();) {
@@ -624,14 +647,15 @@ class S1PolySynth {
                     ++it;  // Move to the next element
                 }
             }
+#endif
+#pragma endregion
 
-             // high pass master to try and stop bottom outs
-             // SEEMS TO BE A PROBLEM?? SILENT??
+            // high pass master to try and stop bottom outs
+            // SEEMS TO BE A PROBLEM?? SILENT??
             signal = high_pass_filter.process(signal);
 
             signal *= volume;
             signal *= pow(10.0, voume_db / 20.0);  // apply volume as decibels (like -12 db for example, 0 is neutral)
-
 
             signal = CLAMP(signal, -1.0, 1.0);  // final hard clip
 

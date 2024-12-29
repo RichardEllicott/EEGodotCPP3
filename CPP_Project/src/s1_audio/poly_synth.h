@@ -48,6 +48,9 @@ class PolySynth : public AudioStreamPlayer {
         SINE_TEST,
         POLY_SYNTH,
     };
+
+#pragma region PROPERTY_MACROS
+
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mode, 0)  // timer for the signal position
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mix_rate, 44100)           // samples per a second (hz)
@@ -84,7 +87,11 @@ class PolySynth : public AudioStreamPlayer {
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, low_pass, 440.0f)
 
+#pragma endregion
+
    public:
+    S1PolySynth poly_synth = S1PolySynth();  // my new synth
+
     // hooks to the synth
     void add_note(float pitch, float volume = 1.0f) {
         // print("S2AudioGenerator add_note: " + godot::String::num(pitch));
@@ -106,11 +113,11 @@ class PolySynth : public AudioStreamPlayer {
         return poly_synth.send_command(command);
     }
 
-    S1PolySynth poly_synth = S1PolySynth();  // my new synth
-
    protected:
     static void _bind_methods() {
         // note these are my custom macros (look in macros.h)
+
+#pragma region BINDING_MACROS
 
         CREATE_VAR_BINDINGS(PolySynth, INT, mode)
 
@@ -146,6 +153,8 @@ class PolySynth : public AudioStreamPlayer {
 
         CREATE_CLASS_BINDINGS(PolySynth, "AudioStreamWAV", audio_stream_wav)
 
+#pragma endregion
+
         ClassDB::bind_method(D_METHOD("macro_generate_wav"), &PolySynth::macro_generate_wav);
 
         // add notes for poly mode
@@ -171,6 +180,11 @@ class PolySynth : public AudioStreamPlayer {
         //     "set_mode", "get_mode");
     }
 
+    inline int pos_mod(int a, int b) {
+        const int result = a % b;
+        return result >= 0 ? result : result + b;
+    }
+
    public:
     PolySynth() {
         _update_sample_rate();
@@ -178,20 +192,14 @@ class PolySynth : public AudioStreamPlayer {
 
         print("some C++ test");
 
-        for (int i = 0; i < 30; i++){
-
+        for (int i = 0; i < 30; i++) {
             auto val = -i;
 
-            print(val % 8);
+            // print(fmod(val, 8));
+            print(pos_mod(val, 8));
 
-
-
-
+                        // print(val % 8);
         }
-
-
-
-
     };
     ~PolySynth() {
         stop_audio_thread();
@@ -244,17 +252,18 @@ class PolySynth : public AudioStreamPlayer {
     // CircularPackedArrayPool<PackedVector2Array> history_buffer2(44100); // should work but doesn't for some reason
     // CircularPackedArrayPool<PackedVector2Array> history_buffer2 = CircularPackedArrayPool<PackedVector2Array>(44100); // use template??
 
-
+// contains a recording of the sound for visualisation purposes
+// we store the data in a wrapped fasion
+#pragma region HISTORY_BUFFER
     int history_buffer_size = mix_rate * 1.0;  // 4 seconds
     PackedVector2Array history_buffer;
     int history_buffer_position = 0;
 
-    void _add_to_history_buffer(Vector2 value){
+    void _add_to_history_buffer(Vector2 value) {
         history_buffer[history_buffer_position] = value;
-        history_buffer_position  = (history_buffer_position + 1) % history_buffer.size(); // position warps around
+        history_buffer_position = (history_buffer_position + 1) % history_buffer.size();  // position warps around
     }
-
-
+#pragma endregion
 
     // get an audio buffer array, stero signal ready to push
     // THIS IS THE MAIN FUNCTION NOW, so using arrays instead of single values (for speed)
@@ -289,11 +298,9 @@ class PolySynth : public AudioStreamPlayer {
 
                 buffer = poly_synth._get_audio_buffer(frames_available);
 
-                for (int i = 0; i < buffer.size(); i++){
-
+                for (int i = 0; i < buffer.size(); i++) {
                     _add_to_history_buffer(buffer[i]);
                 }
-
 
                 // timer = poly_synth.timer;  // ensure the timer here matches the synth
             }

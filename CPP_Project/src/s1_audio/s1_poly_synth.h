@@ -39,8 +39,6 @@ to keep complexity down, we have a seperate wrapper for Godot that will link thi
 #include <godot_cpp/classes/audio_stream_wav.hpp>     // AudioStreamPlayer
 // #include <godot_cpp/classes/random_number_generator.hpp>
 
-
-
 #include <iostream>
 
 // #include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer
@@ -209,7 +207,13 @@ class S1PolySynthChannel {
     float sustain = 1.0f;       // final level while held
     float release = 0.5f;       // release
 
-    int envelope_stage = 0;  // 0 = holding, 1 = released, -1 to delete
+    enum State {
+        DISABLED,
+        HOLD,
+        RELEASE,
+    };
+
+    State envelope_stage = HOLD;  // 0 = holding, 1 = released, -1 to delete
 
     bool filter_enabled = false;
 
@@ -325,7 +329,7 @@ class S1PolySynthChannel {
     }
 
     float _get_envelope1() {
-        if (envelope_stage == 0) {  // stage lone when we hold the note
+        if (envelope_stage == HOLD) {  // stage lone when we hold the note
             // decay from start of note
 
             float position = timer - start_time;
@@ -344,7 +348,7 @@ class S1PolySynthChannel {
 
             return decay_env * attack_env;
 
-        } else {  // stage 1 release
+        } else if (envelope_stage == RELEASE) {  // stage 1 release
 
             float position = timer - release_time;
 
@@ -357,20 +361,25 @@ class S1PolySynthChannel {
             release_env *= sustain;  // should drop from the decay level ?
 
             if (release_env == 0.0f) {
-                envelope_stage = -1;
+                envelope_stage = DISABLED;
             }
 
             return release_env;
+        } else {
+            return 0.0f;
         }
     }
 
-
     float _get_signal() {
+        if (envelope_stage == DISABLED) {  // channel inactive
+            return 0.0f;
+        }
+
         float signal = 0.0f;
 
         float position = timer - start_time;  // timer is synced with parent
 
-        position *= (frequency * pitch_bend); // pitch bend?? not tested
+        position *= (frequency * pitch_bend);  // pitch bend?? not tested
 
         if (phase_modulation > 0.0f) {
             position += phase_modulation * sin(position * Math_TAU * phase_modulation_frequency);  // phase modulation
@@ -694,10 +703,10 @@ class S1PolySynth {
 
             S1PolySynthChannel& channel = channels[note];  // channel already present
 
-            if (channel.envelope_stage != 0) {  // released or finish, so retrigger
+            if (channel.envelope_stage != S1PolySynthChannel::HOLD) {  // released or finish, so retrigger
                 channel.set_note(note);
                 channel.start_time = timer;
-                channel.envelope_stage = 0;
+                channel.envelope_stage = S1PolySynthChannel::HOLD;
             }
         }
     }
@@ -709,10 +718,10 @@ class S1PolySynth {
 
             S1PolySynthChannel& channel = channels[note];
 
-            if (channel.envelope_stage == 0) {  // if we have a playing note
+            if (channel.envelope_stage == S1PolySynthChannel::HOLD) {  // if we have a playing note
 
                 channel.envelope_release_height = channel._get_envelope1();  // save the height of the envelop so release tails matches
-                channel.envelope_stage = 1;                                  // set the enevelope stage to 1 (release)
+                channel.envelope_stage = S1PolySynthChannel::RELEASE;                                  // set the enevelope stage to 1 (release)
                 channel.release_time = timer;                                // save the release time
             }
 

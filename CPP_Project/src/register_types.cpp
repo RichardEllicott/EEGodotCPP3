@@ -12,7 +12,10 @@
 
 // s1 files
 #include "s1_audio_generator.h" // single file new one
-#include "s1_ui_draw.h" //
+
+
+
+#include "s1_audio/s1_ui_draw.h" //
 
 
 // #include "freeverb.h"

@@ -12,23 +12,33 @@ Static Helper Class
 // #include <godot_cpp/classes/string.hpp>
 // #include <godot_cpp/core/class_db.hpp>
 // #include <godot_cpp/variant/dictionary.hpp>
-// #include <godot_cpp/variant/variant.hpp>
+
+
+// #include <godot_cpp/variant/packed_vector2_array.hpp>
 
 using namespace godot;
 
-// Circular Array Pool
-// Used to store audio signal history
-template <typename T, std::size_t Size>
-class CircularArrayPool {
-    std::array<T, Size> pool;
+// chat gp generated circular array pool (for audio), with resizing (uses a vector)
+#pragma region CIRCULAR_VECTOR_POOL
+
+#include <vector>
+#include <stdexcept>
+#include <cstddef>
+
+template <typename T>
+class CircularVectorPool {
+    std::vector<T> pool;
     std::size_t current_index = 0;
     std::size_t count = 0;
 
    public:
+    explicit CircularVectorPool(std::size_t capacity)
+        : pool(capacity), current_index(0), count(0) {}
+
     void add(const T& item) {
         pool[current_index] = item;
-        current_index = (current_index + 1) % Size;  // Wrap around.
-        if (count < Size) {
+        current_index = (current_index + 1) % pool.size();  // Wrap around.
+        if (count < pool.size()) {
             count++;
         }
     }
@@ -38,12 +48,79 @@ class CircularArrayPool {
             throw std::out_of_range("Index out of bounds!");
         }
         // Map logical index to physical index in circular buffer.
-        return pool[(current_index + index) % Size];
+        return pool[(current_index + index) % pool.size()];
     }
 
     std::size_t size() const { return count; }
-    std::size_t capacity() const { return Size; }
+    std::size_t capacity() const { return pool.size(); }
+
+    void resize(std::size_t new_capacity) {
+        std::vector<T> new_pool(new_capacity);
+        std::size_t elements_to_copy = std::min(count, new_capacity);
+
+        for (std::size_t i = 0; i < elements_to_copy; i++) {
+            new_pool[i] = pool[(current_index + i) % pool.size()];
+        }
+
+        pool = std::move(new_pool);
+        current_index = 0;
+        count = elements_to_copy;
+    }
 };
+#pragma endregion
+
+// #pragma region PACKED_ONE
+// // #include <godot_cpp/classes/packed_vector2_array.hpp>
+// // #include <godot_cpp/classes/packed_float_array.hpp>
+// // #include <godot_cpp/classes/packed_int32_array.hpp>
+// // #include <godot_cpp/classes/packed_string_array.hpp>
+// #include <stdexcept>
+// #include <cstddef>  // For std::size_t
+
+// template <typename PackedArrayType>
+// class CircularPackedArrayPool {
+//     PackedArrayType pool;
+//     std::size_t current_index = 0;
+//     std::size_t count = 0;
+
+//    public:
+//     explicit CircularPackedArrayPool(std::size_t capacity)
+//         : pool(capacity), current_index(0), count(0) {}
+
+//     void add(const typename PackedArrayType::ElementType& item) {
+//         pool.write()[current_index] = item;  // Use write() to access elements for modification
+//         current_index = (current_index + 1) % pool.size();
+//         if (count < pool.size()) {
+//             count++;
+//         }
+//     }
+
+//     typename PackedArrayType::ElementType get(std::size_t index) const {
+//         if (index >= count) {
+//             throw std::out_of_range("Index out of bounds!");
+//         }
+//         return pool[(current_index + index) % pool.size()];
+//     }
+
+//     std::size_t size() const { return count; }
+//     std::size_t capacity() const { return pool.size(); }
+
+//     void resize(std::size_t new_capacity) {
+//         PackedArrayType new_pool;
+//         new_pool.resize(new_capacity);
+
+//         std::size_t elements_to_copy = std::min(count, new_capacity);
+//         for (std::size_t i = 0; i < elements_to_copy; i++) {
+//             new_pool.write()[i] = pool[(current_index + i) % pool.size()];
+//         }
+
+//         pool = std::move(new_pool);
+//         current_index = 0;
+//         count = elements_to_copy;
+//     }
+// };
+
+#pragma endregion
 
 static const double DEG_TO_RAD = Math_PI / 180.0;  // multiply by this to convert
 static const double RAD_TO_DEG = 180.0 / Math_PI;  // multiply by this to convert
@@ -55,8 +132,6 @@ static const double RAD_TO_DEG = 180.0 / Math_PI;  // multiply by this to conver
 // 	return sin(2 * Math_PI * carrier_freq * x + modulation_index * sin(2 * Math_PI * modulating_freq * x));
 // }
 
-
-
 // add my lerp function to global namespace
 #ifndef LERP
 #define LERP
@@ -65,9 +140,6 @@ T lerp(T a, T b, T alpha) {
     return a + (b - a) * alpha;
 }
 #endif
-
-
-
 
 static void print(String input)  // string (normal)
 {

@@ -100,6 +100,14 @@ private:                                                                   \
 
 
 
+
+
+/*
+chatgp suggested, reflection simulation
+
+
+MACRO:
+
 #define REFLECTABLE(...) \
     void set(const std::string &name, const std::string &value) { \
         if (false) {} \
@@ -108,10 +116,7 @@ private:                                                                   \
     }
 
 
-/*
-chatgp suggested, reflection simulation
-
-example 
+EXAMPLE: 
 
 REFLECTABLE(
         else if (name == "my_var") my_var = std::stoi(value);

@@ -26,16 +26,25 @@ muparser_dir = 'external/muparser/'
 if not os.path.exists(muparser_dir):
     print("muParser not found, downloading...")
     call(["git", "clone", "https://github.com/beltoforion/muparser.git", muparser_dir])
-env.Append(CPPPATH=[muparser_dir])  # Include path for headers
-env.Append(SOURCES=[
-    muparser_dir + '/src/muParser.cpp',
-    muparser_dir + '/src/muParserBase.cpp',
-    muparser_dir + '/src/muParserBytecode.cpp',
-    muparser_dir + '/src/muParserCallback.cpp',
-    muparser_dir + '/src/muParserError.cpp',
-    muparser_dir + '/src/muParserTokenReader.cpp',
-])
+
+
+# env.Append(CPPPATH=['external/muparser/include'])  # Include directory for muParser headers
+# env.Append(LIBPATH=['external/muparser/lib'])  # Library directory for compiled muParser
+# env.Append(LIBS=['muparser'])  # Link the muParser library
+
+
+# env.Append(CPPPATH=[muparser_dir])  # Include path for headers
+# env.Append(SOURCES=[
+#     muparser_dir + '/src/muParser.cpp',
+#     muparser_dir + '/src/muParserBase.cpp',
+#     muparser_dir + '/src/muParserBytecode.cpp',
+#     muparser_dir + '/src/muParserCallback.cpp',
+#     muparser_dir + '/src/muParserError.cpp',
+#     muparser_dir + '/src/muParserTokenReader.cpp',
+# ])
 ## endregion
+
+## WARNING CANT GET THIS WORKING!!!
 
 
 

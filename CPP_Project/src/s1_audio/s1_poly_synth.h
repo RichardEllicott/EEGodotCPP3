@@ -31,6 +31,8 @@ to keep complexity down, we have a seperate wrapper for Godot that will link thi
 #include <vector>
 #include <string>
 
+#include <iostream>
+
 // #include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer
 
 using namespace godot;
@@ -213,12 +215,12 @@ class S1PolySynthChannel {
 
     float pitch_bend = 1.0f;
 
-    void set_filter_frequency(float filter_frequency) {
-        filter.set_cutoff(filter_frequency);
+    void set_filter_frequency(float _filter_frequency) {
+        filter.set_cutoff(_filter_frequency);
     }
 
-    void set_filter_resonance(float filter_resonance) {
-        filter.set_resonance(filter_resonance);
+    void set_filter_resonance(float _filter_resonance) {
+        filter.set_resonance(_filter_resonance);
     }
 
     enum Waveform {
@@ -352,20 +354,24 @@ class S1PolySynthChannel {
         }
     }
 
+
     float _get_signal() {
         float signal = 0.0f;
 
         float position = timer - start_time;  // timer is synced with parent
 
-        position *= (frequency * pitch_bend);
+        position *= (frequency * pitch_bend); // pitch bend?? not tested
 
-        if (phase_modulation > 0.0) {
+        if (phase_modulation > 0.0f) {
             position += phase_modulation * sin(position * Math_TAU * phase_modulation_frequency);  // phase modulation
         }
         float _pulse_width = pulse_width;
 
-        if (pwm > 0.0) {
+        if (pwm > 0.0f) {
             _pulse_width += pwm * sin(position * Math_TAU * pwm_frequency);  // pulse width modulation
+        }
+
+        if (frequency_modulation > 0.0f) {
         }
 
         switch (waveform) {
@@ -429,8 +435,6 @@ class S1PolySynth {
 
     float timer = 0.0f;  // in seconds
 
-    // float start_time = 0.0f;
-
     float add_level = 0.5f;  // poly add level
 
     // volume is handled here, not on the channels
@@ -460,7 +464,129 @@ class S1PolySynth {
     float phase_modulation = 0.0f;
     float phase_modulation_frequency = 1.0f;
 
+    float frequency_modulation = 0.0f;
+    float frequency_modulation_frequency = 1.0f;
+
     float pitch_bend = 1.0f;
+
+#pragma region REFLECTION
+
+    // this is called on init, to set up my maps (i have put it up here so it's easy to check)
+    void _init_var_maps() {
+        // floats
+
+        _float_map["mix_rate"] = &mix_rate;
+        _float_map["timer"] = &timer;
+        _float_map["add_level"] = &add_level;
+        _float_map["mix_rate"] = &mix_rate;
+        _float_map["volume"] = &volume;
+        _float_map["volume_db"] = &volume;
+
+        _float_map["filter_frequency"] = &volume;
+        _float_map["filter_resonance"] = &volume;
+        _float_map["filter_tracking"] = &volume;
+
+        _float_map["attack"] = &attack;
+        _float_map["decay"] = &decay;
+        _float_map["sustain"] = &sustain;
+        _float_map["release"] = &release;
+
+        _float_map["pulse_width"] = &pulse_width;
+        _float_map["pwm"] = &pwm;
+        _float_map["pwm_frequency"] = &pwm_frequency;
+
+        _float_map["phase_modulation"] = &phase_modulation;
+        _float_map["phase_modulation_frequency"] = &phase_modulation_frequency;
+
+        _float_map["pitch_bend"] = &pitch_bend;
+
+        // ints
+        _int_map["waveform"] = &waveform;
+        _int_map["test_signal"] = &test_signal;
+    }
+
+#ifndef GODOT_STRING_HASH
+#define GODOT_STRING_HASH
+
+    // required to let c++ known how to hash godot string
+    struct GodotStringHash {
+        std::size_t operator()(const godot::String& s) const {
+            // Use the godot::String's internal data for hashing
+            return std::hash<const char*>()(s.ascii());  // ascii() gives a const char* directly
+        }
+    };
+#endif
+
+    // Use the custom hash function for godot::String
+    std::unordered_map<godot::String, float*, GodotStringHash> _float_map;
+    std::unordered_map<godot::String, int*, GodotStringHash> _int_map;
+    std::unordered_map<godot::String, String*, GodotStringHash> _string_map;
+    std::unordered_map<godot::String, bool*, GodotStringHash> _bool_map;
+
+    // set a float using the variable name
+    Variant get_var(const godot::String& name) {
+        if (_float_map.find(name) != _float_map.end()) {
+            return *_float_map[name];
+        } else if (_int_map.find(name) != _int_map.end()) {
+            return *_int_map[name];
+        } else if (_string_map.find(name) != _string_map.end()) {
+            return *_string_map[name];
+        } else if (_bool_map.find(name) != _bool_map.end()) {
+            return *_bool_map[name];
+        } else {
+            return nullptr;
+        }
+    }
+
+    // set a variable using the variable name
+    int set_var(const godot::String& name, String value) {
+        if (_float_map.find(name) != _float_map.end()) {
+            *_float_map[name] = value.to_float();
+            return 0;
+        } else if (_int_map.find(name) != _int_map.end()) {
+            *_int_map[name] = value.to_int();
+            return 0;
+
+        } else if (_string_map.find(name) != _string_map.end()) {
+            *_string_map[name] = value;
+            return 0;
+        } else if (_bool_map.find(name) != _bool_map.end()) {
+            *_bool_map[name] = value.to_int();
+            return 0;
+        }
+
+        return 1;
+    }
+
+#pragma endregion
+
+// implementing commands and also pseudo reflection, with pointers to the variables
+#pragma region COMMANDS
+
+   public:
+    Variant send_command(String command_string) {
+        // split the string
+        Array split = command_string.split(" ", false);
+        while (split.size() < 3)  // ensure length is 3
+            split.append("");
+
+        String command = split[0];
+        String par1 = split[1];
+        String par2 = split[2];
+        String type = split.size() > 3 ? split[3] : "string";  // Default to string if no type provided
+
+        if (command == "test") {
+            return "testing 123...";
+        } else if (command == "set_var") {
+            return set_var(par1, par2);
+        } else if (command == "get_var") {
+            return get_var(par1);
+        } else {
+            return "error";
+        }
+    }
+
+#pragma endregion
 
     // copy all the vars to the channels
     // i might change this later to have channels reference parent
@@ -485,15 +611,16 @@ class S1PolySynth {
         channel.phase_modulation = phase_modulation;
         channel.phase_modulation_frequency = phase_modulation_frequency;
 
-        // filter tracking
-        float _filter_frequency = filter_frequency;
-        if (filter_tracking > 0.0) {
-            float ratio = channel.frequency / 440.0f;
-            float _filter_frequency = _filter_frequency * pow(ratio, filter_tracking);
-        }
+        // // filter tracking
+        // float _filter_frequency = filter_frequency;
+        // if (filter_tracking > 0.0) {
+        //     float ratio = channel.frequency / 440.0f;
+        //     float _filter_frequency = _filter_frequency * pow(ratio, filter_tracking);
+        // }
+
         // filter
         channel.filter_enabled = filter_enabled;
-        channel.set_filter_frequency(_filter_frequency);
+        channel.set_filter_frequency(filter_frequency);
         channel.set_filter_resonance(filter_resonance);
     }
 
@@ -526,45 +653,8 @@ class S1PolySynth {
     S1PolySynth() {
         rng.instantiate();
         rng->set_seed(0);
-    }
 
-    //     void split_godot_string(const String &command) {
-    //     Array tokens = command.split(" "); // Split by spaces
-
-    //     for (int i = 0; i < tokens.size(); ++i) {
-    //         String token = tokens[i];
-    //         godot::UtilityFunctions::print(token); // Prints each token
-    //     }
-    // }
-
-    // REFLECTABLE(
-    //     else if (name == "attack") my_var = std::stoi(value);
-    //     else if (name == "decay") another_var = std::stof(value);
-    // )
-
-
-
-    String send_command(String command_string) {
-        // split the string
-        auto split = command_string.split(" ", false);
-        while (split.size() < 3)  // ensure length is 3
-            split.append("");
-
-        auto command = split[0];
-        auto par1 = split[1];
-        auto par2 = split[2];
-
-        if (command == "test") {
-            return "testing 123...";
-
-
-        } else if (command == "set") {
-            
-
-        } else if (command == "set") {
-        }
-
-        return "test";
+        _init_var_maps();
     }
 
     // the release enevelope pattern looks a bit complicated

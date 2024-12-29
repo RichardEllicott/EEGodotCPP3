@@ -1,5 +1,19 @@
 /*
 
+single file (cpp is inside the header, can cause issues but is easier to edit)
+
+
+this file contains some code to load the audio buffer, and boilerplate to join to the S1PolySynth (contains the synth itself)
+
+also has a feature to save the audio as a wave file
+
+
+this object serves as a hook from the C++ to Godot, whereby the UI is coded in GDScript
+
+
+-make sure to set the stream as an AudioStreamGenerator... this is not done automaticly
+-set the buffer on this to a small size like 0.02 to 0.04 ms for a fast response time (too small you might get weird sounds)
+-usually you want to set autoplay to true so playback will start on launch
 
 */
 #ifndef POLY_SYNTH_H
@@ -38,7 +52,7 @@ class PolySynth : public AudioStreamPlayer {
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(int, mix_rate, 44100)           // samples per a second (hz)
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, frequency, 220)          // frequency of tone generator (hz) (default A3)
-    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume, 1.0f)          // volume db
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume, 1.0f)            // volume db
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, volume_db, 0.0)          // volume db
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, timer, 0.0)              // timer for the signal position
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, render_length, 1.0)      // for rendering to wave example
@@ -52,7 +66,6 @@ class PolySynth : public AudioStreamPlayer {
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, release, 0.125f)
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pitch_bend, 1.0f)
-
 
     DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, pulse_width, 0.5f)
 
@@ -88,15 +101,10 @@ class PolySynth : public AudioStreamPlayer {
         poly_synth.clear_notes();
     }
 
-
-
-
     // send a command, new pattern to try and reduce variables and allow setting up routing
-    String send_command(String command){
+    String send_command(String command) {
         return poly_synth.send_command(command);
     }
-
-
 
     S1PolySynth poly_synth = S1PolySynth();  // my new synth
 
@@ -122,15 +130,12 @@ class PolySynth : public AudioStreamPlayer {
 
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, pitch_bend)
 
-
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, pulse_width)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, pwm)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, pwm_frequency)
 
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, phase_modulation)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, phase_modulation_frequency)
-
-
 
         CREATE_VAR_BINDINGS(PolySynth, BOOL, filter_enabled)
         CREATE_VAR_BINDINGS(PolySynth, FLOAT, filter_frequency)
@@ -148,9 +153,7 @@ class PolySynth : public AudioStreamPlayer {
         ClassDB::bind_method(D_METHOD("clear_note", "pitch"), &PolySynth::clear_note);
         ClassDB::bind_method(D_METHOD("clear_notes"), &PolySynth::clear_notes);
 
-
         ClassDB::bind_method(D_METHOD("send_command", "command"), &PolySynth::add_note);
-
 
         // Bind the enum constants .... we tried and failed to add enumerator export!
         // just crash??
@@ -172,6 +175,23 @@ class PolySynth : public AudioStreamPlayer {
     PolySynth() {
         _update_sample_rate();
         start_audio_thread();
+
+        print("some C++ test");
+
+        for (int i = 0; i < 30; i++){
+
+            auto val = -i;
+
+            print(val % 8);
+
+
+
+
+        }
+
+
+
+
     };
     ~PolySynth() {
         stop_audio_thread();
@@ -218,23 +238,29 @@ class PolySynth : public AudioStreamPlayer {
 
         poly_synth.voume_db = volume_db;
         poly_synth.volume = volume;
-
-    
     }
 
-    // TODO
-    std::vector<float> history_buffer;         // Store the past frames (values)
-    int history_buffer_size = mix_rate * 4.0;  // 4 seconds
+    // not working yet
+    // CircularPackedArrayPool<PackedVector2Array> history_buffer2(44100); // should work but doesn't for some reason
+    // CircularPackedArrayPool<PackedVector2Array> history_buffer2 = CircularPackedArrayPool<PackedVector2Array>(44100); // use template??
+
+
+    int history_buffer_size = mix_rate * 1.0;  // 4 seconds
+    PackedVector2Array history_buffer;
     int history_buffer_position = 0;
+
+    void _add_to_history_buffer(Vector2 value){
+        history_buffer[history_buffer_position] = value;
+        history_buffer_position  = (history_buffer_position + 1) % history_buffer.size(); // position warps around
+    }
 
 
 
     // get an audio buffer array, stero signal ready to push
     // THIS IS THE MAIN FUNCTION NOW, so using arrays instead of single values (for speed)
     PackedVector2Array _get_audio_buffer(int frames_available) {
-        
         // TODO
-        if (history_buffer.size() != history_buffer_size){
+        if (history_buffer.size() != history_buffer_size) {
             history_buffer.resize(history_buffer_size);
         }
 
@@ -260,7 +286,15 @@ class PolySynth : public AudioStreamPlayer {
             if (frames_available) {
                 // poly_synth.timer = timer;  // we sync these variables
                 poly_synth.mix_rate = mix_rate;
+
                 buffer = poly_synth._get_audio_buffer(frames_available);
+
+                for (int i = 0; i < buffer.size(); i++){
+
+                    _add_to_history_buffer(buffer[i]);
+                }
+
+
                 // timer = poly_synth.timer;  // ensure the timer here matches the synth
             }
         }

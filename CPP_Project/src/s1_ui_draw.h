@@ -18,7 +18,11 @@ C++ is very easy if you just start typing it!
 #include <macros.h>  // my macros to help declare properties
 
 // #include <godot_cpp/classes/sprite2d.hpp>
-#include <s1_audio_generator.h>
+// #include <s1_audio_generator.h>
+#include <s1_audio/poly_synth.h>
+
+
+
 
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/node.hpp>
@@ -62,7 +66,7 @@ class S1_UI_Draw : public Control {
 
     auto get_s1_audio_generator_ptr() {
         auto node_ptr = get_node_or_null(s1_audio_generator);
-        auto ret_ptr = Object::cast_to<S1AudioGenerator>(node_ptr);
+        auto ret_ptr = Object::cast_to<PolySynth>(node_ptr);
         return ret_ptr;
     }
 
@@ -71,7 +75,7 @@ class S1_UI_Draw : public Control {
         UtilityFunctions::print("macro_test from c++!!!");
 
 
-        auto audio_gen2 = get_node_as<S1AudioGenerator>(s1_audio_generator);
+        auto audio_gen2 = get_node_as<PolySynth>(s1_audio_generator);
         // auto audio_gen2 = get_node_as<Ref<S1AudioGenerator>>(s1_audio_generator); // doesn't work
 
         // // Check if the pointer is not null

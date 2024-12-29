@@ -64,7 +64,13 @@
         "xtr1common": "cpp",
         "s1_audio_filter": "cpp",
         "random": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "deque": "cpp",
+        "iomanip": "cpp",
+        "map": "cpp",
+        "numeric": "cpp",
+        "stack": "cpp"
     },
-    "godotTools.editorPath.godot4": "c:\\Program Files\\Godot\\Godot_v4.3-stable_mono_win64\\Godot_v4.3-stable_mono_win64.exe"
+    "godotTools.editorPath.godot4": "c:\\Program Files\\Godot\\Godot_v4.3-stable_mono_win64\\Godot_v4.3-stable_mono_win64.exe",
+    "cmake.sourceDirectory": "C:/Users/Richard/Documents/GitHub/Godot/EEGodotCPP3/CPP_Project/godot-cpp"
 }

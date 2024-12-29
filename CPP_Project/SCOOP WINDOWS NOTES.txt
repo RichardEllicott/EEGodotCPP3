@@ -24,3 +24,10 @@ i think:
 cd godot-cpp
 scons generate_bindings=yes  
 
+
+
+
+to compile my library
+
+scoop install cmake
+

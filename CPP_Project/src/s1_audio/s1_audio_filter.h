@@ -1,8 +1,7 @@
 /*
 
-single file, multipurpose filter
+single file (cpp is inside the header, can cause issues but is easier to edit)
 
-only usable from c++
 
 */
 #ifndef S1_AUDIO_FILTER_H
@@ -14,6 +13,50 @@ only usable from c++
 // #include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer
 
 using namespace godot;
+
+
+
+// chatgp created string synth
+class StringSynth {
+   private:
+    std::vector<float> delayLine;
+    size_t delayIndex;
+    float feedback;
+    float damping;
+
+    
+    std::mt19937 rng;
+
+   public:
+    StringSynth(float frequency, float sampleRate, float dampingFactor = 0.5f) {
+        size_t delayLength = static_cast<size_t>(sampleRate / frequency);
+        delayLine.resize(delayLength, 0.0f);
+        delayIndex = 0;
+        feedback = 0.99f;  // Decay factor
+        damping = dampingFactor;
+
+        // Random number generator for excitation
+        rng.seed(std::random_device()());
+    }
+
+    void excite() {
+        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+        for (auto& sample : delayLine) {
+            sample = dist(rng);
+        }
+    }
+
+    float process() {
+        float currentSample = delayLine[delayIndex];
+        size_t nextIndex = (delayIndex + 1) % delayLine.size();
+
+        // Karplus-Strong algorithm
+        delayLine[delayIndex] = (currentSample + delayLine[nextIndex]) * 0.5f * feedback * damping;
+
+        delayIndex = nextIndex;
+        return currentSample;
+    }
+};
 
 // // RC-like envelope follower
 // class AnalogPeakSimulator {

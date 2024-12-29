@@ -31,6 +31,16 @@ to keep complexity down, we have a seperate wrapper for Godot that will link thi
 #include <vector>
 #include <string>
 
+#include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer
+// #include <godot_cpp/classes/audio_stream_generator.hpp>           // AudioStreamGenerator
+#include <godot_cpp/classes/audio_stream_generator_playback.hpp>  // AudioStreamGeneratorPlayback
+// #include <godot_cpp/classes/audio_stream_playback.hpp>            // AudioStreamPlayback
+#include <godot_cpp/classes/audio_stream_player.hpp>  // AudioStreamPlayer
+#include <godot_cpp/classes/audio_stream_wav.hpp>     // AudioStreamPlayer
+// #include <godot_cpp/classes/random_number_generator.hpp>
+
+
+
 #include <iostream>
 
 // #include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer

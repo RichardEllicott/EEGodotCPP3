@@ -3,7 +3,7 @@
 # Godot GDExtension C++ boilerplate library
 
 ## Instructions
-
+- get Godot 4.3
 - install the latest (stable) [python](https://www.python.org/downloads/) to your platform, try to ensure the path variables are set upon install (ensuring you can use the python and pip commands at the terminal)
 - open the terminal and install scons:
 

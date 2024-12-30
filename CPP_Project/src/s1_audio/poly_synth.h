@@ -180,26 +180,10 @@ class PolySynth : public AudioStreamPlayer {
         //     "set_mode", "get_mode");
     }
 
-    inline int pos_mod(int a, int b) {
-        const int result = a % b;
-        return result >= 0 ? result : result + b;
-    }
-
    public:
     PolySynth() {
         _update_sample_rate();
         start_audio_thread();
-
-        print("some C++ test");
-
-        for (int i = 0; i < 30; i++) {
-            auto val = -i;
-
-            // print(fmod(val, 8));
-            print(pos_mod(val, 8));
-
-                        // print(val % 8);
-        }
     };
     ~PolySynth() {
         stop_audio_thread();
@@ -255,14 +239,14 @@ class PolySynth : public AudioStreamPlayer {
 // contains a recording of the sound for visualisation purposes
 // we store the data in a wrapped fasion
 #pragma region HISTORY_BUFFER
-    int history_buffer_size = mix_rate * 1.0;  // 4 seconds
-    PackedVector2Array history_buffer;
-    int history_buffer_position = 0;
 
-    void _add_to_history_buffer(Vector2 value) {
-        history_buffer[history_buffer_position] = value;
-        history_buffer_position = (history_buffer_position + 1) % history_buffer.size();  // position warps around
-    }
+
+    int history_buffer_size = mix_rate * 1.0;  // 4 seconds
+    PackedVector2ArrayBuffer history_buffer = PackedVector2ArrayBuffer(history_buffer_size);
+
+
+
+
 #pragma endregion
 
     // get an audio buffer array, stero signal ready to push
@@ -299,7 +283,7 @@ class PolySynth : public AudioStreamPlayer {
                 buffer = poly_synth._get_audio_buffer(frames_available);
 
                 for (int i = 0; i < buffer.size(); i++) {
-                    _add_to_history_buffer(buffer[i]);
+                    history_buffer.add(buffer[i]);
                 }
 
                 // timer = poly_synth.timer;  // ensure the timer here matches the synth

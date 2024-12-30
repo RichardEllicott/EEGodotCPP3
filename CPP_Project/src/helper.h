@@ -1,124 +1,107 @@
+/*
+
+Helper Functions
+
+
+
+*/
 #ifndef HELPER_H  // header guard
 #define HELPER_H
 
-/*
-Static Helper Class
-*/
+
 
 #include <godot_cpp/variant/utility_functions.hpp>  // godot::UtilityFunctions::print(input);
-
-// for format??? have not checked yet
-// #include <godot_cpp/classes/global_constants.hpp>
-// #include <godot_cpp/classes/string.hpp>
-// #include <godot_cpp/core/class_db.hpp>
-// #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/classes/node.hpp> // Node
 
 
 // #include <godot_cpp/variant/packed_vector2_array.hpp>
 
 using namespace godot;
 
-// chat gp generated circular array pool (for audio), with resizing (uses a vector)
-#pragma region CIRCULAR_VECTOR_POOL
+// // chat gp generated circular array pool (for audio), with resizing (uses a vector)
+// #pragma region CIRCULAR_VECTOR_POOL
 
 #include <vector>
 #include <stdexcept>
 #include <cstddef>
 
+
+// working positive mod (as c++ mod is actually remainder)
+// works the same as the python one, so never returns negative, allows seamless wrapping
+inline int pos_mod(int a, int b) {
+    const int result = a % b;
+    return result >= 0 ? result : result + b;
+}
+
+
+
+#pragma region GET_NODE_AS_OR_NULL
+
+// get any node (staticly)
+// usage:
+// auto node2d = get_node_as<Node2D>(this, "Node2D");
+//
 template <typename T>
-class CircularVectorPool {
-    std::vector<T> pool;
-    std::size_t current_index = 0;
-    std::size_t count = 0;
-
-   public:
-    explicit CircularVectorPool(std::size_t capacity)
-        : pool(capacity), current_index(0), count(0) {}
-
-    void add(const T& item) {
-        pool[current_index] = item;
-        current_index = (current_index + 1) % pool.size();  // Wrap around.
-        if (count < pool.size()) {
-            count++;
-        }
+T* get_node_as(Node* current_node, const NodePath& path) {
+    if (!current_node) {
+        UtilityFunctions::printerr("Current node is null!");
+        return nullptr;
     }
 
-    T& get(std::size_t index) {
-        if (index >= count) {
-            throw std::out_of_range("Index out of bounds!");
-        }
-        // Map logical index to physical index in circular buffer.
-        return pool[(current_index + index) % pool.size()];
-    }
+    Node* node_ptr = current_node->get_node_or_null(path);
+    return Object::cast_to<T>(node_ptr);
+}
 
-    std::size_t size() const { return count; }
-    std::size_t capacity() const { return pool.size(); }
-
-    void resize(std::size_t new_capacity) {
-        std::vector<T> new_pool(new_capacity);
-        std::size_t elements_to_copy = std::min(count, new_capacity);
-
-        for (std::size_t i = 0; i < elements_to_copy; i++) {
-            new_pool[i] = pool[(current_index + i) % pool.size()];
-        }
-
-        pool = std::move(new_pool);
-        current_index = 0;
-        count = elements_to_copy;
-    }
-};
 #pragma endregion
 
-// #pragma region PACKED_ONE
-// // #include <godot_cpp/classes/packed_vector2_array.hpp>
-// // #include <godot_cpp/classes/packed_float_array.hpp>
-// // #include <godot_cpp/classes/packed_int32_array.hpp>
-// // #include <godot_cpp/classes/packed_string_array.hpp>
-// #include <stdexcept>
-// #include <cstddef>  // For std::size_t
 
-// template <typename PackedArrayType>
-// class CircularPackedArrayPool {
-//     PackedArrayType pool;
-//     std::size_t current_index = 0;
-//     std::size_t count = 0;
 
-//    public:
-//     explicit CircularPackedArrayPool(std::size_t capacity)
-//         : pool(capacity), current_index(0), count(0) {}
 
-//     void add(const typename PackedArrayType::ElementType& item) {
-//         pool.write()[current_index] = item;  // Use write() to access elements for modification
-//         current_index = (current_index + 1) % pool.size();
-//         if (count < pool.size()) {
-//             count++;
-//         }
-//     }
+#pragma region HISTORY_BUFFER
+// trouble using templates for this pattern as it involves two types, PackedVector2Array and Vector2
+class PackedVector2ArrayBuffer {
+   public:
+    PackedVector2Array buffer = PackedVector2Array();
 
-//     typename PackedArrayType::ElementType get(std::size_t index) const {
-//         if (index >= count) {
-//             throw std::out_of_range("Index out of bounds!");
-//         }
-//         return pool[(current_index + index) % pool.size()];
-//     }
+    int buffer_position = 0;
 
-//     std::size_t size() const { return count; }
-//     std::size_t capacity() const { return pool.size(); }
+    PackedVector2ArrayBuffer(int size) {
+        buffer.resize(size);
+    }
 
-//     void resize(std::size_t new_capacity) {
-//         PackedArrayType new_pool;
-//         new_pool.resize(new_capacity);
+    void resize(int size) {
+        buffer.resize(size);
+    }
+    void add(Vector2 value) {
+        buffer[buffer_position] = value;
+        buffer_position = (buffer_position + 1) % buffer.size();
+    }
 
-//         std::size_t elements_to_copy = std::min(count, new_capacity);
-//         for (std::size_t i = 0; i < elements_to_copy; i++) {
-//             new_pool.write()[i] = pool[(current_index + i) % pool.size()];
-//         }
+    int size() {
+        return buffer.size();
+    }
 
-//         pool = std::move(new_pool);
-//         current_index = 0;
-//         count = elements_to_copy;
-//     }
-// };
+    Vector2 get(int position) {
+        position = pos_mod(buffer_position + position - 1, buffer.size());
+        return buffer[position];
+    }
+
+    // PackedVector2Array get_frame(int position, int size) {
+    //     position = pos_mod(buffer_position + position, buffer.size());
+
+    //     PackedVector2Array return_buffer = PackedVector2Array();
+    //     return_buffer.resize(size);
+    //     for (int i = 0; i < size; i++) {
+    //         int j = (position + i) % buffer.size();
+    //         return_buffer[i] = buffer[j];
+    //     }
+    //     return return_buffer;
+    // }
+
+    // PackedVector2Array get_last_frame(int size) {
+    //     return get_frame(size - 1, size);
+    // }
+};
 
 #pragma endregion
 
@@ -141,26 +124,40 @@ T lerp(T a, T b, T alpha) {
 }
 #endif
 
-static void print(String input)  // string (normal)
-{
-    UtilityFunctions::print(input);
+
+// print template, makes print() a global function 
+template <typename... Args>
+void print(Args... args) {
+    UtilityFunctions::print(args...);
 }
 
-static void print(int input)  // int
-{
-    String s = String::num(input);
-    print(s);
-}
-static void print(float input)  // float
-{
-    String s = String::num(input);
-    print(s);
-}
-static void print(double input)  // double
-{
-    String s = String::num(input);
-    print(s);
-}
+
+
+// OLD PRINT FUNCTIONS
+
+// static void print(String input)  // string (normal)
+// {
+//     UtilityFunctions::print(input);
+// }
+
+// static void print(int input)  // int
+// {
+//     String s = String::num(input);
+//     print(s);
+// }
+// static void print(float input)  // float
+// {
+//     String s = String::num(input);
+//     print(s);
+// }
+// static void print(double input)  // double
+// {
+//     String s = String::num(input);
+//     print(s);
+// }
+
+
+
 
 // allows getting a node as the type like:
 // auto audio_gen2 = get_node_as<NodeType>(node_path);

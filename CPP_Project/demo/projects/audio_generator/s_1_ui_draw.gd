@@ -10,11 +10,11 @@ i can use a scipt like this though to interact with the C++
 extends S1_UI_Draw
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-    pass # Replace with function body.
+## Called when the node enters the scene tree for the first time.
+#func _ready() -> void:
+    #pass # Replace with function body.
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-    pass
+## Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta: float) -> void:
+    #pass

@@ -1,6 +1,19 @@
 {
     "files.associations": {
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "cmath": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "random": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "xstring": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp",
+        "xutility": "cpp",
+        "array": "cpp",
+        "format": "cpp",
+        "initializer_list": "cpp"
     },
     "cmake.sourceDirectory": "C:/Users/Richard/Documents/GitHub/Godot/EEGodotCPP3/CPP_Project/godot-cpp"
 }

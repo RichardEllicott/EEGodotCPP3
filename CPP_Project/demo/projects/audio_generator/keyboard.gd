@@ -145,6 +145,9 @@ func _input(event):
         elif event.axis == JOY_AXIS_LEFT_Y:
             print("Left stick Y-axis moved: ", event.axis_value)
             
+            var bend = -event.axis_value * 2.0
+            
+            poly_synth.pitch_bend = 2.0 ** (bend / 12.0)
 
                 
     elif event is InputEventMouseMotion:

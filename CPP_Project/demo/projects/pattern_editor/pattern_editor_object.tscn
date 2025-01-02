@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3hgq31omqck7"]
+
+[ext_resource type="Script" path="res://projects/pattern_editor/pattern_editor_object.gd" id="1_wepg1"]
+
+[node name="pattern_editor_object" type="Panel"]
+custom_minimum_size = Vector2(32, 32)
+offset_left = 128.0
+offset_top = 96.0
+offset_right = 160.0
+offset_bottom = 128.0
+script = ExtResource("1_wepg1")

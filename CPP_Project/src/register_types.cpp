@@ -1,40 +1,25 @@
 #ifndef REGISTER_TYPES_CPP
 #define REGISTER_TYPES_CPP
 
-
 #include "register_types.h"
 
 // new modules need and entry here, and the other matching region
-#pragma region MODULES 
-#include "watersim.h" // water sim example (Eulerian Fluid Simulator)
-#include "template.h" // template, do not modify but copy, included for debug
-#include "template_sfile.h" // testing one file ideas
+#pragma region MODULES
 
-// s1 files
-#include "s1_audio_generator.h" // single file new one
+#include "watersim.h"        // water sim example (Eulerian Fluid Simulator)
+#include "template.h"        // template, do not modify but copy, included for debug
+#include "template_sfile.h"  // testing one file ideas
 
-
-
-#include "s1_audio/s1_ui_draw.h" //
-
-
-// #include "freeverb.h"
-// #include "audio_effect_template.h"
+#include "s1_audio_generator.h"  // single file new one
 #include "s1_reverb.h"
+#include "sine_example.h"  // single file sine example for testing
 
-
-#include "sine_example.h" // single file sine example for testing
-
-
-
-
-#include "s1_audio/poly_synth.h" // NEW FINAL
-
-
-
+#include "s1_audio/poly_synth.h"                // NEW FINAL
+#include "s1_audio/s1_poly_synth_visualizer.h"  // visualizer
 
 #include "mesh_generator.h"
 #pragma endregion
+
 
 
 // i think all these are required, but the IDE will not complain
@@ -42,67 +27,59 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-
 using namespace godot;
 
 void initialize_example_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
-		return;
-	}
+    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+        return;
+    }
 
-	// new modules need and entry here, and the other matching region
-	#pragma region MODULES 
-	GDREGISTER_CLASS(WaterSim); 
-	GDREGISTER_CLASS(Template);
-	GDREGISTER_CLASS(TemplateSFile); 
+// new modules need and entry here, and the other matching region
+#pragma region MODULES
 
+    GDREGISTER_CLASS(WaterSim);
+    GDREGISTER_CLASS(Template);
+    GDREGISTER_CLASS(TemplateSFile);
 
-	GDREGISTER_CLASS(S1AudioGenerator); // sort in file
-	GDREGISTER_CLASS(S1_UI_Draw);
+    GDREGISTER_CLASS(S1AudioGenerator);  // sort in file
 
-	GDREGISTER_CLASS(MeshGenerator);
+    GDREGISTER_CLASS(MeshGenerator);
 
-	GDREGISTER_CLASS(SineExample); // Sine example
+    GDREGISTER_CLASS(SineExample);  // Sine example
 
+    GDREGISTER_CLASS(PolySynth);
+    GDREGISTER_CLASS(S1PolySynthVisualizer);
 
-	GDREGISTER_CLASS(PolySynth);
+    // my audio effect
+    // GDREGISTER_CLASS(Freeverb);
+    // GDREGISTER_CLASS(FreeverbInstance);
 
+    GDREGISTER_CLASS(S1Reverb);
+    GDREGISTER_CLASS(S1ReverbInstance);
 
-	// my audio effect
-	// GDREGISTER_CLASS(Freeverb);
-	// GDREGISTER_CLASS(FreeverbInstance);
+    // GDREGISTER_CLASS(AudioEffectTemplate); // seems to be appearing as template
+    // GDREGISTER_CLASS(AudioEffectTemplateInstance); // seems to be appearing as template
 
-	GDREGISTER_CLASS(S1Reverb);
-	GDREGISTER_CLASS(S1ReverbInstance);
-
-
-	// GDREGISTER_CLASS(AudioEffectTemplate); // seems to be appearing as template
-	// GDREGISTER_CLASS(AudioEffectTemplateInstance); // seems to be appearing as template
-
-	
-
-	#pragma endregion
-
+#pragma endregion
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
-		return;
-	}
+    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+        return;
+    }
 }
 
 extern "C" {
 // Initialization.
 GDExtensionBool GDE_EXPORT example_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
-	godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
+    godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 
-	init_obj.register_initializer(initialize_example_module);
-	init_obj.register_terminator(uninitialize_example_module);
-	init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
+    init_obj.register_initializer(initialize_example_module);
+    init_obj.register_terminator(uninitialize_example_module);
+    init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
 
-	return init_obj.init();
+    return init_obj.init();
 }
 }
-
 
 #endif

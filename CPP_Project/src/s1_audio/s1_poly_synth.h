@@ -67,6 +67,11 @@ int frequency_to_note(float frequency) {
 
 #endif
 
+
+
+
+
+
 // forward references .. they don't fully solve the issue in c++ where i might need to seperate this file to h and cpp
 class S1PolySynth;
 class S1PolySynthChannel;

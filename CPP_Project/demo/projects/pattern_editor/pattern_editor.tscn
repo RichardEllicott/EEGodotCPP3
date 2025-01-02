@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=3 uid="uid://bjcbhwapw8es6"]
+
+[ext_resource type="Script" path="res://projects/pattern_editor/pattern_editor.gd" id="1_crdhy"]
+[ext_resource type="PackedScene" uid="uid://c3hgq31omqck7" path="res://projects/pattern_editor/pattern_editor_object.tscn" id="2_kxyc4"]
+
+[node name="pattern_editor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="pattern_editor" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 121.0
+offset_top = 119.0
+offset_right = 603.0
+offset_bottom = 548.0
+script = ExtResource("1_crdhy")
+pattern_object_scene = ExtResource("2_kxyc4")
+
+[node name="pattern_editor_object" parent="pattern_editor" instance=ExtResource("2_kxyc4")]
+layout_mode = 0
+offset_left = 96.0
+offset_right = 128.0
+
+[node name="pattern_editor_object2" parent="pattern_editor" instance=ExtResource("2_kxyc4")]
+layout_mode = 0
+offset_left = 193.0
+offset_right = 225.0
+
+[node name="pattern_editor_object3" parent="pattern_editor" instance=ExtResource("2_kxyc4")]
+layout_mode = 0
+offset_left = 218.0
+offset_top = 228.0
+offset_right = 250.0
+offset_bottom = 260.0
+
+[node name="pattern_editor_object4" parent="pattern_editor" instance=ExtResource("2_kxyc4")]
+layout_mode = 0
+offset_left = 334.0
+offset_top = 155.0
+offset_right = 366.0
+offset_bottom = 187.0

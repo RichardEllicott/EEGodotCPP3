@@ -26,6 +26,8 @@ this object serves as a hook from the C++ to Godot, whereby the UI is coded in G
 
 #include <s1_audio/s1_poly_synth.h>
 
+#include <s1_audio/s2_synth.h>
+
 // #include <s1_audio_filter.h>
 
 #include <godot_cpp/classes/audio_stream.hpp>  // AudioStreamPlayer
@@ -91,6 +93,8 @@ class PolySynth : public AudioStreamPlayer {
 
    public:
     S1PolySynth poly_synth = S1PolySynth();  // my new synth
+
+    S2Synth synth2 = S2Synth(); // TESTING NEW SYNTH
 
     // hooks to the synth
     void add_note(float pitch, float volume = 1.0f) {
@@ -240,12 +244,8 @@ class PolySynth : public AudioStreamPlayer {
 // we store the data in a wrapped fasion
 #pragma region HISTORY_BUFFER
 
-
     int history_buffer_size = mix_rate * 1.0;  // 4 seconds
     PackedVector2ArrayBuffer history_buffer = PackedVector2ArrayBuffer(history_buffer_size);
-
-
-
 
 #pragma endregion
 

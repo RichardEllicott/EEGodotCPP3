@@ -188,6 +188,16 @@ class PolySynth : public AudioStreamPlayer {
     PolySynth() {
         _update_sample_rate();
         start_audio_thread();
+
+        print("test");
+
+        int x = 44;
+        if (x = 33){
+            print("shit");
+        };
+
+
+
     };
     ~PolySynth() {
         stop_audio_thread();

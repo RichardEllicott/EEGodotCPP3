@@ -115,8 +115,6 @@ func _snap():
 func _input(event: InputEvent) -> void:
     
     
-    Vector2.RIGHT
-    
     #if not is_instance_valid(parent): return ## if no parent, skip
         
     if event is InputEventMouseButton:

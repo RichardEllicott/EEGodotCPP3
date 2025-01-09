@@ -3,46 +3,18 @@
 
 #include <mesh_generator.h>
 
-#include <macros.h>
-#include <helper.h>
-
-// chat gp
-#include <godot_cpp/classes/array_mesh.hpp>
-// #include <godot_cpp/classes/packed_vector2_array.hpp>
-// #include <godot_cpp/classes/packed_vector3_array.hpp>
-// #include <godot_cpp/classes/packed_int32_array.hpp>
-#include <godot_cpp/classes/mesh.hpp>
-#include <godot_cpp/variant/array.hpp>
-#include <godot_cpp/core/class_db.hpp>
-
-#include <godot_cpp/classes/texture2d.hpp>
 
 using namespace godot;
 
-// MeshGenerator::MeshGenerator()
-// {
-//     enabled = false;
-//     speed = 35.7;
-// }
 
-// MeshGenerator::~MeshGenerator()
-// {
-// }
 
-void MeshGenerator::_process(double delta)
-{
+void MeshGenerator::_process(double delta) {
 }
 
-// void MeshGenerator::_draw()
-// {
-// }
-
-void MeshGenerator::_physics_process(double delta)
-{
+void MeshGenerator::_physics_process(double delta) {
 }
 
-void MeshGenerator::add_quad()
-{
+void MeshGenerator::add_quad() {
     verts.push_back(Vector3(-1, 0, -1));
     verts.push_back(Vector3(1, 0, -1));
     verts.push_back(Vector3(1, 0, 1));
@@ -66,33 +38,50 @@ void MeshGenerator::add_quad()
     indices.push_back(3);
 }
 
-void MeshGenerator::add_terrain()
-{
+float MeshGenerator::get_terrain_height(Vector2 position) {
+    // auto image = texture2d->get_image();
+
+    // if (image != nullptr) {
+    //     auto color = sample_image(image, position);
+    //     return color.r;
+    // }
+
+    return 0.0f;
+}
+
+
+
+
+
+
+void MeshGenerator::add_terrain() {
+    Vector2 _lerp;
 
     // heights
-    for (int y = 0; y < grid_size.y; y++)
-    {
-        for (int x = 0; x < grid_size.x; x++)
-        {
-            float _height = rng->randf() * height;
+    for (int y = 0; y < grid_size.y; y++) {
+        _lerp.y = float(y) / float(grid_size.y - 1);
+
+        for (int x = 0; x < grid_size.x; x++) {
+            _lerp.x = float(x) / float(grid_size.x - 1);
+
+            float _height = get_terrain_height(_lerp);
+            // float _height = rng->randf() * height;
 
             // int ref_0 = (x + 0) + (y + 0) * grid_size.x;
             // int ref_1 = (x + 1) %  + (y + 0) * grid_size.x;
 
             verts.push_back(Vector3(x, _height, y));
             uvs.push_back(Vector2(x, y));
+            
         }
     }
 
     // normals
-    for (int y = 0; y < grid_size.y; y++)
-    {
-        for (int x = 0; x < grid_size.x; x++)
-        {
-            normals.push_back(Vector3(0, 1, 0));
+    for (int y = 0; y < grid_size.y; y++) {
+        for (int x = 0; x < grid_size.x; x++) {
+            normals.push_back(Vector3(0, 1, 0));  // unfinished
 
-            if (x < grid_size.x - 1 && y < grid_size.y - 1)
-            {
+            if (x < grid_size.x - 1 && y < grid_size.y - 1) {
                 int ref0 = position_to_ref(grid_size, Vector2i(x + 0, y + 0));
                 int ref1 = position_to_ref(grid_size, Vector2i(x + 1, y + 0));
                 int ref2 = position_to_ref(grid_size, Vector2i(x + 1, y + 1));
@@ -107,10 +96,8 @@ void MeshGenerator::add_terrain()
     }
 
     // quads
-    for (int y = 0; y < grid_size.y - 1; y++)
-    {
-        for (int x = 0; x < grid_size.x - 1; x++)
-        {
+    for (int y = 0; y < grid_size.y - 1; y++) {
+        for (int x = 0; x < grid_size.x - 1; x++) {
             int ref_0 = (x + 0) + (y + 0) * grid_size.x;
             int ref_1 = (x + 1) + (y + 0) * grid_size.x;
             int ref_2 = (x + 1) + (y + 1) * grid_size.x;
@@ -127,84 +114,13 @@ void MeshGenerator::add_terrain()
     }
 }
 
-void MeshGenerator::_ready()
-{
-
+void MeshGenerator::_ready() {
+    
     clear();
+    add_terrain();
+    generate_mesh();
 
-    array_mesh = get_array_mesh(); // update the cache
-
-    if (array_mesh != nullptr && array_mesh.is_valid())
-    {
-
-        // add_quad();
-
-        add_terrain();
-
-        // PackedVector3Array verts;
-        // verts.push_back(Vector3(-1, 0, -1));
-        // verts.push_back(Vector3(1, 0, -1));
-        // verts.push_back(Vector3(1, 0, 1));
-        // verts.push_back(Vector3(-1, 0, 1));
-
-        // PackedVector2Array uvs;
-        // uvs.push_back(Vector2(0, 0));
-        // uvs.push_back(Vector2(1, 0));
-        // uvs.push_back(Vector2(1, 1));
-        // uvs.push_back(Vector2(0, 1));
-
-        // PackedVector3Array normals;
-        // normals.push_back(Vector3(0, 1, 0));
-        // normals.push_back(Vector3(0, 1, 0));
-        // normals.push_back(Vector3(0, 1, 0));
-        // normals.push_back(Vector3(0, 1, 0));
-
-        // PackedInt32Array indices;
-        // indices.push_back(0);
-        // indices.push_back(1);
-        // indices.push_back(2);
-        // indices.push_back(0);
-        // indices.push_back(2);
-        // indices.push_back(3);
-
-        // TRYING TO REMOVE .................UNCOMMENT TO WORK
-        // we need this because the PackedVector3Array is a value type i think
-        surface_array.resize(Mesh::ARRAY_MAX);
-        surface_array[Mesh::ARRAY_VERTEX] = verts;
-        surface_array[Mesh::ARRAY_TEX_UV] = uvs;
-        surface_array[Mesh::ARRAY_NORMAL] = normals;
-        surface_array[Mesh::ARRAY_INDEX] = indices;
-
-        // Create and populate the mesh
-        // Ref<ArrayMesh> mesh = memnew(ArrayMesh);
-        // mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, surface_array);
-
-        print("found mesh_ref!"); // note we crash though running twice
-        array_mesh->clear_surfaces();
-        array_mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, surface_array);
-    }
-
-    if (get_static_body3d() != nullptr)
-    {
-        print("get_static_body3d() != nullptr");
-    }
-
-    if (get_collision_shape3d() != nullptr)
-    {
-        print("get_collision_shape3d() != nullptr");
-    }
-
-    if (get_height_map_shape3d() != nullptr && get_height_map_shape3d().is_valid())
-    {
-        print("get_height_map_shape3d() != nullptr && get_height_map_shape3d().is_valid()");
-    }
-
-    if (get_intermediate_mesh() != nullptr && get_intermediate_mesh().is_valid())
-    {
-        print("get_intermediate_mesh() != nullptr && get_intermediate_mesh().is_valid()");
-    }
 }
-
 
 #pragma region CREATE_GET_SET_MACROS
 
@@ -218,13 +134,9 @@ CREATE_GETTER_SETTER(MeshGenerator, NodePath, node_path)
 
 #pragma endregion
 
-
-
-void MeshGenerator::_bind_methods()
-{
+void MeshGenerator::_bind_methods() {
     // to find variants with autotype, use the Variant::
     // Variant::PACKED_VECTOR2_ARRAY
-
 
 #pragma region VARIANT_BINDINGS
     CREATE_VAR_BINDINGS(MeshGenerator, BOOL, enabled)
@@ -237,8 +149,7 @@ void MeshGenerator::_bind_methods()
 
 #pragma region REFERENCE_BINDINGS // generated this with chat gp!
 
-    CREATE_CLASS_BINDINGS(MeshGenerator, "Texture2D", texture2d); // note different macro required for ref types (Texture2D, AudioStream etc)
-
+    CREATE_CLASS_BINDINGS(MeshGenerator, "Texture2D", texture2d);  // note different macro required for ref types (Texture2D, AudioStream etc)
 
     // ClassDB::bind_method(D_METHOD("set_texture2d", "texture2d"), &MeshGenerator::set_texture2d);
     // ClassDB::bind_method(D_METHOD("get_texture2d"), &MeshGenerator::get_texture2d);

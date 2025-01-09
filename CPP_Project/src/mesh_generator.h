@@ -1,8 +1,8 @@
 #ifndef MESH_GENERATOR_H
 #define MESH_GENERATOR_H
 
-#include <macros.h> // my macros to help declare properties
-#include <helper.h> // includes a print function
+#include <macros.h>  // my macros to help declare properties
+#include <helper.h>  // includes a print function
 
 // #include <godot_cpp/classes/sprite2d.hpp>
 #include <godot_cpp/classes/node3d.hpp>
@@ -24,10 +24,19 @@
 
 #include <godot_cpp/classes/texture2d.hpp>
 
+// chatgp suggested for image acces
+#include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/variant/vector2.hpp>
+#include <godot_cpp/variant/color.hpp>
+#include <cmath>
+#include <algorithm>
+
 using namespace godot;
 
-class MeshGenerator : public Node3D
-{
+// Function declaration to sample an image at UV coordinates
+// Color my_sample_image(Ref<Image> image, const Vector2 &uv);
+
+class MeshGenerator : public Node3D {
     GDCLASS(MeshGenerator, Node3D)
 
 #pragma region GDCLASS_EXPAND // not yet used binding
@@ -35,13 +44,11 @@ class MeshGenerator : public Node3D
 #pragma endregion
 
     // MACROS from macros.h
-    DECLARE_PROPERTY(bool, enabled) // we need to also add two more lines to the cpp file per a property we want to @export
+    DECLARE_PROPERTY(bool, enabled)  // we need to also add two more lines to the cpp file per a property we want to @export
     DECLARE_PROPERTY(float, height)
     DECLARE_PROPERTY(Vector2i, grid_size)
 
-
     DECLARE_PROPERTY(NodePath, node_path)
-
 
 #pragma region Texture2DExport // not yet used binding
 
@@ -55,11 +62,11 @@ class MeshGenerator : public Node3D
 //     Ref<Texture2D> get_texture2d() const;
 #pragma endregion
 
-private:
-protected:
+    // private:
+   protected:
     static void _bind_methods();
 
-public:
+   public:
     void _ready() override;
     void _process(double delta) override;
     void _physics_process(double delta) override;
@@ -67,7 +74,7 @@ public:
     void add_quad();
     void add_terrain();
 
-public:
+   public:
     PackedVector3Array verts;
     PackedVector2Array uvs;
     PackedVector3Array normals;
@@ -80,13 +87,15 @@ public:
     // PackedInt32Array indices= PackedInt32Array();
     // Array surface_array= Array();
 
-    void clear()
-    {
+    float get_terrain_height(Vector2 position);  // new get height function (universal route)
+
+    void clear() {
         verts.clear();
         uvs.clear();
         normals.clear();
         indices.clear();
 
+        surface_array.clear();
         surface_array.resize(Mesh::ARRAY_MAX);
         surface_array[Mesh::ARRAY_VERTEX] = verts;
         surface_array[Mesh::ARRAY_TEX_UV] = uvs;
@@ -100,14 +109,15 @@ public:
     //
     // WARNING: this code has low memory saftey if node goes missing! (it will probabally crash)
     //
-    MeshInstance3D *mesh_instance3d = nullptr; // setting nullptr here seems to avoid crash, i think either here of the deconstructor is required
+    // WARNING: declaring in header has the effective consquence these are private functions
 
-    MeshInstance3D *get_mesh_instance3d() // returns NULL if not valid (does cause errors, it's hard to call get_node_or_null, takes longer)
+    MeshInstance3D *mesh_instance3d = nullptr;  // setting nullptr here seems to avoid crash, i think either here of the deconstructor is required
+
+    MeshInstance3D *get_mesh_instance3d()  // returns NULL if not valid (does cause errors, it's hard to call get_node_or_null, takes longer)
     {
-
         // TEST WITHOUT THIS.... i think it causes a bug maybe when i reload the same scene
-        if (mesh_instance3d == nullptr)                                   // note i keep both NULL and nullptr due to some unexpected behaviours
-            mesh_instance3d = get_node<MeshInstance3D>("MeshInstance3D"); // note "get_node_or_null" won't work
+        if (mesh_instance3d == nullptr)                                    // note i keep both NULL and nullptr due to some unexpected behaviours
+            mesh_instance3d = get_node<MeshInstance3D>("MeshInstance3D");  // note "get_node_or_null" won't work
 
         return mesh_instance3d;
     }
@@ -115,10 +125,8 @@ public:
     //  Ref<ArrayMesh> mesh_ref = mesh_instance3d->get_mesh(); // i think this may crash
 
     Ref<ArrayMesh> array_mesh = nullptr;
-    Ref<ArrayMesh> get_array_mesh()
-    {
-        if (array_mesh == nullptr)
-        {
+    Ref<ArrayMesh> get_array_mesh() {
+        if (array_mesh == nullptr) {
             mesh_instance3d = get_mesh_instance3d();
             if (mesh_instance3d != nullptr)
                 array_mesh = mesh_instance3d->get_mesh();
@@ -126,40 +134,57 @@ public:
         return array_mesh;
     }
 
-    Ref<ImmediateMesh> intermediate_mesh = nullptr;
-    Ref<ImmediateMesh> get_intermediate_mesh()
-    {
-        if (intermediate_mesh == nullptr)
-        {
-            mesh_instance3d = get_mesh_instance3d();
-            if (mesh_instance3d != nullptr)
-                intermediate_mesh = mesh_instance3d->get_mesh();
+    void generate_mesh() {
+        array_mesh = get_array_mesh();  // update the cache
+
+        if (array_mesh != nullptr && array_mesh.is_valid()) {
+            // TRYING TO REMOVE ...........but so far as we have to turn this into a godot array that's inconviniant
+            // we need this because the PackedVector3Array is a value type i think
+            surface_array.resize(Mesh::ARRAY_MAX);
+            surface_array[Mesh::ARRAY_VERTEX] = verts;
+            surface_array[Mesh::ARRAY_TEX_UV] = uvs;
+            surface_array[Mesh::ARRAY_NORMAL] = normals;
+            surface_array[Mesh::ARRAY_INDEX] = indices;
+
+            print("found mesh_ref!");  // note we crash though running twice
+            array_mesh->clear_surfaces();
+            array_mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, surface_array);
+
+            clear();
         }
-        return intermediate_mesh;
     }
 
-    void _exit_tree() override
-    {
+    // NOT USED
+    // Ref<ImmediateMesh> intermediate_mesh = nullptr;
+    // Ref<ImmediateMesh> get_intermediate_mesh()
+    // {
+    //     if (intermediate_mesh == nullptr)
+    //     {
+    //         mesh_instance3d = get_mesh_instance3d();
+    //         if (mesh_instance3d != nullptr)
+    //             intermediate_mesh = mesh_instance3d->get_mesh();
+    //     }
+    //     return intermediate_mesh;
+    // }
+
+    void _exit_tree() override {
         // mesh_instance3d = nullptr; // Reset the pointer ... PREVENTS A CRASH VERY IMPORTANT!!
         // mesh_instance3d = NULL;    // Reset the pointer ... PREVENTS A CRASH VERY IMPORTANT!!
     }
 
     StaticBody3D *static_body3d = nullptr;
 
-    StaticBody3D *get_static_body3d()
-    {
-        if (static_body3d == nullptr)                               // raw version
-            static_body3d = get_node<StaticBody3D>("StaticBody3D"); // note "get_node_or_null" won't work
+    StaticBody3D *get_static_body3d() {
+        if (static_body3d == nullptr)                                // raw version
+            static_body3d = get_node<StaticBody3D>("StaticBody3D");  // note "get_node_or_null" won't work
 
         return static_body3d;
     }
 
     CollisionShape3D *collision_shape3d = nullptr;
 
-    CollisionShape3D *get_collision_shape3d()
-    {
-        if (collision_shape3d == nullptr)
-        {
+    CollisionShape3D *get_collision_shape3d() {
+        if (collision_shape3d == nullptr) {
             static_body3d = get_static_body3d();
             if (static_body3d != nullptr)
                 collision_shape3d = static_body3d->get_node<CollisionShape3D>("CollisionShape3D");
@@ -169,14 +194,11 @@ public:
 
     Ref<HeightMapShape3D> height_map_shape3d = nullptr;
 
-    Ref<HeightMapShape3D> get_height_map_shape3d()
-    {
-        if (height_map_shape3d == nullptr)
-        {
+    Ref<HeightMapShape3D> get_height_map_shape3d() {
+        if (height_map_shape3d == nullptr) {
             collision_shape3d = get_collision_shape3d();
 
-            if (collision_shape3d != nullptr)
-            {
+            if (collision_shape3d != nullptr) {
                 height_map_shape3d = collision_shape3d->get_shape();
             }
         }
@@ -190,23 +212,20 @@ public:
     // }
 
     // safer according to chatgp, will test
-    int position_to_ref(Vector2i size, Vector2i position)
-    {
+    int position_to_ref(Vector2i size, Vector2i position) {
         int ref = position.x + position.y * size.x;
         return (ref % (size.x * size.y) + (size.x * size.y)) % (size.x * size.y);
     }
 
-    Vector2i ref_to_position(Vector2i size, int ref)
-    {
-        int x = ref % size.x; // Compute the x-coordinate (column)
-        int y = ref / size.x; // Compute the y-coordinate (row)
+    Vector2i ref_to_position(Vector2i size, int ref) {
+        int x = ref % size.x;  // Compute the x-coordinate (column)
+        int y = ref / size.x;  // Compute the y-coordinate (row)
         return Vector2i(x, y);
     }
 
     Ref<RandomNumberGenerator> rng;
 
-    MeshGenerator()
-    {
+    MeshGenerator() {
         clear();
 
         rng.instantiate();
@@ -217,14 +236,13 @@ public:
         grid_size = Vector2i(8, 8);
         height = 1.0;
     };
-    ~MeshGenerator()
-    {
+    ~MeshGenerator() {
         // it seems safest to clear the pointers here, avoiding a crash with the editor
-        mesh_instance3d = nullptr; // safest pattern, clearing on exit
-        static_body3d = nullptr;   // safest pattern, clearing on exit
+        mesh_instance3d = nullptr;  // safest pattern, clearing on exit
+        static_body3d = nullptr;    // safest pattern, clearing on exit
         collision_shape3d = nullptr;
 
-        array_mesh.unref(); // i don't think i need this, because it should be automatic
+        array_mesh.unref();  // i don't think i need this, because it should be automatic
         height_map_shape3d.unref();
     };
 };

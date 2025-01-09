@@ -18,6 +18,16 @@
 #include "s1_audio/s1_poly_synth_visualizer.h"  // visualizer
 
 #include "mesh_generator.h"
+// #include "mesh_generator/mesh_generator.h" // can't seem to get it here, probabally the h file pattern
+
+
+#include "mesh_generator2.h" // trying with cut down one
+// #include "mesh_generator/mesh_generator2.h" // CANT GET SUBFOLDER WORKING
+
+
+
+
+
 #pragma endregion
 
 
@@ -44,6 +54,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     GDREGISTER_CLASS(S1AudioGenerator);  // sort in file
 
     GDREGISTER_CLASS(MeshGenerator);
+    GDREGISTER_CLASS(MeshGenerator2); // broken in subfolder
+
 
     GDREGISTER_CLASS(SineExample);  // Sine example
 

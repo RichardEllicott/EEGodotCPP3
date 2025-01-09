@@ -57,9 +57,19 @@ if not os.path.exists(muparser_dir):
 # - CPPDEFINES are for pre-processor defines
 # - LINKFLAGS are for linking flags
 
+
+
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=["src/"])
-sources = Glob("src/*.cpp")
+sources = Glob("src/*.cpp") # only supports the top folder i think
+
+
+
+# WARNING TYRING TO SUPPORT SUBFOLDERS BREAKS ME!
+# sources = Glob("src/**/*.cpp") ## IMPORTANT: search all subfolders properly... required now for my folders
+
+
+
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(

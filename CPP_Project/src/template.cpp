@@ -52,7 +52,7 @@ void Template::_bind_methods()
     CREATE_VAR_BINDINGS(Template, FLOAT, speed)
     CREATE_VAR_BINDINGS(Template, VECTOR2I, grid_size)
 
-    CREATE_CLASS_BINDINGS(Template, "Texture2D", texture2d)
+    CREATE_CLASS_BINDINGS(Template, "Texture2D", texture2d) // note a different macro from Variants like Variant::FLOAT
 
     ADD_SIGNAL(MethodInfo("test_signal", PropertyInfo(Variant::OBJECT, "node"), PropertyInfo(Variant::VECTOR2, "new_pos"))); // signal still testing
 }

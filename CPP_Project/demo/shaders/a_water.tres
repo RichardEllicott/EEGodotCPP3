@@ -1,0 +1,61 @@
+[gd_resource type="ShaderMaterial" load_steps=11 format=3 uid="uid://b2rufx1rdxpk8"]
+
+[ext_resource type="Shader" path="res://shaders/a_water.gdshader" id="1_d0brb"]
+
+[sub_resource type="Gradient" id="Gradient_rtyk3"]
+offsets = PackedFloat32Array(0.434783, 0.486842, 0.56917)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_m46a1"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_25fjr"]
+seamless = true
+normalize = false
+color_ramp = SubResource("Gradient_rtyk3")
+noise = SubResource("FastNoiseLite_m46a1")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_xaak1"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_8nx7m"]
+seamless = true
+as_normal_map = true
+noise = SubResource("FastNoiseLite_xaak1")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_jiyvp"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_laev0"]
+seamless = true
+as_normal_map = true
+noise = SubResource("FastNoiseLite_jiyvp")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_xpj16"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3lh78"]
+seamless = true
+noise = SubResource("FastNoiseLite_xpj16")
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_d0brb")
+shader_parameter/depth_fade_distance = 1.0
+shader_parameter/absorbance = 2.0
+shader_parameter/shallow_color = Color(0.22, 0.66, 1, 1)
+shader_parameter/deep_color = Color(0, 0.25, 0.45, 1)
+shader_parameter/foam_amount = 0.2
+shader_parameter/foam_color = Color(1, 1, 1, 1)
+shader_parameter/foam_scale = Vector2(1, 1)
+shader_parameter/roughness = 0.05
+shader_parameter/wave_scale = 4.0
+shader_parameter/height_scale = 0.15
+shader_parameter/wave_dir1 = Vector2(1, 0)
+shader_parameter/wave_dir2 = Vector2(0, 1)
+shader_parameter/wave_speed = 0.015
+shader_parameter/extra_wave_height = 0.0
+shader_parameter/extra_wave_gernster = 0.0
+shader_parameter/extra_wave_skew = 0.0
+shader_parameter/extra_wave_speed = 0.0
+shader_parameter/extra_wave_direction = Vector3(1, 0, 1)
+shader_parameter/foam_noise = SubResource("NoiseTexture2D_25fjr")
+shader_parameter/wave_texture = SubResource("NoiseTexture2D_3lh78")
+shader_parameter/normal1 = SubResource("NoiseTexture2D_8nx7m")
+shader_parameter/normal2 = SubResource("NoiseTexture2D_laev0")

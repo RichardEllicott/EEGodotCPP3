@@ -1,13 +1,14 @@
 #ifndef MESH_GENERATOR2_H
 #define MESH_GENERATOR2_H
 
-#include <macros.h>  // my macros to help declare properties
 #include <helper.h>  // includes a print function
+#include <macros.h>  // my macros to help declare properties
 
 // #include <godot_cpp/classes/sprite2d.hpp>
-// #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/node3d.hpp>
+#include <godot_cpp/classes/noise_texture2d.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
 
 // #include <std>
 
@@ -33,7 +34,6 @@ class MeshGenerator2 : public Node3D {
 
     // DECLARE_PROPERTY(bool, enabled) // variants don't need the Ref<> syntax
     // DECLARE_PROPERTY(float, speed)
-    // DECLARE_PROPERTY(Vector2i, grid_size)
 
     // DECLARE_PROPERTY(Ref<Texture2D>, texture2d) // note the Ref type is correct for this pattern, the ref will delete it's pointer automaticly
 
@@ -43,9 +43,24 @@ class MeshGenerator2 : public Node3D {
     DECLARE_PROPERTY(PackedInt32Array, indices)
     DECLARE_PROPERTY(Array, surface_array)
 
+    DECLARE_PROPERTY(Ref<Texture2D>, heightmap1)
+    DECLARE_PROPERTY(Ref<Texture2D>, heightmap2)
+    DECLARE_PROPERTY(Ref<Texture2D>, heightmap3)
+
+    DECLARE_PROPERTY(float, heightmap1_scale)
+    DECLARE_PROPERTY(float, heightmap2_scale)
+    DECLARE_PROPERTY(float, heightmap3_scale)
+
+
+
+    DECLARE_PROPERTY(Vector2i, grid_size)  // rem to initialize
+    DECLARE_PROPERTY(Vector3, scale)       // rem to initialize
+    DECLARE_PROPERTY(Vector2, uv_scale)    // rem to initialize
+    DECLARE_PROPERTY(float, normal_scale)  // rem to initialize
+    DECLARE_PROPERTY(float, normal_step)   // rem to initialize
+
     // std::vector<QuadRef> quads;
     std::vector<std::vector<int>> ngons;
-
 
    private:
    protected:
@@ -71,12 +86,15 @@ class MeshGenerator2 : public Node3D {
 
     void generate_mesh();  // generate the final mesh, and clear the cache
 
-    float get_terrain_height(Vector2 position);
+    float get_terrain_height(Vector2 position); // get height of terrain (from texture2d)
 
-    void add_terrain();
+    Vector3 get_terrain_normal(Vector2 position); // get normal using the height function, step should be a small fraction
 
+    void add_terrain();  // add terrain data (to internal arrays)
 
-    void _generate_surface_array();
+    void _generate_surface_array();  // generate the mesh (in the child MeshInstance3D with an ArrayMesh)
+
+    void macro_test();  // register me in the bind
 };
 
 #endif

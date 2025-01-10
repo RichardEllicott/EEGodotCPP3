@@ -94,8 +94,14 @@ T* get_node_as(Node* current_node, const NodePath& path) {
 // less important functions in a library
 class ImageHelper {
    public:
+
+
     // Static method to sample an image at UV coordinates using bilinear interpolation
-    static Color sample_image(const Image &image, const Vector2 &uv);
+    static Color sample_image(const Image &image, const Vector2 &uv); // for & ref
+    static Color sample_image(const Ref<Image> image, const Vector2 &uv); // for Godot ref. i think the normal way
+
+
+
 };
 
 // // Simple Frequency Modulation function

@@ -7,13 +7,20 @@
 using namespace godot;
 
 MeshGenerator2::MeshGenerator2() {
-    // enabled = false;
-    // speed = 35.7;
+    // init vars
+    grid_size = Vector2i(16, 16);
+    scale = Vector3(1.0f, 1.0f, 1.0f);
+    uv_scale = Vector2(1, 1);
+    normal_scale = 1.0f;
+    normal_step = 1.0f / 32.0f;
 
-    print("hello from MeshGenerator2!");
+    heightmap1_scale = 1.0f;
+    heightmap2_scale = 1.0f;
+    heightmap3_scale = 1.0f;
 
+
+    // init rng
     rng.instantiate();
-    // rng->randf();
     rng->set_seed(0);
 }
 
@@ -21,6 +28,7 @@ MeshGenerator2::~MeshGenerator2() {
 }
 
 void MeshGenerator2::_ready() {
+    clear();
     add_terrain();
     generate_mesh();  // we need to call in ready, as then the children will be in the tree
     // emit_signal("test_signal", this, Vector2(3, 7));
@@ -52,12 +60,12 @@ Ref<ArrayMesh> MeshGenerator2::get_array_mesh() {
 }
 
 void MeshGenerator2::clear() {
+    // clear all arrays
     verts.clear();
     uvs.clear();
     normals.clear();
     indices.clear();
     surface_array.clear();
-    // quads.clear();
     ngons.clear();
 }
 
@@ -87,7 +95,6 @@ void MeshGenerator2::_generate_surface_array() {
 
             // indices.append_array();
 
-
             // triangle 2 acd
             indices.push_back(ngon[0]);
             indices.push_back(ngon[2]);
@@ -97,7 +104,7 @@ void MeshGenerator2::_generate_surface_array() {
             indices.push_back(ngon[0]);
             indices.push_back(ngon[1]);
             indices.push_back(ngon[2]);
-        } else if (ngon.size() >= 4) { // larger ngon
+        } else if (ngon.size() >= 4) {  // larger ngon
         }
     }
     ngons.clear();
@@ -124,34 +131,97 @@ void MeshGenerator2::generate_mesh() {
 }
 
 float MeshGenerator2::get_terrain_height(Vector2 position) {
-    return 0.0;
+    float sample = 0.0f;
+
+    // 3 heightmaps read the same
+    if (heightmap1.is_valid()) {
+        auto image = heightmap1->get_image();
+
+        if (image.is_valid() && !image->is_compressed()) {
+            auto _sample = ImageHelper::sample_image(image, position);
+            sample += _sample.r * heightmap1_scale;
+        }
+    }
+
+    if (heightmap2.is_valid()) {
+        auto image = heightmap2->get_image();
+
+        if (image.is_valid() && !image->is_compressed()) {
+            auto _sample = ImageHelper::sample_image(image, position);
+            sample += _sample.r * heightmap2_scale;
+        }
+    }
+
+    if (heightmap3.is_valid()) {
+        auto image = heightmap3->get_image();
+
+        if (image.is_valid() && !image->is_compressed()) {
+            auto _sample = ImageHelper::sample_image(image, position);
+            sample += _sample.r * heightmap3_scale;
+        }
+    }
+    return sample;
+    // Ref<NoiseTexture2D> noise_texture2d = texture2d;
+    // if (noise_texture2d.is_valid()) {
+    // }
+}
+
+// uncheked chatgp (can be errors sometimes)
+Vector3 MeshGenerator2::get_terrain_normal(Vector2 position) {
+    // Normal calculation function
+    // Sample heights around the point
+    float hL = get_terrain_height(Vector2(position.x - normal_step, position.y));  // Height to the left
+    float hR = get_terrain_height(Vector2(position.x + normal_step, position.y));  // Height to the right
+    float hD = get_terrain_height(Vector2(position.x, position.y - normal_step));  // Height below
+    float hU = get_terrain_height(Vector2(position.x, position.y + normal_step));  // Height above
+
+    // Compute gradient (partial derivatives)
+    float dx = hR - hL;  // Gradient in X direction
+    float dz = hU - hD;  // Gradient in Z direction
+
+    // Adjust the Y scale for normalized height data
+    dx *= normal_scale;
+    dz *= normal_scale;
+
+    // Normal vector
+    Vector3 normal(-dx, 2.0f * normal_step, -dz);
+
+    // Normalize the vector
+    return normal.normalized();  // not sure i need a normalize here?
 }
 
 void MeshGenerator2::add_terrain() {
-    Vector2i grid_size = Vector2i(32, 32);
-
-    Vector2 _lerp;
+    //
+    Vector2 _lerp;  // track position x,y from 0 to 1
 
     std::vector<Vector2> lerps;
     lerps.resize((grid_size.y - 1) * (grid_size.x - 1));
 
     // heights
     for (int y = 0; y < grid_size.y; y++) {
-        _lerp.y = float(y) / float(grid_size.y - 1);
+        _lerp.y = float(y) / float(grid_size.y - 1);  // calculate y position from 0 to 1
 
         for (int x = 0; x < grid_size.x; x++) {
-            _lerp.x = float(x) / float(grid_size.x - 1);
+            _lerp.x = float(x) / float(grid_size.x - 1);  // calculate x position from 0 to 1
+
+
 
             float _height = get_terrain_height(_lerp);
-            // float _height = rng->randf() * height;
 
-            // int ref_0 = (x + 0) + (y + 0) * grid_size.x;
-            // int ref_1 = (x + 1) %  + (y + 0) * grid_size.x;
 
-            verts.push_back(Vector3(x, _height, y));
-            uvs.push_back(Vector2(x, y));
+            // auto final_pos = Vector3(_lerp.x, _height, _lerp.y) * scale;  // scaled allows height and dimension control
+            auto final_pos = Vector3(_lerp.x - 0.5f, _height, _lerp.y - 0.5f) * scale;  // with center correction
 
-            normals.push_back(Vector3(0, 1, 0));  // unfinished (just left up)
+
+
+            // verts.push_back(Vector3(x, _height, y));
+            verts.push_back(final_pos);
+
+            // uvs.push_back(Vector2(x, y));
+            uvs.push_back(_lerp * uv_scale);
+
+            auto normal = get_terrain_normal(_lerp); // get normal
+            normals.push_back(normal);  // unfinished (just left up)
         }
     }
 
@@ -170,6 +240,11 @@ void MeshGenerator2::add_terrain() {
     }
 }
 
+void MeshGenerator2::macro_test() {
+    print("MeshGenerator2::macro_test...");
+    _ready();
+}
+
 // BINDINGS:
 // macros from macros.h
 // CREATE_GETTER_SETTER(MeshGenerator2, bool, enabled)
@@ -177,11 +252,26 @@ void MeshGenerator2::add_terrain() {
 // CREATE_GETTER_SETTER(MeshGenerator2, Vector2i, grid_size)
 // CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, texture2d)
 
+// macros from macros.h
 CREATE_GETTER_SETTER(MeshGenerator2, PackedVector3Array, verts)
 CREATE_GETTER_SETTER(MeshGenerator2, PackedVector2Array, uvs)
 CREATE_GETTER_SETTER(MeshGenerator2, PackedVector3Array, normals)
 CREATE_GETTER_SETTER(MeshGenerator2, PackedInt32Array, indices)
 CREATE_GETTER_SETTER(MeshGenerator2, Array, surface_array)
+
+CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, heightmap1)
+CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, heightmap2)
+CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, heightmap3)
+
+CREATE_GETTER_SETTER(MeshGenerator2, float, heightmap1_scale)
+CREATE_GETTER_SETTER(MeshGenerator2, float, heightmap2_scale)
+CREATE_GETTER_SETTER(MeshGenerator2, float, heightmap3_scale)
+
+CREATE_GETTER_SETTER(MeshGenerator2, Vector3, scale)
+CREATE_GETTER_SETTER(MeshGenerator2, Vector2i, grid_size)
+CREATE_GETTER_SETTER(MeshGenerator2, Vector2, uv_scale)
+CREATE_GETTER_SETTER(MeshGenerator2, float, normal_scale)
+CREATE_GETTER_SETTER(MeshGenerator2, float, normal_step)
 
 void MeshGenerator2::_bind_methods() {
     // macros from macros.h
@@ -192,11 +282,28 @@ void MeshGenerator2::_bind_methods() {
 
     // CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", texture2d)
 
+    // macros from macros.h
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::PACKED_VECTOR3_ARRAY, verts)
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::PACKED_VECTOR2_ARRAY, uvs)
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::PACKED_VECTOR3_ARRAY, normals)
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::PACKED_INT32_ARRAY, indices)
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::ARRAY, surface_array)
+
+    CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", heightmap1);
+    CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", heightmap2);
+    CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", heightmap3);
+
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, heightmap1_scale)  // different macro for classes
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, heightmap2_scale)  // different macro for classes
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, heightmap3_scale)  // different macro for classes
+
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::VECTOR3, scale)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::VECTOR2I, grid_size)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::VECTOR2, uv_scale)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, normal_scale)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, normal_step)
+
+    ClassDB::bind_method(D_METHOD("macro_test"), &MeshGenerator2::macro_test);  // manual bind of macro (see examples of this in poly_synth.h)
 }
 
 #endif

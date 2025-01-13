@@ -16,6 +16,14 @@ Helper Functions
 #include <godot_cpp/variant/vector2.hpp>
 #include <stdexcept>
 #include <vector>
+
+
+// #include "core/object.h"
+// #include "core/class_db.h"
+// #include "core/math/vector2.h"
+#include <random>
+
+
 // #include <cmath>
 // #include <algorithm>
 
@@ -97,6 +105,10 @@ class ImageHelper {
 
     // Helper function to create a 1D Gaussian kernel
     static void create_gaussian_kernel(std::vector<float>& kernel, float radius);
+
+
+
+    static PackedFloat32Array erode(const PackedFloat32Array& heightmap, Vector2i image_size, int iterations, float deposition, float erosion);
 };
 
 // // Simple Frequency Modulation function

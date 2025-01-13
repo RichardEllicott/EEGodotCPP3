@@ -256,4 +256,152 @@ PackedFloat32Array ImageHelper::blur_image(const PackedFloat32Array& input_image
 }
 
 
+
+
+// PackedFloat32Array ImageHelper::erode(const PackedFloat32Array& heightmap, Vector2i image_size, int iterations, float deposition, float erosion) {
+//         PackedFloat32Array eroded_heightmap = heightmap;
+
+//         std::random_device rd;
+//         std::mt19937 gen(rd());
+//         std::uniform_int_distribution<> dis(0, image_size.x - 1);
+
+//         for (int i = 0; i < iterations; ++i) {
+//             // Random starting point
+//             int x = dis(gen);
+//             int y = dis(gen);
+
+//             float water = 1.0f;
+//             float sediment = 0.0f;
+
+//             while (water > 0.0f) {
+//                 Vector2 flow_direction(0, 0);
+
+//                 for (int dx = -1; dx <= 1; ++dx) {
+//                     for (int dy = -1; dy <= 1; ++dy) {
+//                         if (dx == 0 && dy == 0) {
+//                             continue;
+//                         }
+
+//                         int neighbor_x = CLAMP(x + dx, 0, image_size.x - 1);
+//                         int neighbor_y = CLAMP(y + dy, 0, image_size.y - 1);
+
+//                         int current_index = y * image_size.x + x;
+//                         int neighbor_index = neighbor_y * image_size.x + neighbor_x;
+
+//                         float current_height = heightmap[current_index];
+//                         float neighbor_height = heightmap[neighbor_index];
+
+//                         if (neighbor_height < current_height) {
+//                             flow_direction += Vector2(dx, dy);
+//                         }
+//                     }
+//                 }
+
+//                 flow_direction = flow_direction.normalized();
+
+//                 x += (int)round(flow_direction.x);
+//                 y += (int)round(flow_direction.y);
+
+//                 x = CLAMP(x, 0, image_size.x - 1);
+//                 y = CLAMP(y, 0, image_size.y - 1);
+
+//                 float distance = flow_direction.length(); 
+
+//                 if (distance == 0.0f) {
+//                     // Deposition
+//                     sediment *= deposition; // Corrected line
+//                     eroded_heightmap[y * image_size.x + x] += sediment;
+//                     sediment -= sediment * deposition;
+//                 } else {
+//                     // Erosion
+//                     float erosion_amount = water * erosion * distance;
+//                     eroded_heightmap[y * image_size.x + x] -= erosion_amount; 
+//                     sediment += erosion_amount;
+//                 }
+
+//                 water -= 0.01f;
+//             }
+//         }
+
+//         return eroded_heightmap;
+//     }
+
+
+
+     PackedFloat32Array ImageHelper::erode(const PackedFloat32Array& heightmap,  Vector2i image_size, int iterations, float deposition, float erosion) {
+        PackedFloat32Array eroded_heightmap = heightmap;
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, image_size.x - 1);
+
+        for (int i = 0; i < iterations; ++i) {
+            // Random starting point
+            int x = dis(gen);
+            int y = dis(gen);
+
+            float water = 1.0f;
+            float sediment = 0.0f;
+
+            while (water > 0.0f) {
+                Vector2 flow_direction(0, 0);
+
+                for (int dx = -1; dx <= 1; ++dx) {
+                    for (int dy = -1; dy <= 1; ++dy) {
+                        if (dx == 0 && dy == 0) {
+                            continue;
+                        }
+
+                        int neighbor_x = CLAMP(x + dx, 0, image_size.x - 1);
+                        int neighbor_y = CLAMP(y + dy, 0, image_size.y - 1);
+
+                        int current_index = y * image_size.x + x;
+                        int neighbor_index = neighbor_y * image_size.x + neighbor_x;
+
+                        float current_height = heightmap[current_index];
+                        float neighbor_height = heightmap[neighbor_index];
+
+                        if (neighbor_height < current_height) {
+                            flow_direction += Vector2(dx, dy);
+                        }
+                    }
+                }
+
+                flow_direction = flow_direction.normalized();
+
+                x += (int)round(flow_direction.x);
+                y += (int)round(flow_direction.y);
+
+                x = CLAMP(x, 0, image_size.x - 1);
+                y = CLAMP(y, 0, image_size.y - 1);
+
+                float distance = flow_direction.length(); 
+
+                if (eroded_heightmap[y * image_size.x + x] <= 0.0f) { 
+                    // If water reaches the lowest point (height 0), stop depositing sediment
+                    sediment = 0.0f; 
+                }
+
+                if (distance == 0.0f) {
+                    // Deposition
+                    sediment *= deposition; 
+                    eroded_heightmap[y * image_size.x + x] += sediment;
+                    sediment -= sediment * deposition;
+                } else {
+                    // Erosion
+                    float erosion_amount = water * erosion * distance;
+                    eroded_heightmap[y * image_size.x + x] -= erosion_amount; 
+                    sediment += erosion_amount;
+                }
+
+                water -= 0.01f;
+            }
+        }
+
+        return eroded_heightmap;
+    }
+
+
+
+
 #endif

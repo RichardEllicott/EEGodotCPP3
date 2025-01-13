@@ -4,20 +4,33 @@
 // #include <mesh_generator/mesh_generator2.h>
 #include <mesh_generator2.h>
 
+
+
+
+
 using namespace godot;
 
 MeshGenerator2::MeshGenerator2() {
     // init vars
+
+        heightmap1_scale = 1.0f;
+    heightmap2_scale = 1.0f;
+    heightmap3_scale = 1.0f;
+
+
     grid_size = Vector2i(16, 16);
     scale = Vector3(1.0f, 1.0f, 1.0f);
     uv_scale = Vector2(1, 1);
     normal_scale = 1.0f;
     normal_step = 1.0f / 32.0f;
-    blur_value = 2.0f;
 
-    heightmap1_scale = 1.0f;
-    heightmap2_scale = 1.0f;
-    heightmap3_scale = 1.0f;
+    blur_value = 2.0f;
+    erosion_iterations = 0;
+    erosion_deposition = 2.0f;
+    erosion_erosion = 2.0f;
+
+
+
 
     // init rng
     rng.instantiate();
@@ -250,13 +263,17 @@ void MeshGenerator2::macro_generate_terrain() {
         auto image_floats = ImageHelper::image_channel_to_floats(image, 0);  // red channel to floats
 
         if (blur_value > 0.0f) {
-
-            
             print("apply blur ", blur_value, "");
             image_floats = ImageHelper::blur_image(image_floats, image_size, blur_value);  // blur  (SEEMS TO CRASH AT THE MO!!!)
         }
-        auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_L8);  // grey
-        // auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_RGB8);  // rgb
+
+        
+        image_floats = ImageHelper::erode(image_floats, image_size, erosion_iterations, erosion_deposition, erosion_erosion);
+
+
+
+        // auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_L8);  // grey
+        auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_RGB8);  // rgb
         // auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_RGBA8);  // rgba
 
         heightmap1 = ImageTexture::create_from_image(new_image);
@@ -285,6 +302,8 @@ void MeshGenerator2::macro_test_blur() {
         image_out = ImageTexture::create_from_image(new_image);
     }
 }
+
+
 
 // BINDINGS:
 // macros from macros.h
@@ -317,6 +336,12 @@ CREATE_GETTER_SETTER(MeshGenerator2, float, normal_scale)
 CREATE_GETTER_SETTER(MeshGenerator2, float, normal_step)
 
 CREATE_GETTER_SETTER(MeshGenerator2, float, blur_value)
+CREATE_GETTER_SETTER(MeshGenerator2, int, erosion_iterations)
+CREATE_GETTER_SETTER(MeshGenerator2, float, erosion_deposition)
+CREATE_GETTER_SETTER(MeshGenerator2, float, erosion_erosion)
+
+
+
 
 void MeshGenerator2::_bind_methods() {
     // macros from macros.h
@@ -351,6 +376,9 @@ void MeshGenerator2::_bind_methods() {
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, normal_step)
 
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, blur_value)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::INT, erosion_iterations)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, erosion_deposition)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, erosion_erosion)
 
     // manual bind of macro (see examples of this in poly_synth.h)
     ClassDB::bind_method(D_METHOD("macro_test"), &MeshGenerator2::macro_test);

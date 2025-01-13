@@ -56,6 +56,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 
     GDREGISTER_CLASS(MeshGenerator);
     GDREGISTER_CLASS(MeshGenerator2); // broken in subfolder
+    GDREGISTER_CLASS(MeshGenerator3); // broken in subfolder
+    GDREGISTER_CLASS(MeshGenerator4); // broken in subfolder
 
 
     GDREGISTER_CLASS(SineExample);  // Sine example

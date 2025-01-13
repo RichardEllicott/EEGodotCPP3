@@ -16,7 +16,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-_CppStaticLib="*res://addons/cpp_static_lib.gd"
+_CppStaticLib="res://addons/cpp_library.gd"
 
 [display]
 

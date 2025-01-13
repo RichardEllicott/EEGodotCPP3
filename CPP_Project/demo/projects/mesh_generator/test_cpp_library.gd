@@ -14,8 +14,14 @@ func _ready() -> void:
     #var result = MyLibrary.new().my_static_function(5, 3) 
     #MyLibrary.
     
+    print(CPPLibrary.get_lib().my_static_function(3,4))
+    
+    
+    
+    
+    
+    
     pass
-
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

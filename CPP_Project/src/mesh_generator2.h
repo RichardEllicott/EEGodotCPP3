@@ -5,13 +5,13 @@
 #include <macros.h>  // my macros to help declare properties
 
 // #include <godot_cpp/classes/sprite2d.hpp>
-#include <godot_cpp/classes/node3d.hpp>
-#include <godot_cpp/classes/noise_texture2d.hpp>
-#include <godot_cpp/classes/random_number_generator.hpp>
-#include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
-
+#include <godot_cpp/classes/node3d.hpp>
+#include <godot_cpp/classes/noise_texture2d.hpp>
+#include <godot_cpp/classes/object.hpp>
+#include <godot_cpp/classes/random_number_generator.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
 
 // #include <std>
 
@@ -19,16 +19,25 @@
 
 using namespace godot;
 
-// struct QuadRef {
-//     int a;
-//     int b;
-//     int c;
-//     int d;
+// works!
+class MeshGenerator3 : public ArrayMesh {
+    GDCLASS(MeshGenerator3, ArrayMesh)
+   protected:
+    static void _bind_methods() {
+    }
+};
 
-//     // Constructor
-//     QuadRef(int _a, int _b, int _c, int _d)
-//         : a(_a), b(_b), c(_c), d(_d) {}
-// };
+// also works!!
+class MeshGenerator4 : public Object {
+    GDCLASS(MeshGenerator4, Object)
+
+    DECLARE_PROPERTY_SINGLE_FILE_DEFAULT(float, test, 0.0f)
+
+   protected:
+    static void _bind_methods() {
+        CREATE_VAR_BINDINGS(MeshGenerator4, Variant::FLOAT, test)
+    }
+};
 
 class MeshGenerator2 : public Node3D {
     GDCLASS(MeshGenerator2, Node3D)
@@ -52,23 +61,22 @@ class MeshGenerator2 : public Node3D {
     DECLARE_PROPERTY(Ref<Texture2D>, image_out)
     DECLARE_PROPERTY(Ref<Texture2D>, process_image)
 
-
-
-
+    // rem to initialize these vars
     DECLARE_PROPERTY(float, heightmap1_scale)
     DECLARE_PROPERTY(float, heightmap2_scale)
     DECLARE_PROPERTY(float, heightmap3_scale)
 
+    DECLARE_PROPERTY(Vector2i, grid_size)
+    DECLARE_PROPERTY(Vector3, scale)
+    DECLARE_PROPERTY(Vector2, uv_scale)
+    DECLARE_PROPERTY(float, normal_scale)
+    DECLARE_PROPERTY(float, normal_step)
 
+    DECLARE_PROPERTY(float, blur_value)
 
-    DECLARE_PROPERTY(Vector2i, grid_size)  // rem to initialize
-    DECLARE_PROPERTY(Vector3, scale)       // rem to initialize
-    DECLARE_PROPERTY(Vector2, uv_scale)    // rem to initialize
-    DECLARE_PROPERTY(float, normal_scale)  // rem to initialize
-    DECLARE_PROPERTY(float, normal_step)   // rem to initialize
-
-    DECLARE_PROPERTY(float, blur_value)   // rem to initialize
-
+    DECLARE_PROPERTY(int, erosion_iterations)
+    DECLARE_PROPERTY(float, erosion_deposition)
+    DECLARE_PROPERTY(float, erosion_erosion)
 
     // std::vector<QuadRef> quads;
     std::vector<std::vector<int>> ngons;
@@ -97,9 +105,9 @@ class MeshGenerator2 : public Node3D {
 
     void generate_mesh();  // generate the final mesh, and clear the cache
 
-    float get_terrain_height(Vector2 position); // get height of terrain (from texture2d)
+    float get_terrain_height(Vector2 position);  // get height of terrain (from texture2d)
 
-    Vector3 get_terrain_normal(Vector2 position); // get normal using the height function, step should be a small fraction
+    Vector3 get_terrain_normal(Vector2 position);  // get normal using the height function, step should be a small fraction
 
     void add_terrain();  // add terrain data (to internal arrays)
 
@@ -109,9 +117,7 @@ class MeshGenerator2 : public Node3D {
 
     void macro_test_blur();
 
-
     void macro_generate_terrain();  // register me in the bind
-
 };
 
 #endif

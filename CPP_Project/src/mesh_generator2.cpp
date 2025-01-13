@@ -13,11 +13,11 @@ MeshGenerator2::MeshGenerator2() {
     uv_scale = Vector2(1, 1);
     normal_scale = 1.0f;
     normal_step = 1.0f / 32.0f;
+    blur_value = 2.0f;
 
     heightmap1_scale = 1.0f;
     heightmap2_scale = 1.0f;
     heightmap3_scale = 1.0f;
-
 
     // init rng
     rng.instantiate();
@@ -204,15 +204,10 @@ void MeshGenerator2::add_terrain() {
         for (int x = 0; x < grid_size.x; x++) {
             _lerp.x = float(x) / float(grid_size.x - 1);  // calculate x position from 0 to 1
 
-
-
             float _height = get_terrain_height(_lerp);
-
 
             // auto final_pos = Vector3(_lerp.x, _height, _lerp.y) * scale;  // scaled allows height and dimension control
             auto final_pos = Vector3(_lerp.x - 0.5f, _height, _lerp.y - 0.5f) * scale;  // with center correction
-
-
 
             // verts.push_back(Vector3(x, _height, y));
             verts.push_back(final_pos);
@@ -220,8 +215,8 @@ void MeshGenerator2::add_terrain() {
             // uvs.push_back(Vector2(x, y));
             uvs.push_back(_lerp * uv_scale);
 
-            auto normal = get_terrain_normal(_lerp); // get normal
-            normals.push_back(normal);  // unfinished (just left up)
+            auto normal = get_terrain_normal(_lerp);  // get normal
+            normals.push_back(normal);                // unfinished (just left up)
         }
     }
 
@@ -241,8 +236,54 @@ void MeshGenerator2::add_terrain() {
 }
 
 void MeshGenerator2::macro_test() {
-    print("MeshGenerator2::macro_test...");
+    print("MeshGenerator2::macro_test()...");
     _ready();
+}
+
+void MeshGenerator2::macro_generate_terrain() {
+    print("MeshGenerator2::macro_generate_terrain()...");
+
+    if (process_image.is_valid()) {
+        print("found process image...");
+        auto image = process_image->get_image();
+        auto image_size = process_image->get_size();
+        auto image_floats = ImageHelper::image_channel_to_floats(image, 0);  // red channel to floats
+
+        if (blur_value > 0.0f) {
+
+            
+            print("apply blur ", blur_value, "");
+            image_floats = ImageHelper::blur_image(image_floats, image_size, blur_value);  // blur  (SEEMS TO CRASH AT THE MO!!!)
+        }
+        auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_L8);  // grey
+        // auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_RGB8);  // rgb
+        // auto new_image = ImageHelper::floats_to_image(image_floats, image_size, Image::FORMAT_RGBA8);  // rgba
+
+        heightmap1 = ImageTexture::create_from_image(new_image);
+    }
+
+    clear();
+    add_terrain();
+    generate_mesh();  // we need to call in ready, as then the children will be in the tree
+}
+
+void MeshGenerator2::macro_test_blur() {
+    if (heightmap1.is_valid()) {
+        auto image_size = heightmap1->get_size();
+
+        auto image = heightmap1->get_image();
+
+        auto floats = ImageHelper::image_channel_to_floats(image, 0);  // red channel to floats
+
+        if (blur_value > 0.0f) {
+            floats = ImageHelper::blur_image(floats, image_size, blur_value);  // blur  (SEEMS TO CRASH AT THE MO!!!)
+        }
+        auto new_image = ImageHelper::floats_to_image(floats, image_size, Image::FORMAT_L8);  // black and white
+        // auto new_image = ImageHelper::floats_to_image(floats, image_size, Image::FORMAT_RGB8);  // RGB
+        // auto new_image =  ImageHelper::floats_to_image(floats, image_size, Image::FORMAT_RGBA8); // with alpha
+
+        image_out = ImageTexture::create_from_image(new_image);
+    }
 }
 
 // BINDINGS:
@@ -262,6 +303,8 @@ CREATE_GETTER_SETTER(MeshGenerator2, Array, surface_array)
 CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, heightmap1)
 CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, heightmap2)
 CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, heightmap3)
+CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, image_out)
+CREATE_GETTER_SETTER(MeshGenerator2, Ref<Texture2D>, process_image)
 
 CREATE_GETTER_SETTER(MeshGenerator2, float, heightmap1_scale)
 CREATE_GETTER_SETTER(MeshGenerator2, float, heightmap2_scale)
@@ -272,6 +315,8 @@ CREATE_GETTER_SETTER(MeshGenerator2, Vector2i, grid_size)
 CREATE_GETTER_SETTER(MeshGenerator2, Vector2, uv_scale)
 CREATE_GETTER_SETTER(MeshGenerator2, float, normal_scale)
 CREATE_GETTER_SETTER(MeshGenerator2, float, normal_step)
+
+CREATE_GETTER_SETTER(MeshGenerator2, float, blur_value)
 
 void MeshGenerator2::_bind_methods() {
     // macros from macros.h
@@ -292,6 +337,8 @@ void MeshGenerator2::_bind_methods() {
     CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", heightmap1);
     CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", heightmap2);
     CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", heightmap3);
+    CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", image_out);
+    CREATE_CLASS_BINDINGS(MeshGenerator2, "Texture2D", process_image);
 
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, heightmap1_scale)  // different macro for classes
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, heightmap2_scale)  // different macro for classes
@@ -303,7 +350,13 @@ void MeshGenerator2::_bind_methods() {
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, normal_scale)
     CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, normal_step)
 
-    ClassDB::bind_method(D_METHOD("macro_test"), &MeshGenerator2::macro_test);  // manual bind of macro (see examples of this in poly_synth.h)
+    CREATE_VAR_BINDINGS(MeshGenerator2, Variant::FLOAT, blur_value)
+
+    // manual bind of macro (see examples of this in poly_synth.h)
+    ClassDB::bind_method(D_METHOD("macro_test"), &MeshGenerator2::macro_test);
+    ClassDB::bind_method(D_METHOD("macro_test_blur"), &MeshGenerator2::macro_test_blur);
+    ClassDB::bind_method(D_METHOD("macro_generate_terrain"), &MeshGenerator2::macro_generate_terrain);
+
 }
 
 #endif

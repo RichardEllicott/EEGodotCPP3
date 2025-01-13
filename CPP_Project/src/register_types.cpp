@@ -24,6 +24,7 @@
 #include "mesh_generator2.h" // trying with cut down one
 // #include "mesh_generator/mesh_generator2.h" // CANT GET SUBFOLDER WORKING
 
+#include "cpp_static_library.h"
 
 
 
@@ -68,6 +69,9 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 
     GDREGISTER_CLASS(S1Reverb);
     GDREGISTER_CLASS(S1ReverbInstance);
+
+    GDREGISTER_CLASS(CPPStaticLibrary);
+
 
     // GDREGISTER_CLASS(AudioEffectTemplate); // seems to be appearing as template
     // GDREGISTER_CLASS(AudioEffectTemplateInstance); // seems to be appearing as template

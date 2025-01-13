@@ -9,6 +9,9 @@
 #include <godot_cpp/classes/noise_texture2d.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
+#include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/image_texture.hpp>
+
 
 // #include <std>
 
@@ -46,6 +49,11 @@ class MeshGenerator2 : public Node3D {
     DECLARE_PROPERTY(Ref<Texture2D>, heightmap1)
     DECLARE_PROPERTY(Ref<Texture2D>, heightmap2)
     DECLARE_PROPERTY(Ref<Texture2D>, heightmap3)
+    DECLARE_PROPERTY(Ref<Texture2D>, image_out)
+    DECLARE_PROPERTY(Ref<Texture2D>, process_image)
+
+
+
 
     DECLARE_PROPERTY(float, heightmap1_scale)
     DECLARE_PROPERTY(float, heightmap2_scale)
@@ -58,6 +66,9 @@ class MeshGenerator2 : public Node3D {
     DECLARE_PROPERTY(Vector2, uv_scale)    // rem to initialize
     DECLARE_PROPERTY(float, normal_scale)  // rem to initialize
     DECLARE_PROPERTY(float, normal_step)   // rem to initialize
+
+    DECLARE_PROPERTY(float, blur_value)   // rem to initialize
+
 
     // std::vector<QuadRef> quads;
     std::vector<std::vector<int>> ngons;
@@ -95,6 +106,12 @@ class MeshGenerator2 : public Node3D {
     void _generate_surface_array();  // generate the mesh (in the child MeshInstance3D with an ArrayMesh)
 
     void macro_test();  // register me in the bind
+
+    void macro_test_blur();
+
+
+    void macro_generate_terrain();  // register me in the bind
+
 };
 
 #endif

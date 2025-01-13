@@ -43,6 +43,9 @@ uniform sampler2D albedo3: hint_default_black;
 
 uniform sampler2D gradient: hint_default_white;
 
+uniform float gradient_scale = 1.0;
+uniform float gradient_offset = 0.01;
+
 
 
 #ifdef _NORMAL
@@ -121,7 +124,6 @@ void vertex() {
     vertex_NORMAL = NORMAL;
 }
 
-uniform float gradient_scale = 1.0;
 
 void fragment() {
 
@@ -168,7 +170,7 @@ void fragment() {
     
 
     float height = vertex_VERTEX.y; // Height in object space (Y coordinate)
-     vec4 gradient_color = texture(gradient, vec2(height * gradient_scale, 0.0)) ;
+     vec4 gradient_color = texture(gradient, vec2((height + gradient_offset) / gradient_scale, 0.0)) ;
     _albedo = gradient_color;
     
     

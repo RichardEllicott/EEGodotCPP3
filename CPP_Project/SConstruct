@@ -28,6 +28,13 @@ if not os.path.exists(muparser_dir):
     call(["git", "clone", "https://github.com/beltoforion/muparser.git", muparser_dir])
 
 
+# get OpenImageIO lib
+openimageio_dir = 'external/openimageio/'
+if not os.path.exists(openimageio_dir):
+    print("openimageio not found, downloading...")
+    call(["git", "clone", "https://github.com/AcademySoftwareFoundation/OpenImageIO", openimageio_dir])
+
+
 # env.Append(CPPPATH=['external/muparser/include'])  # Include directory for muParser headers
 # env.Append(LIBPATH=['external/muparser/lib'])  # Library directory for compiled muParser
 # env.Append(LIBS=['muparser'])  # Link the muParser library

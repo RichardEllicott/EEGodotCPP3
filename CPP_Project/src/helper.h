@@ -8,16 +8,14 @@ Helper Functions
 #ifndef HELPER_H  // header guard
 #define HELPER_H
 
-#include <godot_cpp/variant/utility_functions.hpp>  // godot::UtilityFunctions::print(input);
-#include <godot_cpp/classes/node.hpp>               // Node
-
-#include <vector>
-#include <stdexcept>
 #include <cstddef>
-
 #include <godot_cpp/classes/image.hpp>
-#include <godot_cpp/variant/vector2.hpp>
+#include <godot_cpp/classes/node.hpp>  // Node
 #include <godot_cpp/variant/color.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>  // godot::UtilityFunctions::print(input);
+#include <godot_cpp/variant/vector2.hpp>
+#include <stdexcept>
+#include <vector>
 // #include <cmath>
 // #include <algorithm>
 
@@ -39,16 +37,6 @@ void print(Args... args) {
     UtilityFunctions::print(args...);
 }
 #endif
-
-
-
-
-
-
-
-
-
-
 
 // lerp template function, works with c++ types
 // see also:
@@ -94,14 +82,21 @@ T* get_node_as(Node* current_node, const NodePath& path) {
 // less important functions in a library
 class ImageHelper {
    public:
-
-
     // Static method to sample an image at UV coordinates using bilinear interpolation
-    static Color sample_image(const Image &image, const Vector2 &uv); // for & ref
-    static Color sample_image(const Ref<Image> image, const Vector2 &uv); // for Godot ref. i think the normal way
+    static Color sample_image(const Image& image, const Vector2& uv);      // for & ref
+    static Color sample_image(const Ref<Image> image, const Vector2& uv);  // for Godot ref. i think the normal way
 
+    // convert an image channel to float data
+    static PackedFloat32Array image_channel_to_floats(const Ref<Image> image, int channel);
 
+    static Ref<Image> floats_to_image(PackedFloat32Array image, Vector2i image_size, Image::Format image_format);
 
+    // worked from:
+    // https://gemini.google.com/app/2eb57cf690ac3d2e
+    static PackedFloat32Array blur_image(const PackedFloat32Array& input_image, Vector2i image_size, float radius);
+
+    // Helper function to create a 1D Gaussian kernel
+    static void create_gaussian_kernel(std::vector<float>& kernel, float radius);
 };
 
 // // Simple Frequency Modulation function
@@ -159,8 +154,5 @@ class PackedVector2ArrayBuffer {
 };
 
 #pragma endregion
-
-
-
 
 #endif

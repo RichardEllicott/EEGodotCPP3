@@ -3,8 +3,8 @@
 [ext_resource type="Shader" path="res://shaders/vertex_color_splat3.gdshader" id="1_x6aec"]
 
 [sub_resource type="Gradient" id="Gradient_ncuyq"]
-offsets = PackedFloat32Array(0, 0.464286, 0.535714, 0.75, 1)
-colors = PackedColorArray(1, 0.974558, 0.451732, 1, 0.617985, 0.872187, 0.261001, 1, 0.0952284, 0.7321, 0, 1, 0.0517294, 1, 0, 1, 1, 0.976471, 0.45098, 1)
+offsets = PackedFloat32Array(0.278049, 0.726829)
+colors = PackedColorArray(1, 0.974558, 0.451732, 1, 0.0952284, 0.7321, 0, 1)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_viyhp"]
 gradient = SubResource("Gradient_ncuyq")
@@ -19,5 +19,6 @@ shader_parameter/normal2_depth = 1.0
 shader_parameter/normal3_depth = 1.0
 shader_parameter/uv_offset = null
 shader_parameter/uv_scale = Vector2(1, 1)
-shader_parameter/gradient_scale = 0.25
+shader_parameter/gradient_scale = 4.01
+shader_parameter/gradient_offset = 1.0
 shader_parameter/gradient = SubResource("GradientTexture1D_viyhp")

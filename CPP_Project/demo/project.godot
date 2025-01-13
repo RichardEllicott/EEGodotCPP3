@@ -14,6 +14,10 @@ config/name="EEGodotCPP1_demo"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+_CppStaticLib="*res://addons/cpp_static_lib.gd"
+
 [display]
 
 window/size/viewport_width=1440

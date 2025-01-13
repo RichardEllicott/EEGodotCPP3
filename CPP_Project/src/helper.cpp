@@ -6,7 +6,7 @@
 using namespace godot;
 
 // for c++ reference
-Color ImageHelper::sample_image(const Image &image, const Vector2 &uv) {
+Color ImageHelper::sample_image(const Image& image, const Vector2& uv) {
     // Clamp UV coordinates to [0, 1]
     Vector2 clamped_uv = uv.clamp(Vector2(0.0, 0.0), Vector2(1.0, 1.0));
 
@@ -36,7 +36,7 @@ Color ImageHelper::sample_image(const Image &image, const Vector2 &uv) {
 }
 
 // for Godot ref. i think the normal way for images in godot
-Color ImageHelper::sample_image(const Ref<Image> image, const Vector2 &uv) {
+Color ImageHelper::sample_image(const Ref<Image> image, const Vector2& uv) {
     // Clamp UV coordinates to [0, 1]
     Vector2 clamped_uv = uv.clamp(Vector2(0.0, 0.0), Vector2(1.0, 1.0));
 
@@ -64,5 +64,196 @@ Color ImageHelper::sample_image(const Ref<Image> image, const Vector2 &uv) {
     Color c1 = c01.lerp(c11, fx);
     return c0.lerp(c1, fy);
 }
+
+
+
+Ref<Image> ImageHelper::floats_to_image(PackedFloat32Array float_image, Vector2i image_size, Image::Format format) {
+    int bytes_per_pixel = 4;  // RGBA8 format
+
+    // set byte count based on format
+    switch (format) {
+        case Image::FORMAT_RGBA8:
+            bytes_per_pixel = 4;
+            break;
+        case Image::FORMAT_RGB8:  // crashes!
+            bytes_per_pixel = 3;
+            break;
+
+        case Image::FORMAT_L8:  // single channel
+            bytes_per_pixel = 1;
+            break;
+
+        default:
+            UtilityFunctions::push_error("unknown format!");
+            break;
+    }
+
+    int pixel_count = image_size.x * image_size.y;
+
+    // build the image as bytes
+    PackedByteArray image_bytes;
+    image_bytes.resize(pixel_count * bytes_per_pixel);
+
+    for (int i = 0; i < pixel_count; i++) {
+        auto i2 = i * bytes_per_pixel;
+
+        auto pixel_float = float_image[i];
+        uint8_t pixel_denormalized = static_cast<uint8_t>(pixel_float * 255.0f);  // convert the float to an 8 bit int (0-255)
+
+        image_bytes[i2] = pixel_denormalized;  // red
+
+        if (bytes_per_pixel >= 3) {
+            image_bytes[i2 + 1] = pixel_denormalized;  // green
+            image_bytes[i2 + 2] = pixel_denormalized;  // blue
+        }
+        if (bytes_per_pixel >= 4) {
+            image_bytes[i2 + 3] = 255;  // alpha
+        }
+    }
+
+    // create the image from the bytes (no mips)
+    auto image = Image::create_from_data(image_size.x, image_size.y, false, format, image_bytes);
+
+    return image;
+}
+
+PackedFloat32Array ImageHelper::image_channel_to_floats(const Ref<Image> image, int channel = 0) {
+    PackedFloat32Array float_data;  // convert image to floats
+
+    if (!image.is_valid()) {
+        UtilityFunctions::push_error("!image.is_valid()");
+        return float_data;
+    }
+    if (channel < 0 || channel > 3) {
+        UtilityFunctions::push_error("channel < 0 || channel > 3");
+        return float_data;
+    }
+
+    auto image_size = image->get_size();
+    auto image_format = image->get_format();
+    auto image_data = image->get_data();
+
+    int pixel_count = image_size.x * image_size.y;
+
+    // Ref<Image> img_out = Image::create(image_size.x, image_size.y, false, Image::FORMAT_RGBA8);
+
+    float_data.resize(pixel_count);
+
+    int bytes_per_pixel = 4;  // RGBA8 format
+
+    switch (image_format) {
+        case Image::FORMAT_RGBA8:
+            bytes_per_pixel = 4;
+            break;
+        case Image::FORMAT_RGB8:
+            bytes_per_pixel = 3;
+            break;
+        default:
+            UtilityFunctions::push_error("image is unknown format!");
+            return float_data;
+            break;
+    }
+
+    for (int i = 0; i < pixel_count; i++) {
+        auto i2 = i * bytes_per_pixel;
+        uint8_t pixel = image_data[i2 + channel];
+        float pixel_normalized = pixel / 255.0f;  // Normalize to [0, 1]
+        float_data[i] = pixel_normalized;
+    }
+
+    // for (int y = 0; y < image_size.y; y++) {
+    //     for (int x = 0; x < image_size.x; x++) {
+    //         int index = (y * image_size.x + x) * bytes_per_pixel;
+
+    //         uint8_t pixel = image_data[index + channel];
+
+    //         float pixel_normalized = pixel / 255.0f;  // Normalize to [0, 1]
+
+    //         float_data[index] = pixel_normalized;
+    //     }
+    // }
+
+    return float_data;
+}
+
+
+
+// Helper function to create a 1D Gaussian kernel
+void ImageHelper::create_gaussian_kernel(std::vector<float>& kernel, float radius) {
+    int kernel_size = 2 * radius + 1;
+    kernel.resize(kernel_size);
+
+    float sigma = radius / 2.0f;
+    float sum = 0.0f;
+
+    for (int i = 0; i < kernel_size; ++i) {
+        float x = i - radius;
+        kernel[i] = std::exp(-(x * x) / (2.0f * sigma * sigma));
+        sum += kernel[i];
+    }
+
+    // Normalize the kernel
+    for (int i = 0; i < kernel_size; ++i) {
+        kernel[i] /= sum;
+    }
+}
+
+
+// this one i asked gemeni to modify it to pass vertical and horizontal seperatly
+// seems to be a bit faster but blur is a tad slow, moreso for larger radius
+// https://gemini.google.com/app/2eb57cf690ac3d2e
+
+
+PackedFloat32Array ImageHelper::blur_image(const PackedFloat32Array& input_image, Vector2i image_size, float radius) {
+    PackedFloat32Array output_image;
+    output_image.resize(input_image.size());
+
+    // Create a 1D Gaussian kernel
+    std::vector<float> kernel;
+    create_gaussian_kernel(kernel, radius);
+
+    // Horizontal Blur
+    for (int y = 0; y < image_size.y; ++y) {
+        for (int x = 0; x < image_size.x; ++x) {
+            float blurred_value = 0.0f;
+            float total_weight = 0.0f;
+
+            for (int kx = -radius; kx <= radius; ++kx) {
+                int x_neighbor = x + kx;
+
+                x_neighbor = CLAMP(x_neighbor, 0, image_size.x - 1);
+
+                float weight = kernel[kx + radius]; 
+                blurred_value += input_image[y * image_size.x + x_neighbor] * weight;
+                total_weight += weight;
+            }
+
+            output_image[y * image_size.x + x] = blurred_value / total_weight;
+        }
+    }
+
+    // Vertical Blur
+    for (int y = 0; y < image_size.y; ++y) {
+        for (int x = 0; x < image_size.x; ++x) {
+            float blurred_value = 0.0f;
+            float total_weight = 0.0f;
+
+            for (int ky = -radius; ky <= radius; ++ky) {
+                int y_neighbor = y + ky;
+
+                y_neighbor = CLAMP(y_neighbor, 0, image_size.y - 1);
+
+                float weight = kernel[ky + radius]; 
+                blurred_value += output_image[y_neighbor * image_size.x + x] * weight; 
+                total_weight += weight;
+            }
+
+            output_image[y * image_size.x + x] = blurred_value / total_weight;
+        }
+    }
+
+    return output_image;
+}
+
 
 #endif

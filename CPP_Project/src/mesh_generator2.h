@@ -19,13 +19,8 @@
 
 using namespace godot;
 
-// works!
-class MeshGenerator3 : public ArrayMesh {
-    GDCLASS(MeshGenerator3, ArrayMesh)
-   protected:
-    static void _bind_methods() {
-    }
-};
+
+
 
 // also works!!
 class MeshGenerator4 : public Object {
@@ -77,6 +72,7 @@ class MeshGenerator2 : public Node3D {
     DECLARE_PROPERTY(int, erosion_iterations)
     DECLARE_PROPERTY(float, erosion_deposition)
     DECLARE_PROPERTY(float, erosion_erosion)
+    DECLARE_PROPERTY(float, erosion_jitter)
 
     // std::vector<QuadRef> quads;
     std::vector<std::vector<int>> ngons;

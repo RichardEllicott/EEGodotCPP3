@@ -68,7 +68,10 @@
         "xlocnum": "cpp",
         "xloctime": "cpp",
         "xmemory": "cpp",
-        "xtr1common": "cpp"
+        "xtr1common": "cpp",
+        "forward_list": "cpp",
+        "queue": "cpp",
+        "chrono": "cpp"
     },
     "cmake.sourceDirectory": "C:/Users/Richard/Documents/GitHub/Godot/EEGodotCPP3/CPP_Project/godot-cpp",
     "godotTools.editorPath.godot4": "c:\\Program Files\\Godot\\Godot_v4.3-stable_mono_win64\\Godot_v4.3-stable_mono_win64.exe"

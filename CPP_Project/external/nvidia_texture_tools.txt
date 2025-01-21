@@ -1,0 +1,10 @@
+
+i need to make sure we use GCC (i think)
+
+
+cmake -G "MinGW Makefiles" .
+
+then make i think
+
+cmake .
+

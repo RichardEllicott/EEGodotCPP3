@@ -17,14 +17,18 @@
 #include "s1_audio/poly_synth.h"                // NEW FINAL
 #include "s1_audio/s1_poly_synth_visualizer.h"  // visualizer
 
-#include "mesh_generator.h"
-// #include "mesh_generator/mesh_generator.h" // can't seem to get it here, probabally the h file pattern
+
+
 
 
 #include "mesh_generator2.h" // trying with cut down one
 // #include "mesh_generator/mesh_generator2.h" // CANT GET SUBFOLDER WORKING
 
-#include "cpp_static_library.h"
+#include "c_static_library.h"
+
+
+#include "h_mesh_generator.h"
+#include "hydraulic_erosion.h"
 
 
 
@@ -54,10 +58,12 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 
     GDREGISTER_CLASS(S1AudioGenerator);  // sort in file
 
-    GDREGISTER_CLASS(MeshGenerator);
     GDREGISTER_CLASS(MeshGenerator2); // broken in subfolder
-    GDREGISTER_CLASS(MeshGenerator3); // broken in subfolder
+    // GDREGISTER_CLASS(MeshGenerator3); // broken in subfolder
     GDREGISTER_CLASS(MeshGenerator4); // broken in subfolder
+
+    GDREGISTER_CLASS(HArrayMesh); // new lite object
+
 
 
     GDREGISTER_CLASS(SineExample);  // Sine example
@@ -72,7 +78,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     GDREGISTER_CLASS(S1Reverb);
     GDREGISTER_CLASS(S1ReverbInstance);
 
-    GDREGISTER_CLASS(CPPStaticLibrary);
+    GDREGISTER_CLASS(CStaticLibrary); // new library hooks, allows calling c++ from gdscript
+    GDREGISTER_CLASS(HydraulicErosion); // new library hooks, allows calling c++ from gdscript
 
 
     // GDREGISTER_CLASS(AudioEffectTemplate); // seems to be appearing as template

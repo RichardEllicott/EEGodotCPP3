@@ -3,6 +3,11 @@ import os
 import sys
 from subprocess import call
 
+# import os
+# from SCons.Script import *
+
+
+
 ##
 ## AUTOMATICLY DOWNLOAD AND COMPILE GODOT 4.3 BINDINGS
 ## https://github.com/godotengine/godot-cpp/tree/4.3
@@ -33,6 +38,39 @@ openimageio_dir = 'external/openimageio/'
 if not os.path.exists(openimageio_dir):
     print("openimageio not found, downloading...")
     call(["git", "clone", "https://github.com/AcademySoftwareFoundation/OpenImageIO", openimageio_dir])
+
+
+
+
+
+# tried to cpmpile and build nvidia tools
+# # Set up the path for nvidia_texture_tools
+nvidia_texture_tools_dir = 'external/nvidia_texture_tools/'
+
+# Check if the repository is already cloned
+if not os.path.exists(nvidia_texture_tools_dir):
+    print("nvidia_texture_tools not found, downloading...")
+    # Clone the repo if not found
+    call(["git", "clone", "https://github.com/castano/nvidia-texture-tools", nvidia_texture_tools_dir])
+
+# # Specify the build directory
+# build_dir = os.path.join(nvidia_texture_tools_dir, 'build')
+
+# # Check if build directory exists, create it if not
+# if not os.path.exists(build_dir):
+#     os.makedirs(build_dir)
+
+# # Run CMake to configure the project
+# call(['cmake', '..'], cwd=build_dir)
+
+# # Run the build command
+# call(['cmake', '--build', '.'], cwd=build_dir)
+
+# # Optionally, install (if needed)
+# # Call(['cmake', '--install', '.'], cwd=build_dir)
+
+
+
 
 
 # env.Append(CPPPATH=['external/muparser/include'])  # Include directory for muParser headers

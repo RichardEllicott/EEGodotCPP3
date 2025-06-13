@@ -1,3 +1,5 @@
+WARNING, this repo of mine was an experiment, Godot is 4.4.1 now! it still seems to work with 4.4.1
+
 # EEGodotCPP3
 
 # Godot GDExtension C++ boilerplate library

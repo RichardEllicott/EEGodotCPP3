@@ -40,6 +40,8 @@ class CStaticLibrary : public Object {
         BIND_METHOD(colors_to_image, "color_array", "image_size")
         BIND_METHOD(generate_normal_map, "image", "image_size", "normal_strength", "wrap")
         BIND_METHOD(generate_normal_map_old, "image", "image_size", "normal_strength")
+
+        BIND_METHOD(generate_ao_map, "image", "image_size", "radius", "wrap")
     }
 
     // we cannot actually make this function static and bind it!
@@ -57,7 +59,7 @@ class CStaticLibrary : public Object {
     }
 
     PackedFloat32Array blur_image(const PackedFloat32Array& input_image, Vector2i image_size, float radius, bool wrap) {
-        return ImageHelper::blur_image(input_image, image_size, radius, wrap);
+        return ImageHelper::blur_image2d(input_image, image_size, radius, wrap);
     }
 
     PackedFloat32Array overlay_image(const PackedFloat32Array& target_image, const PackedFloat32Array& overlay_image, int mode = 0) {
@@ -76,6 +78,10 @@ class CStaticLibrary : public Object {
 
     PackedColorArray generate_normal_map_old(const PackedFloat32Array& image, Vector2i image_size, float normal_strength) {
         return ImageHelper::generate_normal_map_old(image, image_size, normal_strength);
+    }
+
+    PackedFloat32Array generate_ao_map(const PackedFloat32Array& image, Vector2i image_size, int radius, bool wrap) {
+        return ImageHelper::generate_ao_map(image, image_size, radius, wrap);
     }
 
     Ref<Image> colors_to_image(const PackedColorArray& color_array, Vector2i image_size) {

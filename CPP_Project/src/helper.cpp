@@ -225,7 +225,7 @@ void ImageHelper::create_gaussian_kernel(std::vector<float>& kernel, float radiu
 
 // this one i asked gemeni to modify it to pass vertical and horizontal seperatly
 // seems to be a bit faster but blur is a tad slow, moreso for larger radius
-// https://gemini.google.com/app/2eb57cf690ac3d2e
+// // https://gemini.google.com/app/2eb57cf690ac3d2e
 
 PackedFloat32Array ImageHelper::blur_image(const PackedFloat32Array& input_image, Vector2i image_size, float radius, bool wrap = false) {
     PackedFloat32Array output_image;
@@ -286,6 +286,68 @@ PackedFloat32Array ImageHelper::blur_image(const PackedFloat32Array& input_image
             }
 
             output_image[y * image_size.x + x] = blurred_value / total_weight;
+        }
+    }
+
+    return output_image;
+}
+
+// 2d kernel one
+PackedFloat32Array ImageHelper::blur_image2d(const PackedFloat32Array& input_image, Vector2i image_size, float radius, bool wrap = false) {
+    PackedFloat32Array output_image;
+
+    if (input_image.size() != image_size.x * image_size.y) {  // godot error
+        UtilityFunctions::push_error("input_image.size() != image_size.x * image_size.y");
+        return output_image;
+    }
+
+    output_image.resize(input_image.size());
+
+    // Create a 2D Gaussian kernel
+    std::vector<std::vector<float>> kernel(radius * 2 + 1, std::vector<float>(radius * 2 + 1));
+    float sigma = radius / 2.0f;  // Standard deviation based on radius
+    float two_sigma_sq = 2.0f * sigma * sigma;
+    float sum = 0.0f;
+
+    for (int ky = -radius; ky <= radius; ++ky) {
+        for (int kx = -radius; kx <= radius; ++kx) {
+            float distance_sq = kx * kx + ky * ky;
+            kernel[ky + radius][kx + radius] = expf(-distance_sq / two_sigma_sq);
+            sum += kernel[ky + radius][kx + radius];
+        }
+    }
+
+    // Normalize the kernel
+    for (int ky = -radius; ky <= radius; ++ky) {
+        for (int kx = -radius; kx <= radius; ++kx) {
+            kernel[ky + radius][kx + radius] /= sum;
+        }
+    }
+
+    // Apply the blur
+    for (int y = 0; y < image_size.y; ++y) {
+        for (int x = 0; x < image_size.x; ++x) {
+            float blurred_value = 0.0f;
+
+            for (int ky = -radius; ky <= radius; ++ky) {
+                for (int kx = -radius; kx <= radius; ++kx) {
+                    int x_neighbor = x + kx;
+                    int y_neighbor = y + ky;
+
+                    if (wrap) {
+                        x_neighbor = pos_mod(x_neighbor, image_size.x);
+                        y_neighbor = pos_mod(y_neighbor, image_size.y);
+                    } else {
+                        x_neighbor = CLAMP(x_neighbor, 0, image_size.x - 1);
+                        y_neighbor = CLAMP(y_neighbor, 0, image_size.y - 1);
+                    }
+
+                    float weight = kernel[ky + radius][kx + radius];
+                    blurred_value += input_image[y_neighbor * image_size.x + x_neighbor] * weight;
+                }
+            }
+
+            output_image[y * image_size.x + x] = blurred_value;
         }
     }
 
@@ -502,12 +564,11 @@ PackedColorArray ImageHelper::generate_normal_map(const PackedFloat32Array& imag
             float partialDerivativeX = (top_right + 2 * right + bottom_right) - (top_left + 2 * left + bottom_left);
             float partialDerivativeY = (bottom_left + 2 * bottom + bottom_right) - (top_left + 2 * top + top_right);
 
-
             // get the normal
             // Vector3 normal(partialDerivativeX, partialDerivativeY, 1.0f * normal_strength); // like normal map online
 
             // seems to work here, i am not sure what godot wants when we do it this way
-            Vector3 normal(partialDerivativeX, -partialDerivativeY, 1.0f * normal_strength); // correct in godot (i believe opengl)
+            Vector3 normal(partialDerivativeX, -partialDerivativeY, 1.0f * normal_strength);  // correct in godot (i believe opengl)
 
             normal = normal.normalized();
 
@@ -574,6 +635,55 @@ PackedColorArray ImageHelper::generate_normal_map_old(const PackedFloat32Array& 
     }
 
     return normal_map;
+}
+
+PackedFloat32Array ImageHelper::generate_ao_map(const PackedFloat32Array& image, Vector2i image_size, int radius, bool wrap) {
+    PackedFloat32Array ao_map;
+    // Validate input size
+    if (image.size() != image_size.x * image_size.y) {
+        UtilityFunctions::push_error("Input image size does not match the specified image dimensions.");
+        return ao_map;
+    }
+    // Initialize AO map with the same size as the input image
+    ao_map.resize(image.size());
+
+    // Function to safely access a pixel value with boundary checks
+    auto get_pixel = [&](int x, int y) -> float {
+        x = CLAMP(x, 0, image_size.x - 1);
+        y = CLAMP(y, 0, image_size.y - 1);
+        return image[x + y * image_size.x];
+    };
+
+    // Generate AO values for each pixel
+    for (int y = 0; y < image_size.y; ++y) {
+        for (int x = 0; x < image_size.x; ++x) {
+            float base_height = get_pixel(x, y);
+            float occlusion = 0.0f;
+            int sample_count = 0;
+
+            // Sample neighbors within the given radius
+            for (int dy = -radius; dy <= radius; ++dy) {
+                for (int dx = -radius; dx <= radius; ++dx) {
+                    if (dx == 0 && dy == 0) continue;  // Skip the current pixel
+
+                    float neighbor_height = get_pixel(x + dx, y + dy);
+                    float diff = neighbor_height - base_height;
+
+                    // Add occlusion if the neighbor is higher
+                    if (diff > 0) {
+                        occlusion += diff / (radius * 2.0f);  // Scale occlusion by distance
+                    }
+                    ++sample_count;
+                }
+            }
+
+            // Normalize and invert occlusion for AO (more occlusion = darker)
+            float ao_value = CLAMP(1.0f - (occlusion / sample_count), 0.0f, 1.0f);
+            ao_map[x + y * image_size.x] = ao_value;
+        }
+    }
+
+    return ao_map;
 }
 
 // void ImageHelper::image_clamp_range(PackedFloat32Array& image, float min = 0.0f, float max = 0.0f) {

@@ -1,0 +1,130 @@
+[gd_scene load_steps=4 format=3 uid="uid://chh128c22cyoa"]
+
+[ext_resource type="Script" uid="uid://dd5l4gy74wdxk" path="res://projects/image_process_nodes/image_process_graph_edit.gd" id="1_c4am1"]
+[ext_resource type="Script" uid="uid://d7n1gss8rxws" path="res://projects/image_process_nodes/graph_node.gd" id="2_e43ef"]
+[ext_resource type="PackedScene" uid="uid://c0cdlysqovgt1" path="res://projects/image_process_nodes/nodes/noise_graph_node.tscn" id="3_cqv8y"]
+
+[node name="image_process_nodes" type="GraphEdit"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_c4am1")
+
+[node name="GraphNode" type="GraphNode" parent="."]
+layout_mode = 2
+offset_left = 211.0
+offset_top = 187.0
+offset_right = 345.0
+offset_bottom = 290.0
+mouse_filter = 1
+position_offset = Vector2(211, 187)
+title = "test1"
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 0, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 0, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = true
+slot/1/left_type = 1
+slot/1/left_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = true
+slot/1/right_type = 1
+slot/1/right_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+script = ExtResource("2_e43ef")
+
+[node name="Label" type="Label" parent="GraphNode"]
+layout_mode = 2
+text = "why?"
+
+[node name="Label2" type="Label" parent="GraphNode"]
+layout_mode = 2
+text = "why?"
+
+[node name="GraphNode2" type="GraphNode" parent="."]
+layout_mode = 2
+offset_left = 400.0
+offset_top = 185.0
+offset_right = 506.0
+offset_bottom = 288.0
+mouse_filter = 1
+position_offset = Vector2(400, 185)
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 0, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 0, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = true
+slot/1/left_type = 1
+slot/1/left_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = true
+slot/1/right_type = 1
+slot/1/right_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+script = ExtResource("2_e43ef")
+
+[node name="Label" type="Label" parent="GraphNode2"]
+layout_mode = 2
+text = "why?"
+
+[node name="Label2" type="Label" parent="GraphNode2"]
+layout_mode = 2
+text = "why?"
+
+[node name="GraphNode3" type="GraphNode" parent="."]
+layout_mode = 2
+offset_left = 516.0
+offset_top = 335.0
+offset_right = 622.0
+offset_bottom = 438.0
+mouse_filter = 1
+position_offset = Vector2(516, 335)
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 0, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 0, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = true
+slot/1/left_type = 1
+slot/1/left_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = true
+slot/1/right_type = 1
+slot/1/right_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+script = ExtResource("2_e43ef")
+
+[node name="Label" type="Label" parent="GraphNode3"]
+layout_mode = 2
+text = "why?"
+
+[node name="Label2" type="Label" parent="GraphNode3"]
+layout_mode = 2
+text = "why?"
+
+[node name="noise_graph_node" parent="." instance=ExtResource("3_cqv8y")]
+layout_mode = 0
+offset_left = 187.0
+offset_top = 394.0
+offset_right = 351.0
+offset_bottom = 602.0
+position_offset = Vector2(187, 394)

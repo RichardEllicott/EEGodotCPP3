@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bjcbhwapw8es6"]
 
-[ext_resource type="Script" path="res://projects/pattern_editor/drag_drop_container.gd" id="3_4c52f"]
+[ext_resource type="Script" uid="uid://bbpo4q7lbiub7" path="res://projects/pattern_editor/drag_drop_container.gd" id="3_4c52f"]
 
 [node name="pattern_editor" type="Control"]
 layout_mode = 3

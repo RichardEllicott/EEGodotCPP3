@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3 uid="uid://c0cdlysqovgt1"]
+
+[ext_resource type="Script" uid="uid://8br16vqenom0" path="res://projects/image_process_nodes/nodes/noise_graph_node.gd" id="1_amt4e"]
+[ext_resource type="Texture2D" uid="uid://e61vh63y5b13" path="res://textures/proto.png" id="2_dwluh"]
+
+[node name="noise_graph_node" type="GraphNode"]
+offset_left = 211.0
+offset_top = 187.0
+offset_right = 345.0
+offset_bottom = 290.0
+mouse_filter = 1
+position_offset = Vector2(211, 187)
+title = "noise"
+slot/0/left_enabled = false
+slot/0/left_type = 0
+slot/0/left_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(0.745098, 0.745098, 0.745098, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(1, 1, 1, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+script = ExtResource("1_amt4e")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "noise out"
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 2
+texture = ExtResource("2_dwluh")

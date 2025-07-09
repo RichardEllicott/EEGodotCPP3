@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cum8wqoxslotf"]
 
-[ext_resource type="Script" path="res://projects/audio_generator/ui_controls/spin_box_set_var.gd" id="1_2xdx4"]
+[ext_resource type="Script" uid="uid://cwk0ci700ffau" path="res://projects/audio_generator/ui_controls/spin_box_set_var.gd" id="1_2xdx4"]
 
 [node name="waveform" type="SpinBox"]
 offset_left = 97.0

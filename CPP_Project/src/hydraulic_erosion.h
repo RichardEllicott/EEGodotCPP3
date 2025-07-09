@@ -78,9 +78,6 @@ class HydraulicErosion : public Object {
 
             current_erosion_radius = erosion_radius;
             current_map_size = map_size;
-
-
-            
         }
     }
 
@@ -88,6 +85,15 @@ class HydraulicErosion : public Object {
     PackedFloat32Array erode(PackedFloat32Array map, int map_size, int iterations) {
         _erode(map, map_size, iterations);
         return map;
+    }
+
+    int _position_to_ref(Vector2i position) {
+        // out of bounds
+        if (position.x < 0 || position.x >= current_map_size || position.y < 0 || position.y >= current_map_size) {
+            return -1;
+        }
+
+        return position.x + position.y * current_map_size;
     }
 
     // references can only be used internally in the c++ it seems
@@ -104,8 +110,6 @@ class HydraulicErosion : public Object {
         current_map_size = map_size;
 
         for (int iteration = 0; iteration < iterations; iteration++) {
-            
-
             // Create water droplet at random point on map
             Vector2 pos = Vector2(
                 rng->randf_range(0, map_size - 1),
@@ -128,9 +132,7 @@ class HydraulicErosion : public Object {
                 // Calculate droplet's offset inside the cell (0,0) = at NW node, (1,1) = at SE node
                 Vector2 cell_offset = pos - node;
 
-
                 // continue; // NO CRASH TO THIS POINT!
-
 
                 // Calculate droplet's height and direction of flow with bilinear interpolation of surrounding heights
                 HeightAndGradient heightAndGradient = CalculateHeightAndGradient(map, map_size, pos);
@@ -153,10 +155,7 @@ class HydraulicErosion : public Object {
                     break;
                 }
 
-
                 // continue; // STILL WORKS FOR 1M... slight freeze
-
-
 
                 // Find the droplet's new height and calculate the deltaHeight
                 float newHeight = CalculateHeightAndGradient(map, map_size, pos).height;
@@ -164,7 +163,6 @@ class HydraulicErosion : public Object {
 
                 // Calculate the droplet's sediment capacity (higher when moving fast down a slope and contains lots of water)
                 float sedimentCapacity = MAX(-deltaHeight * speed * water * sediment_capacity_factor, min_sediment_capacity);
-
 
                 // continue; // NO CRASH
 
@@ -177,12 +175,25 @@ class HydraulicErosion : public Object {
                     // Add the sediment to the four nodes of the current cell using bilinear interpolation
                     // Deposition is not distributed over a radius (like erosion) so that it can fill small pits
 
-                    // maybe overflow here????
+                    // maybe overflow here???? ... YES!!!
 
-                    // map[dropletIndex] += amountToDeposit * (1 - cell_offset.x) * (1 - cell_offset.y);
-                    // map[dropletIndex + 1] += amountToDeposit * cell_offset.x * (1 - cell_offset.y);
-                    // map[dropletIndex + map_size] += amountToDeposit * (1 - cell_offset.x) * cell_offset.y;
-                    // map[dropletIndex + map_size + 1] += amountToDeposit * cell_offset.x * cell_offset.y;
+                    map[dropletIndex] += amountToDeposit * (1 - cell_offset.x) * (1 - cell_offset.y);
+                    // no crash yet
+                    map[dropletIndex + 1] += amountToDeposit * cell_offset.x * (1 - cell_offset.y);
+
+                    int id3 = dropletIndex + map_size;
+                    if (id3 >= map.size()) {
+                        // print("crash id3!"); // both these actually trigger, so the error is the position goes off?
+                    } else {
+                        map[id3] += amountToDeposit * (1 - cell_offset.x) * cell_offset.y;
+                    }
+
+                    int id4 = dropletIndex + map_size + 1;
+                    if (id4 >= map.size()) {
+                        // print("crash id4!");
+                    } else {
+                        map[id4] += amountToDeposit * cell_offset.x * cell_offset.y;
+                    }
 
                 } else {
                     // Erode a fraction of the droplet's current carry capacity.
@@ -199,8 +210,7 @@ class HydraulicErosion : public Object {
                     }
                 }
 
-                    // continue; CRASH BY THIS POINT!!! (crash is above)
-
+                // continue; CRASH BY THIS POINT!!! (crash is above)
 
                 // Update droplet's speed and water content
                 speed = sqrt(speed * speed + deltaHeight * gravity);

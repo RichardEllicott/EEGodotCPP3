@@ -102,6 +102,7 @@ class ImageHelper {
     // worked from:
     // https://gemini.google.com/app/2eb57cf690ac3d2e
     static PackedFloat32Array blur_image(const PackedFloat32Array& input_image, Vector2i image_size, float radius, bool wrap);
+    static PackedFloat32Array blur_image2d(const PackedFloat32Array& input_image, Vector2i image_size, float radius, bool wrap);
 
     // Helper function to create a 1D Gaussian kernel
     static void create_gaussian_kernel(std::vector<float>& kernel, float radius);
@@ -116,8 +117,14 @@ class ImageHelper {
 
     static PackedColorArray generate_normal_map(const PackedFloat32Array& image, Vector2i image_size, float normal_strength, bool wrap);
     static PackedColorArray generate_normal_map_old(const PackedFloat32Array& image, Vector2i image_size, float normal_strength);
-    
-    // might help normals
+
+
+
+    static PackedFloat32Array generate_ao_map(const PackedFloat32Array& image, Vector2i image_size, int radius, bool wrap);
+
+
+
+    // might help normals .... i have no use for this now??? delete
     static PackedFloat32Array sobel_filter(const PackedFloat32Array& image, Vector2i image_size) {
         PackedFloat32Array result;
         result.resize(image.size());  // Initialize the result array with the same size as the input image.
@@ -162,16 +169,9 @@ class ImageHelper {
         return result;
     }
 
-
-
     static int image_position_to_index(Vector2i position, Vector2i size, bool wrap);
 
-        static Vector2i index_to_image_position(int index, Vector2i image_size);
-
-
-
-
-
+    static Vector2i index_to_image_position(int index, Vector2i image_size);
 };
 
 //

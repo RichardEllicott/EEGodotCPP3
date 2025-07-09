@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://brxy6ohod2rcg"]
 
-[ext_resource type="Script" path="res://projects/audio_generator/ui_controls/control_knob.gd" id="1_he7rp"]
+[ext_resource type="Script" uid="uid://c51n1rriykwvn" path="res://projects/audio_generator/ui_controls/control_knob.gd" id="1_he7rp"]
 
 [node name="attack" type="Control" node_paths=PackedStringArray("label")]
 custom_minimum_size = Vector2(64, 80)
